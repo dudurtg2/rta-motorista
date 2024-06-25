@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496286534403",
+    "project_id": "lc-app-22a9e",
+    "storage_bucket": "lc-app-22a9e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496286534403:android:89e852c47dce0e6c6df736",
+        "android_client_info": {
+          "package_name": "com.example.lc_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBS68TYgE0O9coyUR8gQnMuO6--5P5e1u0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
