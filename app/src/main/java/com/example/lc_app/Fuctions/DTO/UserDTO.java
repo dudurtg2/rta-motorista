@@ -1,7 +1,5 @@
 package com.example.lc_app.Fuctions.DTO;
 
-import com.example.lc_app.Fuctions.DAO.UserDAO;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

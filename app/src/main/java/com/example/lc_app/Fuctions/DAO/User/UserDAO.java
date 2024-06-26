@@ -1,4 +1,4 @@
-package com.example.lc_app.Fuctions.DAO;
+package com.example.lc_app.Fuctions.DAO.User;
 
 import android.content.Context;
 import android.widget.Toast;
