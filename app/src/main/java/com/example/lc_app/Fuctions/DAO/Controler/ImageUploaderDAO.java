@@ -19,6 +19,8 @@ import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ImageUploaderDAO {
     private final Context context;
@@ -30,7 +32,7 @@ public class ImageUploaderDAO {
         this.context = context;
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         this.currentUser = mAuth.getCurrentUser();
-        this.storageReference = FirebaseStorage.getInstance().getReference().child("work_hours").child(currentUser.getUid());
+        this.storageReference = FirebaseStorage.getInstance().getReference().child("work_hours").child(currentUser.getUid()).child(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
         this.hour = hour;
     }
 
@@ -97,16 +99,16 @@ public class ImageUploaderDAO {
                     WorkHourActivity activity = (WorkHourActivity) context;
                     switch (hour) {
                         case "Entrada":
-                            activity.binding.imageFistHour.setImageResource(R.drawable.baseimageforuser);
+                            activity.binding.imageFistHour.setImageResource(R.drawable.chegada);
                             break;
                         case "Almoço":
-                            activity.binding.imageDinnerStarHour.setImageResource(R.drawable.baseimageforuser);
+                            activity.binding.imageDinnerStarHour.setImageResource(R.drawable.ialmouco);
                             break;
                         case "Saída":
-                            activity.binding.imageDinnerFinishHour.setImageResource(R.drawable.baseimageforuser);
+                            activity.binding.imageDinnerFinishHour.setImageResource(R.drawable.ialmouco);
                             break;
                         case "Fim":
-                            activity.binding.imageStop.setImageResource(R.drawable.baseimageforuser);
+                            activity.binding.imageStop.setImageResource(R.drawable.fim);
                             break;
                     }
                 }

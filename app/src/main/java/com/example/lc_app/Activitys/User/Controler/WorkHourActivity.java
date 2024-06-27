@@ -57,7 +57,7 @@ public class WorkHourActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         setupClickListeners();
-
+        getUser();
     }
     @Override
     protected void onStart() {
@@ -68,7 +68,17 @@ public class WorkHourActivity extends AppCompatActivity {
         new ImageUploaderDAO(this, "Fim").loadImagem();
         loadInitialData();
     }
-
+    private void getUser() {
+        firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        binding.UserNameDisplay.setText(documentSnapshot.getString("nome"));
+                    } else {
+                        binding.UserNameDisplay.setText(mAuth.getCurrentUser().getDisplayName());
+                    }
+                })
+                .addOnFailureListener(e -> { Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show(); });
+    }
     private void validateFields(String hour, OnValidationCompleteListener listener) {
         String currentDate = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         docHour = firestore.collection("usuarios")
@@ -91,13 +101,6 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        binding.imageFistHour.setImageResource(R.drawable.baseimageforuser);
-        binding.imageDinnerStarHour.setImageResource(R.drawable.baseimageforuser);
-        binding.imageDinnerFinishHour.setImageResource(R.drawable.baseimageforuser);
-        binding.imageStop.setImageResource(R.drawable.baseimageforuser);
-
-
-
         binding.imageFistHour.setOnClickListener(v ->
             validateFields("Entrada", isValid -> {
                 if (isValid) {

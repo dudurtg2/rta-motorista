@@ -8,85 +8,104 @@
     tools:context=".Activitys.User.Controler.WorkHourActivity">
 
     <TextView
+        android:id="@+id/UserNameDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.09"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.043" />
+
+    <ImageView
+        android:id="@+id/imageStop"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="448dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/imageDinnerStarHour"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/fim" />
+
+    <ImageView
+        android:id="@+id/imageDinnerFinishHour"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageFistHour"
+        app:layout_constraintTop_toBottomOf="@+id/buttonDinnerStarHour"
+        tools:src="@drawable/falmouco" />
+
+    <TextView
+        android:id="@+id/buttonStop"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Button"
+        app:layout_constraintEnd_toEndOf="@+id/imageStop"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/imageStop"
+        app:layout_constraintTop_toBottomOf="@+id/imageStop" />
+
+    <TextView
         android:id="@+id/buttonFistHour"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="Button"
         app:layout_constraintEnd_toEndOf="@+id/imageFistHour"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/imageFistHour"
         app:layout_constraintTop_toBottomOf="@+id/imageFistHour" />
-
-    <TextView
-        android:id="@+id/buttonDinnerStarHour"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/imageDinnerStarHour"
-        app:layout_constraintStart_toStartOf="@+id/imageDinnerStarHour"
-        app:layout_constraintTop_toBottomOf="@+id/imageDinnerStarHour" />
 
     <TextView
         android:id="@+id/buttonDinnerFinishHour"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="Button"
         app:layout_constraintEnd_toEndOf="@+id/imageDinnerFinishHour"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/imageDinnerFinishHour"
         app:layout_constraintTop_toBottomOf="@+id/imageDinnerFinishHour" />
 
-    <TextView
-        android:id="@+id/buttonStop"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/imageStop"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/imageStop"
-        app:layout_constraintTop_toBottomOf="@+id/imageStop" />
-
     <ImageView
         android:id="@+id/imageFistHour"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="216dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/imageDinnerFinishHour"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@tools:sample/avatars" />
+        tools:src="@drawable/chegada" />
+
+    <TextView
+        android:id="@+id/buttonDinnerStarHour"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Button"
+        app:layout_constraintEnd_toEndOf="@+id/imageDinnerStarHour"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/imageDinnerStarHour"
+        app:layout_constraintTop_toBottomOf="@+id/imageDinnerStarHour" />
 
     <ImageView
         android:id="@+id/imageDinnerStarHour"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        app:layout_constraintEnd_toEndOf="@+id/imageFistHour"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/imageFistHour"
-        app:layout_constraintTop_toBottomOf="@+id/imageFistHour"
-        tools:src="@tools:sample/avatars" />
-
-    <ImageView
-        android:id="@+id/imageDinnerFinishHour"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        app:layout_constraintEnd_toEndOf="@+id/imageDinnerStarHour"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/imageDinnerStarHour"
-        app:layout_constraintTop_toBottomOf="@+id/imageDinnerStarHour"
-        tools:src="@tools:sample/avatars" />
-
-    <ImageView
-        android:id="@+id/imageStop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        app:layout_constraintEnd_toEndOf="@+id/imageDinnerFinishHour"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/imageDinnerFinishHour"
-        app:layout_constraintTop_toBottomOf="@+id/imageDinnerFinishHour"
-        tools:src="@tools:sample/avatars" />
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        android:layout_marginTop="216dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageStop"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ialmouco" />
 </androidx.constraintlayout.widget.ConstraintLayout>
