@@ -18,11 +18,17 @@ import com.example.lc_app.Activitys.MainActivity;
 import com.example.lc_app.R;
 import com.example.lc_app.databinding.ActivityLoginBinding;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
     private FirebaseAuth mAuth;
+    private DocumentReference docRef;
+    private FirebaseFirestore firestore;
     private static final int REQUEST_CAMERA_PERMISSION = 101;
 
     private final ActivityResultLauncher<String> requestCameraPermissionLauncher = registerForActivityResult(
@@ -42,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        firestore = FirebaseFirestore.getInstance();
 
         mAuth = FirebaseAuth.getInstance();
         binding.loginButton.setOnClickListener(view -> validateData());
@@ -61,13 +68,29 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        checkCameraPermission();
+                        checkStoreData();
                     } else {
                         Toast.makeText(this, "Email não cadastrado", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+    private void checkStoreData(){
+        docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()) {
+                HashMap<String, Object> data = new HashMap<>();
+                data.put("nome", mAuth.getCurrentUser().getDisplayName());
+                data.put("uid", mAuth.getCurrentUser().getUid());
+                data.put("rota", "001");
 
+                docRef.set(data).addOnSuccessListener(aVoid -> {
+                    checkCameraPermission();
+                });
+            } else {
+                checkCameraPermission();
+            }
+        });
+    }
     private void checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));

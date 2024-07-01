@@ -29,7 +29,7 @@ public class UserDAO {
         user.put("nome", userDTO.getName());
         user.put("uid", userDTO.getUid());
 
-        return db.collection("usuarios").document(uid).set(user);
+        return db.collection("usuarios").document(uid).update(user);
     }
     public Task<Void> updateWorkHours(String uid, String date, String workHours, String nome) {
         DocumentReference docRef = db.collection("usuarios").document(uid).collection("work_hours").document(date);

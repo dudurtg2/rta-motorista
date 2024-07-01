@@ -91,7 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
     private void updateUser() {
         if (mAuth.getCurrentUser() != null) {
             new UserDAO(this)
-                    .addUser(mAuth.getCurrentUser().getUid(), binding.editNameUser.getText().toString())
+                    .addUser( binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
                         binding.profileUserInsert.setVisibility(View.GONE);
