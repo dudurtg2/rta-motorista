@@ -23,11 +23,16 @@ public class UserDAO {
     }
 
     public Task<Void> addUser(String name, String uid) {
-        UserDTO userDTO = new UserDTO(name, uid);
-
         Map<String, Object> user = new HashMap<>();
-        user.put("nome", userDTO.getName());
-        user.put("uid", userDTO.getUid());
+        user.put("nome", name);
+        user.put("uid", uid);
+
+        return db.collection("usuarios").document(uid).update(user);
+    }
+    public Task<Void> addRota(String rota, String uid) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("rota", rota);
+        user.put("uid", uid);
 
         return db.collection("usuarios").document(uid).update(user);
     }
