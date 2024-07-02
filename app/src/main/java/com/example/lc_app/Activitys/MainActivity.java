@@ -6,8 +6,12 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.example.lc_app.Activitys.User.Controler.WorkHourActivity;
 import com.example.lc_app.Activitys.User.ProfileActivity;
+import com.example.lc_app.Fuctions.DAO.Querys.QueryRTA;
+import com.example.lc_app.Fuctions.DAO.View.AdapterViewRTA;
 import com.example.lc_app.R;
 import com.example.lc_app.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
@@ -58,6 +62,14 @@ public class MainActivity extends AppCompatActivity {
         });
         binding.buttonProfileUser.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
+        queryItems();
+    }
+    private void queryItems() {
+        QueryRTA queryRTA = new QueryRTA(this);
+        queryRTA.readData(dishesDTO -> {
+            binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+            binding.listRTAview.setAdapter(new AdapterViewRTA(getApplicationContext(), dishesDTO));
+        });
     }
 
     private void confirmDocExist(String uid) {
@@ -84,14 +96,14 @@ public class MainActivity extends AppCompatActivity {
                                     rota = documentSnapshotUsuario.getString("rota");
                                     if (rota.equals(rtaRota)) {
                                         docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
-                                                .addOnSuccessListener(aVoid -> {
+                                                .addOnSuccessListener(aVoid ->
                                                     firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
                                                             .update("RTA_sacas", FieldValue.arrayUnion(uid))
                                                             .addOnSuccessListener(v ->
                                                                 docRefRTA.update("Status", "em rota")
                                                                         .addOnSuccessListener(aVoid2 -> Toast.makeText(this, "RTA " + uid + " adicionada a rota.", Toast.LENGTH_SHORT).show()))
-                                                            .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                                                })
+                                                            .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show())
+                                                )
                                                 .addOnFailureListener(e -> {
                                                     Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show();
                                                 });
@@ -100,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                 } else if (documentSnapshotRTA.getString("Status").equals("em rota")) { Toast.makeText(this, "Motorista já está em rota", Toast.LENGTH_SHORT).show();}
                 else if (documentSnapshotRTA.getString("Status").equals("finalizado")) {Toast.makeText(this, "Motorista já finalizou", Toast.LENGTH_SHORT).show();}
-            }
+            } else { Toast.makeText(this, "RTA não encontrado", Toast.LENGTH_SHORT).show(); }
         });
     }
 
