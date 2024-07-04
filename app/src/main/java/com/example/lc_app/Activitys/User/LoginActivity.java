@@ -88,15 +88,16 @@ public class LoginActivity extends AppCompatActivity {
                 HashMap<String, Object> data = new HashMap<>();
                 data.put("nome", mAuth.getCurrentUser().getDisplayName());
                 data.put("uid", mAuth.getCurrentUser().getUid());
-                data.put("rota", "001");
 
                 docRef.set(data).addOnSuccessListener(aVoid -> {
                     checkCameraPermission();
+                    firestore.collection("finalizados").document(mAuth.getCurrentUser().getUid()).set(data);
                 });
             } else {
                 checkCameraPermission();
             }
         });
+
     }
     private void checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {

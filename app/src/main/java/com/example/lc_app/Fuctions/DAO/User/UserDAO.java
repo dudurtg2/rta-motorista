@@ -29,12 +29,12 @@ public class UserDAO {
 
         return db.collection("usuarios").document(uid).update(user);
     }
-    public Task<Void> addRota(String rota, String uid) {
+    public Task<Void> addFinal(String rota, String uid) {
         Map<String, Object> user = new HashMap<>();
-        user.put("rota", rota);
+        user.put("nome", rota);
         user.put("uid", uid);
 
-        return db.collection("usuarios").document(uid).update(user);
+        return db.collection("finalizados").document(uid).update(user);
     }
     public Task<Void> updateWorkHours(String uid, String date, String workHours, String nome) {
         DocumentReference docRef = db.collection("usuarios").document(uid).collection("work_hours").document(date);

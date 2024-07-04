@@ -37,8 +37,8 @@ public class QueryRTA {
                         list.clear();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            if (document.getString("Motorista").equals(mAuth.getCurrentUser().getUid())) {
-                                String codigoDeFicha = document.getString("Codigo de ficha");
+                            if (document.getString("Motorista").equals(mAuth.getCurrentUser().getUid()) && document.getString("Status").equals("aguardando")) {
+                                String codigoDeFicha = document.getString("Codigo_de_ficha");
                                 String status = document.getString("Status");
                                 ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
                                 list.add(listRTADTO);
@@ -50,5 +50,25 @@ public class QueryRTA {
                     }
                 });
     }
+    public void readDataInTravel(final FirestoreCallback firestoreCallback) {
+        db.collection("bipagem")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        list.clear();
 
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            if (document.getString("Motorista").equals(mAuth.getCurrentUser().getUid()) && document.getString("Status").equals("em rota")) {
+                                String codigoDeFicha = document.getString("Codigo_de_ficha");
+                                String status = document.getString("Status");
+                                ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
+                                list.add(listRTADTO);
+                            }
+                        }
+                        firestoreCallback.onCallback(list);
+                    } else {
+                        Toast.makeText(context, "Erro ao obter documentos: " + task.getException(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 }

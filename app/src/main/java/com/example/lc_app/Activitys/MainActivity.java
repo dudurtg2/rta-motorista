@@ -14,17 +14,20 @@ import com.example.lc_app.Fuctions.DAO.Querys.QueryRTA;
 import com.example.lc_app.Fuctions.DAO.View.AdapterViewRTA;
 import com.example.lc_app.R;
 import com.example.lc_app.databinding.ActivityMainBinding;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     public ActivityMainBinding binding;
@@ -62,13 +65,19 @@ public class MainActivity extends AppCompatActivity {
         });
         binding.buttonProfileUser.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
+        binding.button.setOnClickListener(v -> queryItems());
         queryItems();
     }
     private void queryItems() {
         QueryRTA queryRTA = new QueryRTA(this);
         queryRTA.readData(dishesDTO -> {
-            binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+            binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
             binding.listRTAview.setAdapter(new AdapterViewRTA(getApplicationContext(), dishesDTO));
+        });
+        QueryRTA queryRTATravel = new QueryRTA(this);
+        queryRTATravel.readDataInTravel(dishesDTO -> {
+            binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            binding.listRTATravelview.setAdapter(new AdapterViewRTA(getApplicationContext(), dishesDTO));
         });
     }
 
@@ -88,32 +97,32 @@ public class MainActivity extends AppCompatActivity {
         docRefRTA = firestore.collection("bipagem").document(uid);
         docRefRTA.get().addOnSuccessListener(documentSnapshotRTA -> {
             if (documentSnapshotRTA.exists()) {
-                if (documentSnapshotRTA.getString("Status").equals("aguardando")) {
-                    rtaRota = documentSnapshotRTA.getString("Rota");
+                if (documentSnapshotRTA.getString("Motorista").equals(mAuth.getCurrentUser().getUid()) && documentSnapshotRTA.getString("Status").equals("aguardando")) {
                     firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
                             .get().addOnSuccessListener(documentSnapshotUsuario -> {
                                 if (documentSnapshotUsuario.exists()) {
-                                    rota = documentSnapshotUsuario.getString("rota");
-                                    if (rota.equals(rtaRota)) {
-                                        docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
-                                                .addOnSuccessListener(aVoid ->
-                                                    firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                                                            .update("RTA_sacas", FieldValue.arrayUnion(uid))
-                                                            .addOnSuccessListener(v ->
-                                                                docRefRTA.update("Status", "em rota")
-                                                                        .addOnSuccessListener(aVoid2 -> Toast.makeText(this, "RTA " + uid + " adicionada a rota.", Toast.LENGTH_SHORT).show()))
-                                                            .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show())
-                                                )
-                                                .addOnFailureListener(e -> {
-                                                    Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                });
-                                    } else {Toast.makeText(this, "Rota da RTA não corresponde a rota do motorista", Toast.LENGTH_SHORT).show();}
+                                    docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
+                                            .addOnSuccessListener(aVoid -> firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
+                                                    .update("RTA_sacas", FieldValue.arrayUnion(uid))
+                                                    .addOnSuccessListener(v ->
+                                                            docRefRTA.update("Status", "em rota")
+                                                                    .addOnSuccessListener(aVoid2 -> {
+                                                                        Toast.makeText(this,  uid + " adicionada a rota.", Toast.LENGTH_SHORT).show();
+                                                                        queryItems();
+                                                                    }))
+                                                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show())
+                                            )
+                                            .addOnFailureListener(e -> {
+                                                Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            });
                                 }
                             });
                 } else if (documentSnapshotRTA.getString("Status").equals("em rota")) { Toast.makeText(this, "Motorista já está em rota", Toast.LENGTH_SHORT).show();}
                 else if (documentSnapshotRTA.getString("Status").equals("finalizado")) {Toast.makeText(this, "Motorista já finalizou", Toast.LENGTH_SHORT).show();}
+                else { Toast.makeText(this, "Motorista não corresponde a RTA", Toast.LENGTH_SHORT).show();}
             } else { Toast.makeText(this, "RTA não encontrado", Toast.LENGTH_SHORT).show(); }
-        });
+        }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
+
     }
 
     private void removeToTraver(String uid) {
@@ -122,37 +131,47 @@ public class MainActivity extends AppCompatActivity {
             if (documentSnapshotRTA.exists()) {
                 String motorista = documentSnapshotRTA.getString("Motorista");
                 String status = documentSnapshotRTA.getString("Status");
-                if (motorista != null && motorista.equals(mAuth.getCurrentUser().getUid()) && status != null && status.equals("em rota")) {
-                    firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                            .get().addOnSuccessListener(documentSnapshotUsuario -> {
-                                if (documentSnapshotUsuario.exists()) {
-                                    docRefRTA.update("Status", "finalizado").addOnSuccessListener(aVoid -> {
-                                        docRefRTA.update("Fim", FieldValue.serverTimestamp());
-                                        //deleteRTAFirebase(uid);
-                                        firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                                                .update("RTA_sacas", FieldValue.arrayRemove(uid))
-                                                .addOnSuccessListener(aVoid2 -> Toast.makeText(this, "RTA " + uid + " finalizada.", Toast.LENGTH_SHORT).show())
-                                                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA da rota: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                                    }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show());
-                                }
-                            });
+                if (motorista != null && motorista.equals(mAuth.getCurrentUser().getUid())) {
+                    if (status != null && status.equals("em rota")) {
+                        firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
+                                .get().addOnSuccessListener(documentSnapshotUsuario -> {
+                                    if (documentSnapshotUsuario.exists()) {
+                                            deleteRTAFirebase(uid).addOnSuccessListener( aVoid -> firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
+                                                    .update("RTA_sacas", FieldValue.arrayRemove(uid))
+                                                    .addOnSuccessListener(aVoid2 -> {
+                                                                queryItems();
+                                                                Toast.makeText(this, uid + " finalizada.", Toast.LENGTH_SHORT).show();
+                                                            }
+                                                    ).addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA da rota: " + e.getMessage(), Toast.LENGTH_SHORT).show())
+                                            ).addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+                                    }
+                                });
+                    } else { Toast.makeText(this, "RTA não está em rota", Toast.LENGTH_SHORT).show(); }
                 } else { Toast.makeText(this, "Motorista não corresponde a RTA", Toast.LENGTH_SHORT).show(); }
+            }
+        }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
+
+    }
+
+
+    private Task<DocumentSnapshot> deleteRTAFirebase(String uid) {
+        docRefRTA = firestore.collection("bipagem").document(uid);
+        return docRefRTA.get().addOnSuccessListener(documentSnapshotRTA -> {
+            if (documentSnapshotRTA.exists()) {
+                docRefRTA.delete().addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "RTA " + uid + " removida.", Toast.LENGTH_SHORT).show();
+
+                    Map<String, Object> finalizadoData = new HashMap<>();
+                    finalizadoData.put(uid, new Timestamp(new Date()));
+
+                    firestore.collection("finalizados").document(mAuth.getCurrentUser().getUid()).update(finalizadoData);
+
+                }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         });
     }
 
-    /*
-    private void deleteRTAFirebase(String uid){
-        docRefRTA = firestore.collection("bipagem").document(uid);
-        docRefRTA.get().addOnSuccessListener(documentSnapshotRTA -> {
-            if (documentSnapshotRTA.exists()) {
-                docRefRTA.delete().addOnSuccessListener(
-                        aVoid -> Toast.makeText(this, "RTA " + uid + " removida.", Toast.LENGTH_SHORT).show()
-                        ).addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-        });
-    }
-    */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

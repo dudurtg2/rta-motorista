@@ -91,28 +91,16 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateUser() {
         if (mAuth.getCurrentUser() != null) {
-            new UserDAO(this)
-                    .addUser( binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())
+            new UserDAO(this).addUser( binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())
                     .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
-                        binding.profileUserInsert.setVisibility(View.GONE);
-                        binding.editNameUser.setText("");
-                        getUser();
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
+                        new UserDAO(this).addFinal(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid()).addOnSuccessListener(aVoid1 -> {
+                            Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
+                            binding.profileUserInsert.setVisibility(View.GONE);
+                            binding.editNameUser.setText("");
+                            getUser();
+                        }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
+                    }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
         }
     }
-    private void updateRota() {
-        if (mAuth.getCurrentUser() != null) {
-            new UserDAO(this)
-                    .addRota( binding.editCargoUser.getText().toString(), mAuth.getCurrentUser().getUid())
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Rota atualizado com sucesso", Toast.LENGTH_SHORT).show();
-                        binding.profileUserInsert.setVisibility(View.GONE);
-                        binding.editCargoUser.setText("");
-                        getUser();
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
-        }
-    }
+
 }
