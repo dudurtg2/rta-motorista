@@ -30,19 +30,16 @@ public class QueryRTA {
     }
 
     public void readData(final FirestoreCallback firestoreCallback) {
-        db.collection("bipagem")
+        db.collection("direcionado").document(mAuth.getCurrentUser().getUid()).collection("pacotes")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         list.clear();
-
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            if (document.getString("Motorista").equals(mAuth.getCurrentUser().getUid()) && document.getString("Status").equals("aguardando")) {
                                 String codigoDeFicha = document.getString("Codigo_de_ficha");
                                 String status = document.getString("Status");
                                 ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
                                 list.add(listRTADTO);
-                            }
                         }
                         firestoreCallback.onCallback(list);
                     } else {
@@ -51,19 +48,19 @@ public class QueryRTA {
                 });
     }
     public void readDataInTravel(final FirestoreCallback firestoreCallback) {
-        db.collection("bipagem")
+        db.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         list.clear();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            if (document.getString("Motorista").equals(mAuth.getCurrentUser().getUid()) && document.getString("Status").equals("em rota")) {
+
                                 String codigoDeFicha = document.getString("Codigo_de_ficha");
                                 String status = document.getString("Status");
                                 ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
                                 list.add(listRTADTO);
-                            }
+
                         }
                         firestoreCallback.onCallback(list);
                     } else {
