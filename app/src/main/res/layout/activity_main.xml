@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#474747"
     tools:context=".Activitys.MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,80 +12,95 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"> <!-- Changed to wrap_content -->
 
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="419dp"
+
+            android:layout_height="170dp"
+            android:background="@drawable/baselayoutdishesdetails"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="218dp"
+
+            android:layout_height="155dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/lc" />
+
+
         <Button
             android:id="@+id/qrCodeImageView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:layout_marginTop="16dp"
-            android:background="#000000"
-            android:text="RTA inserir"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_stroke_normal"
+            android:text="CLICE AQUI PARA INCLUIR RTA"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay" />
+            app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour" />
 
         <Button
             android:id="@+id/buttonWorkHour"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:text="Pontos"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/qrCodeImageView"
-            app:layout_constraintVertical_bias="0.112" />
-
-        <Button
-            android:id="@+id/buttonProfileUser"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:text="Perfil"
-            app:layout_constraintEnd_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toBottomOf="@+id/inTravelbutton" />
+            android:layout_marginEnd="8dp"
+            android:text="Pontos"
+            app:layout_constraintEnd_toStartOf="@+id/inTravelbutton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay" />
 
         <TextView
             android:id="@+id/UserNameDisplay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:text="TextView"
+            android:textColor="@color/white"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.144"
+            app:layout_constraintHorizontal_bias="0.045"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.066" />
+            app:layout_constraintTop_toBottomOf="@+id/imageView2"
+            app:layout_constraintVertical_bias="0.0" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listRTAview"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="450dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="57dp"
+            android:layout_marginBottom="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonProfileUser"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintTop_toBottomOf="@+id/qrCodeImageView"
+            app:layout_constraintVertical_bias="0.0" />
 
         <Button
             android:id="@+id/inTravelbutton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
             android:text="rota"
-            app:layout_constraintEnd_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintStart_toStartOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour" />
+            app:layout_constraintBottom_toBottomOf="@+id/buttonWorkHour"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/buttonWorkHour"
+            app:layout_constraintTop_toTopOf="@+id/buttonWorkHour" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

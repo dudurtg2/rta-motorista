@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             integrator.initiateScan();
         });
 
-        binding.buttonProfileUser.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        binding.UserNameDisplay.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
         binding.inTravelbutton.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
         queryItems();
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     private void getUser() {
         firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) { binding.UserNameDisplay.setText(documentSnapshot.getString("nome")); }
+                    if (documentSnapshot.exists()) { binding.UserNameDisplay.setText("Motorista: " + documentSnapshot.getString("nome")); }
                     else { binding.UserNameDisplay.setText(mAuth.getCurrentUser().getDisplayName()); }
                 })
                 .addOnFailureListener(e ->  Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());

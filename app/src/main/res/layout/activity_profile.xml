@@ -4,53 +4,64 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
+    android:background="#474747"
     android:layout_height="match_parent"
     tools:context=".Activitys.User.ProfileActivity">
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="411dp"
+        android:layout_height="342dp"
+        android:background="@drawable/baselayoutdishesdetails"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="309dp"
+        android:layout_height="280dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/lc" />
 
     <EditText
         android:id="@+id/editNameUser"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="332dp"
+        android:hint="Motorista"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"
         android:ems="10"
+        android:background="@drawable/button_stroke"
+        android:paddingLeft="15dp"
+        android:layout_height="45dp"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/UserImagenView" />
 
     <ImageView
         android:id="@+id/UserImagenView"
         android:layout_width="256dp"
         android:layout_height="256dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2"
         tools:src="@tools:sample/avatars" />
-
-    <EditText
-        android:id="@+id/editCargoUser"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="35dp"
-        android:ems="3"
-        android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/profileUserInsert"
-        app:layout_constraintEnd_toEndOf="@+id/editNameUser"
-        app:layout_constraintStart_toStartOf="@+id/editNameUser"
-        app:layout_constraintTop_toBottomOf="@+id/editNameUser" />
 
     <Button
         android:id="@+id/profileUserInsert"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="24dp"
         android:text="confirma"
         android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="@+id/editCargoUser"
-        app:layout_constraintStart_toStartOf="@+id/editCargoUser"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editNameUser"
         tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

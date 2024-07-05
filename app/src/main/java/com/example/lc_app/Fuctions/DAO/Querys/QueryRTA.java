@@ -41,6 +41,10 @@ public class QueryRTA {
                                 ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
                                 list.add(listRTADTO);
                         }
+                        if (list.isEmpty()) {
+                            ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível");
+                            list.add(listRTADTO);
+                        }
                         firestoreCallback.onCallback(list);
                     } else {
                         Toast.makeText(context, "Erro ao obter documentos: " + task.getException(), Toast.LENGTH_SHORT).show();
@@ -55,11 +59,15 @@ public class QueryRTA {
                         list.clear();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            String codigoDeFicha = document.getString("Codigo_de_ficha");
+                            String status = document.getString("Status");
+                            ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
+                            list.add(listRTADTO);
+                        }
+                        if (list.isEmpty()) {
 
-                                String codigoDeFicha = document.getString("Codigo_de_ficha");
-                                String status = document.getString("Status");
-                                ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
-                                list.add(listRTADTO);
+                            ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível");
+                            list.add(listRTADTO);
 
                         }
                         firestoreCallback.onCallback(list);

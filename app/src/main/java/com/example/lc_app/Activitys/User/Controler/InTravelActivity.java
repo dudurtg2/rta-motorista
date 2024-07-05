@@ -57,11 +57,20 @@ public class InTravelActivity extends AppCompatActivity {
             integrator.initiateScan();
         });
         queryItems();
+        getUser();
+    }
+    private void getUser() {
+        firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) { binding.UserNameDisplay.setText("Motorista: " + documentSnapshot.getString("nome")); }
+                    else { binding.UserNameDisplay.setText(mAuth.getCurrentUser().getDisplayName()); }
+                })
+                .addOnFailureListener(e ->  Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }
     private void queryItems() {
         QueryRTA queryRTATravel = new QueryRTA(this);
         queryRTATravel.readDataInTravel(dishesDTO -> {
-            binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             binding.listRTATravelview.setAdapter(new AdapterViewRTA(getApplicationContext(), dishesDTO));
         });
     }

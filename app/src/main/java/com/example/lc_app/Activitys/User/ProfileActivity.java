@@ -81,10 +81,10 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         binding.editNameUser.setHint(documentSnapshot.getString("nome"));
-                        binding.editCargoUser.setHint(documentSnapshot.getString("rota"));
+
                     } else {
                         binding.editNameUser.setHint(mAuth.getCurrentUser().getDisplayName());
-                        binding.editCargoUser.setHint("");
+
                     }
                 }).addOnFailureListener(e ->  Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }

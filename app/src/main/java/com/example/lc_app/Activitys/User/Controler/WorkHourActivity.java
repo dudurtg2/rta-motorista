@@ -72,7 +72,7 @@ public class WorkHourActivity extends AppCompatActivity {
         firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        binding.UserNameDisplay.setText(documentSnapshot.getString("nome"));
+                        binding.UserNameDisplay.setText("Motorista: " + documentSnapshot.getString("nome"));
                     } else {
                         binding.UserNameDisplay.setText(mAuth.getCurrentUser().getDisplayName());
                     }
