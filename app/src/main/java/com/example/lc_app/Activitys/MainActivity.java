@@ -90,20 +90,14 @@ public class MainActivity extends AppCompatActivity {
                             .get().addOnSuccessListener(documentSnapshotUsuario -> {
                                 if (documentSnapshotUsuario.exists()) {
                                     docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
-                                            .addOnSuccessListener(aVoid -> firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                                                    .update("RTA_sacas", FieldValue.arrayUnion(uid))
-                                                    .addOnSuccessListener(v ->
+                                            .addOnSuccessListener(aVoid -> {
                                                             docRefRTA.update("Status", "em rota")
                                                                     .addOnSuccessListener(aVoid2 -> {
                                                                         moveDocumentToRotaFolder(uid);
                                                                         Toast.makeText(this,  uid + " adicionada a rota.", Toast.LENGTH_SHORT).show();
                                                                         queryItems();
-                                                                    }))
-                                                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show())
-                                            )
-                                            .addOnFailureListener(e -> {
-                                                Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                            });
+                                                                    });
+                                            }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
                                 }
                             });
                 } else if (documentSnapshotRTA.getString("Status").equals("em rota")) { Toast.makeText(this, "Motorista já está em rota", Toast.LENGTH_SHORT).show();}

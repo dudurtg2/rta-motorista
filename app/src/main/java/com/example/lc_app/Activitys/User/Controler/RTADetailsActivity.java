@@ -29,7 +29,7 @@ public class RTADetailsActivity extends AppCompatActivity {
     private DocumentReference docRef, docRefRTA;
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
-
+    private String uid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,42 +37,19 @@ public class RTADetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rtadetails);
         binding = ActivityRtadetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         Intent intent = getIntent();
         if (intent != null) {
-            String uid = intent.getStringExtra("uid");
+            uid = intent.getStringExtra("uid");
         }
+
+
     }
     private void removeToTraver(String uid) {
         docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
         docRefRTA.get().addOnSuccessListener(documentSnapshotRTA -> {
             if (documentSnapshotRTA.exists()) {
-                String motorista = documentSnapshotRTA.getString("Motorista");
-                String status = documentSnapshotRTA.getString("Status");
-                if (motorista != null && motorista.equals(mAuth.getCurrentUser().getUid())) {
-                    if (status != null && status.equals("em rota")) {
-                        firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                                .get().addOnSuccessListener(documentSnapshotUsuario -> {
-                                    if (documentSnapshotUsuario.exists()) {
-                                        deleteRTAFirebase(uid).addOnSuccessListener( aVoid -> firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                                                .update("RTA_sacas", FieldValue.arrayRemove(uid))
-                                                .addOnSuccessListener(aVoid2 -> {
 
-                                                            Toast.makeText(this, uid + " finalizada.", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                ).addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA da rota: " + e.getMessage(), Toast.LENGTH_SHORT).show())
-                                        ).addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show());
-                                    }
-                                });
-                    } else { Toast.makeText(this, "RTA não está em rota", Toast.LENGTH_SHORT).show(); }
-                } else { Toast.makeText(this, "Motorista não corresponde a RTA", Toast.LENGTH_SHORT).show(); }
-            }
-        }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
-    }
-
-    private Task<DocumentSnapshot> deleteRTAFirebase(String uid) {
-        docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
-        return docRefRTA.get().addOnSuccessListener(documentSnapshotRTA -> {
-            if (documentSnapshotRTA.exists()) {
                 docRefRTA.delete().addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "RTA " + uid + " removida.", Toast.LENGTH_SHORT).show();
 
@@ -82,7 +59,10 @@ public class RTADetailsActivity extends AppCompatActivity {
                     firestore.collection("finalizados").document(mAuth.getCurrentUser().getUid()).update(finalizadoData);
 
                 }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
             }
-        });
+        }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }
+
+
 }
