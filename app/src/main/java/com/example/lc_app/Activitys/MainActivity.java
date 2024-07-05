@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
                     docRefRTA.update("Status", "Retirado").addOnSuccessListener(aVoid2 -> {
                       moveDocumentToRotaFolder(uid);
                       Toast.makeText(this, uid + " adicionada a rota.", Toast.LENGTH_SHORT).show();
-                      queryItems();
                     });
                   })
                   .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -124,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
           if (documentSnapshot.exists()) {
             Map<String, Object> docData = documentSnapshot.getData();
             if (docData != null) {
-              targetDocRef.set(docData).addOnSuccessListener(aVoid -> { sourceDocRef.delete().addOnSuccessListener(aVoid1 -> Log.d("Firestore", "Documento movido e original deletado com sucesso")).addOnFailureListener(e -> Log.d("Firestore", "Erro ao deletar documento original: " + e.getMessage())); }).addOnFailureListener(e -> Log.d("Firestore", "Erro ao mover documento: " + e.getMessage()));
+              targetDocRef.set(docData).addOnSuccessListener(aVoid -> { sourceDocRef.delete().addOnSuccessListener(aVoid1 -> queryItems()).addOnFailureListener(e -> Log.d("Firestore", "Erro ao deletar documento original: " + e.getMessage())); }).addOnFailureListener(e -> Log.d("Firestore", "Erro ao mover documento: " + e.getMessage()));
             }
           } else {
             Log.d("Firestore", "Documento de origem não encontrado");
