@@ -1,5 +1,7 @@
 package com.example.lc_app.Activitys.User.Controler;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -79,56 +81,15 @@ public class InTravelActivity extends AppCompatActivity {
             docRef = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
             docRef.get().addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
-                    removeToTraver(uid);
+                    Intent intent = new Intent(this, RTADetailsActivity.class);
+                    intent.putExtra("uid", uid);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    this.startActivity(intent);
                 } else { Toast.makeText(this, "RTA não encontrado", Toast.LENGTH_SHORT).show(); }
             }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
         } else { Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show(); }
     }
-    private void removeToTraver(String uid) {
-        docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
-        docRefRTA.get().addOnSuccessListener(documentSnapshotRTA -> {
-            if (documentSnapshotRTA.exists()) {
-                String motorista = documentSnapshotRTA.getString("Motorista");
-                String status = documentSnapshotRTA.getString("Status");
-                if (motorista != null && motorista.equals(mAuth.getCurrentUser().getUid())) {
-                    if (status != null && status.equals("em rota")) {
-                        firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                                .get().addOnSuccessListener(documentSnapshotUsuario -> {
-                                    if (documentSnapshotUsuario.exists()) {
-                                        deleteRTAFirebase(uid).addOnSuccessListener( aVoid -> firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid())
-                                                .update("RTA_sacas", FieldValue.arrayRemove(uid))
-                                                .addOnSuccessListener(aVoid2 -> {
-                                                            queryItems();
-                                                            Toast.makeText(this, uid + " finalizada.", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                ).addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA da rota: " + e.getMessage(), Toast.LENGTH_SHORT).show())
-                                        ).addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status." + e.getMessage(), Toast.LENGTH_SHORT).show());
 
-                                    }
-                                });
-                    } else { Toast.makeText(this, "RTA não está em rota", Toast.LENGTH_SHORT).show(); }
-                } else { Toast.makeText(this, "Motorista não corresponde a RTA", Toast.LENGTH_SHORT).show(); }
-            }
-        }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
-
-    }
-
-    private Task<DocumentSnapshot> deleteRTAFirebase(String uid) {
-        docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
-        return docRefRTA.get().addOnSuccessListener(documentSnapshotRTA -> {
-            if (documentSnapshotRTA.exists()) {
-                docRefRTA.delete().addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "RTA " + uid + " removida.", Toast.LENGTH_SHORT).show();
-
-                    Map<String, Object> finalizadoData = new HashMap<>();
-                    finalizadoData.put(uid, new Timestamp(new Date()));
-
-                    firestore.collection("finalizados").document(mAuth.getCurrentUser().getUid()).update(finalizadoData);
-
-                }).addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            }
-        });
-    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
