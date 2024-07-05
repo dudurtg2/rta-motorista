@@ -52,39 +52,55 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:background="@drawable/button_stroke_normal"
             android:text="CLICE AQUI PARA LOCALIZAR RTA"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.25"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay"
+            app:layout_constraintTop_toBottomOf="@+id/buttonFinaliza"
             app:layout_constraintVertical_bias="0.0" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listRTATravelview"
             android:layout_width="0dp"
-            android:layout_height="500dp"
+            android:layout_height="450dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonList" />
+            app:layout_constraintTop_toBottomOf="@+id/buttonList"
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/atualizar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="48dp"
+            android:background="@drawable/button_stroke_squad"
             android:text="Atualizar lista"
             android:textColor="@color/white"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/listRTATravelview"
             app:layout_constraintTop_toBottomOf="@+id/listRTATravelview" />
+
+        <Button
+            android:id="@+id/buttonFinaliza"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_stroke_normal_f"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="FINALIZAR ROTA"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

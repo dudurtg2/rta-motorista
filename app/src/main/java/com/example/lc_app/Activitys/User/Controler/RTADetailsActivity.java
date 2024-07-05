@@ -65,7 +65,6 @@ public class RTADetailsActivity extends AppCompatActivity {
             docRef.update(updateData)
                 .addOnSuccessListener(aVoid -> {
                   Toast.makeText(this, "Status atualizado para " + status, Toast.LENGTH_SHORT).show();
-                  startActivity(new Intent(this, InTravelActivity.class));
                   finish();
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status", Toast.LENGTH_SHORT).show());
@@ -106,23 +105,4 @@ public class RTADetailsActivity extends AppCompatActivity {
         .addOnFailureListener(e -> { Toast.makeText(getApplicationContext(), "Error fetching document: " + e.getMessage(), Toast.LENGTH_SHORT).show(); });
   }
 
-  private void removeToTraver(String uid) {
-    docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
-    docRefRTA.get()
-        .addOnSuccessListener(documentSnapshotRTA -> {
-          if (documentSnapshotRTA.exists()) {
-            docRefRTA.delete()
-                .addOnSuccessListener(aVoid -> {
-                  Toast.makeText(this, "RTA " + uid + " removida.", Toast.LENGTH_SHORT).show();
-
-                  Map<String, Object> finalizadoData = new HashMap<>();
-                  finalizadoData.put(uid, new Timestamp(new Date()));
-
-                  firestore.collection("finalizados").document(mAuth.getCurrentUser().getUid()).update(finalizadoData);
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-          }
-        })
-        .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
-  }
 }

@@ -25,6 +25,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -37,6 +38,7 @@ public class InTravelActivity extends AppCompatActivity {
   private DocumentReference docRef, docRefRTA;
   private FirebaseFirestore firestore;
   private FirebaseAuth mAuth;
+  private boolean ocorrerncias;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +47,7 @@ public class InTravelActivity extends AppCompatActivity {
     setContentView(R.layout.activity_in_travel);
     mAuth = FirebaseAuth.getInstance();
     firestore = FirebaseFirestore.getInstance();
-
+    ocorrerncias = false;
     binding = ActivityInTravelBinding.inflate(getLayoutInflater());
     setContentView(binding.getRoot());
 
@@ -56,10 +58,49 @@ public class InTravelActivity extends AppCompatActivity {
       integrator.initiateScan();
     });
     binding.atualizar.setOnClickListener(v -> queryItems());
+    binding.buttonFinaliza.setOnClickListener(v -> {removeFromTraver(); });
     queryItems();
 
     getUser();
   }
+    private void removeFromTraver() {
+      ocorrerncias = false;
+      firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").get().addOnCompleteListener(task -> {
+        if (task.isSuccessful()) {
+          for (QueryDocumentSnapshot document : task.getResult()) {
+            String codigoDeFicha = document.getString("Codigo_de_ficha");
+            String status = document.getString("Status");
+            if (status.equals("Finalizado")) {
+              removeToTraver(codigoDeFicha);
+            } else {
+              ocorrerncias = true;
+            }
+          }
+          if (ocorrerncias) {
+            Toast.makeText(this, "Rota contem pendencias", Toast.LENGTH_SHORT).show();
+          } else {
+            Toast.makeText(this, "Rota finalizada", Toast.LENGTH_SHORT).show();
+          }
+        }
+        queryItems();
+      });
+    }
+    private void removeToTraver(String uid) {
+      docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
+      docRefRTA.get()
+              .addOnSuccessListener(documentSnapshotRTA -> {
+                if (documentSnapshotRTA.exists()) {
+                  docRefRTA.delete()
+                          .addOnSuccessListener(aVoid -> {
+                            Map<String, Object> finalizadoData = new HashMap<>();
+                            finalizadoData.put(uid, new Timestamp(new Date()));
+                            firestore.collection("finalizados").document(mAuth.getCurrentUser().getUid()).update(finalizadoData);
+                          })
+                          .addOnFailureListener(e -> Toast.makeText(this, "Erro ao remover RTA: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+              })
+              .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
+    }
   private void getUser() {
     firestore.collection("usuarios")
         .document(mAuth.getCurrentUser().getUid())
@@ -73,7 +114,7 @@ public class InTravelActivity extends AppCompatActivity {
         })
         .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
   }
-  private void queryItems() {
+  public void queryItems() {
     QueryRTA queryRTATravel = new QueryRTA(this);
     queryRTATravel.readDataInTravel(dishesDTO -> {
       binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -94,6 +135,7 @@ public class InTravelActivity extends AppCompatActivity {
                 intent.putExtra("uid", uid);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 this.startActivity(intent);
+                finish();
               }
             } else {
               Toast.makeText(this, "RTA não encontrado", Toast.LENGTH_SHORT).show();

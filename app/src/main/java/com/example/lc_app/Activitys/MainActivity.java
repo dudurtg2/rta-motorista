@@ -12,6 +12,7 @@ import com.example.lc_app.Activitys.User.Controler.WorkHourActivity;
 import com.example.lc_app.Activitys.User.ProfileActivity;
 import com.example.lc_app.Fuctions.DAO.Querys.QueryRTA;
 import com.example.lc_app.Fuctions.DAO.View.AdapterViewRTA;
+import com.example.lc_app.Fuctions.DTO.ListRTADTO;
 import com.example.lc_app.R;
 import com.example.lc_app.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.Task;
@@ -21,6 +22,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     binding.UserNameDisplay.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
     binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
     binding.inTravelbutton.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
+
     binding.atualizar.setOnClickListener(v -> queryItems());
     queryItems();
   }
