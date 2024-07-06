@@ -70,7 +70,7 @@ public class WorkHourActivity extends AppCompatActivity {
         .get()
         .addOnSuccessListener(documentSnapshot -> {
           if (documentSnapshot.exists()) {
-            binding.UserNameDisplay.setText("Motorista: " + documentSnapshot.getString("nome"));
+            binding.UserNameDisplay.setText("\uD83D\uDE9B " + documentSnapshot.getString("nome"));
           } else {
             binding.UserNameDisplay.setText(mAuth.getCurrentUser().getDisplayName());
           }

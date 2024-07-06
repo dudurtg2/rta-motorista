@@ -2,6 +2,7 @@ package com.example.lc_app.Activitys.User.Controler;
 
 import android.content.Intent;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -43,8 +44,32 @@ public class RTADetailsActivity extends AppCompatActivity {
     binding.buttonRecusar.setOnClickListener(v -> statusUpdate(uid, "Recusado"));
     binding.buttonFinalizar.setOnClickListener(v -> statusUpdate(uid, "Finalizado"));
     binding.buttonOcorrencia.setOnClickListener(v -> statusUpdate(uid, "Ocorrencia"));
+    binding.textRTA.setOnClickListener(v -> downloadRTA(uid) );
     getRTA(uid);
   }
+  private void downloadRTA(String uid) {
+    docRefRTA = firestore.collection("rota")
+            .document(mAuth.getCurrentUser().getUid())
+            .collection("pacotes")
+            .document(uid);
+
+    docRefRTA.get().addOnSuccessListener(documentSnapshot -> {
+      if (documentSnapshot.exists()) {
+        String downloadLink = documentSnapshot.getString("Download_link");
+        if (downloadLink != null) {
+          Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink));
+          startActivity(intent);
+        } else {
+          Toast.makeText(this, "Download link not available", Toast.LENGTH_SHORT).show();
+        }
+      } else {
+        Toast.makeText(this, "Document does not exist", Toast.LENGTH_SHORT).show();
+      }
+    }).addOnFailureListener(e -> {
+      Toast.makeText(this, "Failed to fetch document: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+    });
+  }
+
   private void statusUpdate(String uid, String status) {
     docRef = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
 
@@ -80,7 +105,7 @@ public class RTADetailsActivity extends AppCompatActivity {
     docRef.get()
         .addOnSuccessListener(documentSnapshot -> {
           if (documentSnapshot.exists()) {
-            binding.textRTA.setText(uid);
+            binding.textRTA.setText(uid + " \uD83D\uDCBE");
             binding.TextCidade.setText("Cidade: " + documentSnapshot.getString("Local"));
             binding.textDate.setText("Data: " + documentSnapshot.getString("Hora_e_Dia"));
             binding.textCount.setText("Quantidade: " + documentSnapshot.getString("Quantidade"));

@@ -36,6 +36,7 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
 
   @Override
   public void onBindViewHolder(@NonNull ViewRTA holder, int position) {
+
     ListRTADTO item = list.get(position);
 
     holder.nameRTAText.setText(item.getName());
@@ -69,6 +70,9 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
             break;
           case "Ocorrencia":
             Toast.makeText(context, "RTA em Ocorrência", Toast.LENGTH_SHORT).show();
+            break;
+          case "Indisponível":
+            Toast.makeText(context, "RTA indisponível", Toast.LENGTH_SHORT).show();
             break;
           default:
             Intent intent = new Intent(context, RTADetailsActivity.class);
