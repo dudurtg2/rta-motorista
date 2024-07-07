@@ -1,4 +1,4 @@
-package com.example.lc_app.Activitys.User;
+package com.example.rta_app.Activitys.User;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,10 +9,10 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.lc_app.Fuctions.DAO.User.ImageUploaderDAO;
-import com.example.lc_app.Fuctions.DAO.User.UserDAO;
-import com.example.lc_app.R;
-import com.example.lc_app.databinding.ActivityProfileBinding;
+import com.example.rta_app.Fuctions.DAO.User.ImageUploaderDAO;
+import com.example.rta_app.Fuctions.DAO.User.UserDAO;
+import com.example.rta_app.R;
+import com.example.rta_app.databinding.ActivityProfileBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;

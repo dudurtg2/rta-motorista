@@ -1,23 +1,17 @@
-package com.example.lc_app.Activitys.User.Controler;
+package com.example.rta_app.Activitys.User.Controler;
 
 import android.content.Intent;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewTreeObserver;
-import android.widget.MultiAutoCompleteTextView;
-import android.widget.ScrollView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.lc_app.R;
-import com.example.lc_app.databinding.ActivityRtadetailsBinding;
-import com.google.firebase.Timestamp;
+import com.example.rta_app.R;
+import com.example.rta_app.databinding.ActivityRtadetailsBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import java.util.Date;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

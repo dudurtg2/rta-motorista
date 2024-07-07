@@ -1,4 +1,4 @@
-package com.example.lc_app.Fuctions.DAO.View;
+package com.example.rta_app.Fuctions.DAO.View;
 
 import android.view.View;
 import android.widget.TextView;
@@ -6,7 +6,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.lc_app.R;
+import com.example.rta_app.R;
 
 public class ViewRTA extends RecyclerView.ViewHolder {
     protected TextView nameRTAText;

@@ -1,4 +1,4 @@
-package com.example.lc_app.Fuctions.DTO;
+package com.example.rta_app.Fuctions.DTO;
 
 
 public class ListRTADTO {

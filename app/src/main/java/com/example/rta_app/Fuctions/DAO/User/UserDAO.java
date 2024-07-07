@@ -1,9 +1,8 @@
-package com.example.lc_app.Fuctions.DAO.User;
+package com.example.rta_app.Fuctions.DAO.User;
 
 import android.content.Context;
 import android.widget.Toast;
-import com.example.lc_app.Activitys.MainActivity;
-import com.example.lc_app.Fuctions.DTO.UserDTO;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;

@@ -1,4 +1,4 @@
-package com.example.lc_app;
+package com.example.rta_app;
 
 import org.junit.Test;
 

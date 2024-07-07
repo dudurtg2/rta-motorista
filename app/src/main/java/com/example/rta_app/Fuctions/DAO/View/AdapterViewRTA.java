@@ -1,19 +1,17 @@
-package com.example.lc_app.Fuctions.DAO.View;
+package com.example.rta_app.Fuctions.DAO.View;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.lc_app.Activitys.User.Controler.RTADetailsActivity;
-import com.example.lc_app.Fuctions.DTO.ListRTADTO;
-import com.example.lc_app.R;
+import com.example.rta_app.Activitys.User.Controler.RTADetailsActivity;
+import com.example.rta_app.Fuctions.DTO.ListRTADTO;
+import com.example.rta_app.R;
 import java.util.List;
 
 public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {

@@ -1,4 +1,4 @@
-package com.example.lc_app.Activitys;
+package com.example.rta_app.Activitys;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,27 +7,21 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.example.lc_app.Activitys.User.Controler.InTravelActivity;
-import com.example.lc_app.Activitys.User.Controler.WorkHourActivity;
-import com.example.lc_app.Activitys.User.ProfileActivity;
-import com.example.lc_app.Fuctions.DAO.Querys.QueryRTA;
-import com.example.lc_app.Fuctions.DAO.View.AdapterViewRTA;
-import com.example.lc_app.Fuctions.DTO.ListRTADTO;
-import com.example.lc_app.R;
-import com.example.lc_app.databinding.ActivityMainBinding;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
+
+import com.example.rta_app.R;
+import com.example.rta_app.databinding.ActivityMainBinding;
+import com.example.rta_app.Activitys.User.Controler.InTravelActivity;
+import com.example.rta_app.Activitys.User.Controler.WorkHourActivity;
+import com.example.rta_app.Activitys.User.ProfileActivity;
+import com.example.rta_app.Fuctions.DAO.Querys.QueryRTA;
+import com.example.rta_app.Fuctions.DAO.View.AdapterViewRTA;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
-import java.util.Date;
-import java.util.HashMap;
+
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {

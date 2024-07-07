@@ -1,20 +1,18 @@
-package com.example.lc_app.Activitys.User;
+package com.example.rta_app.Activitys.User;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
-import androidx.activity.EdgeToEdge;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import com.example.lc_app.Activitys.MainActivity;
-import com.example.lc_app.R;
-import com.example.lc_app.databinding.ActivityLoginBinding;
+import com.example.rta_app.Activitys.MainActivity;
+import com.example.rta_app.R;
+import com.example.rta_app.databinding.ActivityLoginBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;

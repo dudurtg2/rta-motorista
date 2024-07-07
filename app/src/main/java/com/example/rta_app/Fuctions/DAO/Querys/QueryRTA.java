@@ -1,12 +1,12 @@
-package com.example.lc_app.Fuctions.DAO.Querys;
+package com.example.rta_app.Fuctions.DAO.Querys;
 
 import android.content.Context;
 import android.widget.Toast;
-import com.example.lc_app.Fuctions.DTO.ListRTADTO;
+import com.example.rta_app.Fuctions.DTO.ListRTADTO;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.ArrayList;
 import java.util.List;
 

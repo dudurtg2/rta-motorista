@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LC_app"
+rootProject.name = "RTA_app"
 include ':app'

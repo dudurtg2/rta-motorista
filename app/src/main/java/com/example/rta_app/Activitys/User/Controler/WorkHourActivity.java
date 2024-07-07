@@ -1,4 +1,4 @@
-package com.example.lc_app.Activitys.User.Controler;
+package com.example.rta_app.Activitys.User.Controler;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -9,10 +9,10 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
-import com.example.lc_app.Fuctions.DAO.Controler.ImageUploaderDAO;
-import com.example.lc_app.Fuctions.DAO.User.UserDAO;
-import com.example.lc_app.R;
-import com.example.lc_app.databinding.ActivityWorkHourBinding;
+import com.example.rta_app.Fuctions.DAO.Controler.ImageUploaderDAO;
+import com.example.rta_app.Fuctions.DAO.User.UserDAO;
+import com.example.rta_app.R;
+import com.example.rta_app.databinding.ActivityWorkHourBinding;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -141,7 +141,7 @@ public class WorkHourActivity extends AppCompatActivity {
         Toast.makeText(this, "Erro ao criar arquivo de imagem", Toast.LENGTH_SHORT).show();
       }
       if (photoFile != null) {
-        photoURI = FileProvider.getUriForFile(this, "com.example.lc_app.provider", photoFile);
+        photoURI = FileProvider.getUriForFile(this, "com.example.rta_app.provider", photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
       }
