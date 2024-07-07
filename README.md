@@ -1,4 +1,4 @@
-# LC Transportes Controle de Rota e Ponto de Hora
+# RTA Controle de Rota e Ponto de Hora
 ## Funcionalidades
  - Controle de Rota: Monitore e gerencie rotas em tempo real, garantindo que os motoristas sigam os trajetos planejados e otimizados para eficiência e economia de combustível.
  - Registro de Ponto: Facilite o registro de horas trabalhadas, com marcação de entrada e saída, pausas e horas extras.
