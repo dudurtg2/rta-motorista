@@ -32,11 +32,14 @@ public class QueryRTA {
         for (QueryDocumentSnapshot document : task.getResult()) {
           String codigoDeFicha = document.getString("Codigo_de_ficha");
           String status = document.getString("Status");
-          ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
+          String data = document.getString("Hora_e_Dia");
+          String city = document.getString("Local");
+          String enterprise = document.getString("Empresa");
+          ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status, data, city, enterprise);
           list.add(listRTADTO);
         }
         if (list.isEmpty()) {
-          ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível");
+          ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível", "Indisponível", "Indisponível", "Indisponível");
           list.add(listRTADTO);
         }
         firestoreCallback.onCallback(list);
@@ -53,11 +56,14 @@ public class QueryRTA {
         for (QueryDocumentSnapshot document : task.getResult()) {
           String codigoDeFicha = document.getString("Codigo_de_ficha");
           String status = document.getString("Status");
-          ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status);
+          String data = document.getString("Hora_e_Dia");
+          String city = document.getString("Local");
+          String enterprise = document.getString("Empresa");
+          ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status, data, city, enterprise);
           list.add(listRTADTO);
         }
         if (list.isEmpty()) {
-          ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível");
+          ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível", "Indisponível", "Indisponível", "Indisponível");
           list.add(listRTADTO);
         }
         firestoreCallback.onCallback(list);

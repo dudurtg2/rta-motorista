@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
-  private void confirmDocExist(String uid) {
+  public void confirmDocExist(String uid) {
     if (mAuth.getCurrentUser() != null) {
       docRef = firestore.collection("direcionado").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
       docRef.get()

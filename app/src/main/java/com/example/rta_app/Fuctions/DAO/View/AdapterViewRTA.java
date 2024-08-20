@@ -39,6 +39,9 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
 
     holder.nameRTAText.setText(item.getName());
     holder.stsRTAtext.setText(item.getStatus());
+    holder.dateRTAtext.setText(item.getDate());
+    holder.cityRTAtext.setText(item.getCity());
+    holder.Empresa.setText(item.getEnteprise());
 
     int color;
     switch (item.getStatus()) {
@@ -81,7 +84,7 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
         }
       });
     } else {
-      holder.itemView.setOnClickListener(null); // Clear listener if not needed
+      holder.itemView.setOnClickListener(null);
     }
   }
   private void showToast(Context context, String message) {

@@ -29,10 +29,42 @@
         android:id="@+id/stsRTAtext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:text="TextView"
         android:textColor="#002AFF"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/nameRTAText"
         app:layout_constraintTop_toBottomOf="@+id/nameRTAText" />
+
+    <TextView
+        android:id="@+id/cityRTAtext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="4dp"
+        android:text="TextView"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/stsRTAtext"
+        app:layout_constraintTop_toBottomOf="@+id/EmpresaRTAtext" />
+
+    <TextView
+        android:id="@+id/dateRTAtext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="TextView"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/nameRTAText"
+        app:layout_constraintTop_toBottomOf="@+id/nameRTAText" />
+
+    <TextView
+        android:id="@+id/EmpresaRTAtext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="TextView"
+        android:textColor="#002AFF"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/stsRTAtext"
+        app:layout_constraintTop_toBottomOf="@+id/stsRTAtext" />
 </androidx.constraintlayout.widget.ConstraintLayout>

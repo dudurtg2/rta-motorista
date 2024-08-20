@@ -102,8 +102,9 @@ public class RTADetailsActivity extends AppCompatActivity {
             binding.textRTA.setText(uid + " \uD83D\uDCBE");
             binding.TextCidade.setText("Cidade: " + documentSnapshot.getString("Local"));
             binding.textDate.setText("Data: " + documentSnapshot.getString("Hora_e_Dia"));
-            binding.textCount.setText("Quantidade: " + documentSnapshot.getString("Quantidade"));
+            binding.textCount.setText(documentSnapshot.getString("Quantidade"));
             binding.textEntregador.setText("Entregador: " + documentSnapshot.getString("Entregador"));
+            binding.Empresa.setText("Empresa: " + documentSnapshot.getString("Empresa"));
 
             List<String> codes = (List<String>) documentSnapshot.get("Codigos inseridos");
             binding.textAllCodes.setText("Codigos inseridos:\n");
@@ -119,6 +120,7 @@ public class RTADetailsActivity extends AppCompatActivity {
             binding.textCount.setText("");
             binding.textEntregador.setText("");
             binding.textAllCodes.setText("");
+            binding.Empresa.setText("");
           }
         })
         .addOnFailureListener(e -> { Toast.makeText(getApplicationContext(), "Error fetching document: " + e.getMessage(), Toast.LENGTH_SHORT).show(); });
