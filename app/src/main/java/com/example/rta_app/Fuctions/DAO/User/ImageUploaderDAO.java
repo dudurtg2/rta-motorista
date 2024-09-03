@@ -50,6 +50,10 @@ public class ImageUploaderDAO {
     }
   }
 
+  private Bitmap resizeBitmap(Bitmap bitmap, int width, int height) {
+    return Bitmap.createScaledBitmap(bitmap, width, height, true);
+  }
+
   private void uploadFile(Bitmap bitmap) {
     if (bitmap != null) {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -77,7 +81,5 @@ public class ImageUploaderDAO {
     }
   }
 
-  private Bitmap resizeBitmap(Bitmap bitmap, int width, int height) {
-    return Bitmap.createScaledBitmap(bitmap, width, height, true);
-  }
+
 }

@@ -34,13 +34,6 @@ public class ImageUploaderDAO {
         this.hour = hour;
     }
 
-    public void openFileChooser(WorkHourActivity workHourActivity) {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        workHourActivity.startActivityForResult(intent, WorkHourActivity.PICK_IMAGE_REQUEST);
-    }
-
     public void handleCameraResult(Uri photoUri, WorkHourActivity workHourActivity) {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(workHourActivity.getContentResolver(), photoUri);
@@ -74,43 +67,45 @@ public class ImageUploaderDAO {
         if (currentUser != null) {
             StorageReference gsReference = storageReference.child(hour + ".png");
 
-            gsReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                if (context instanceof WorkHourActivity) {
-                    WorkHourActivity activity = (WorkHourActivity) context;
-                    switch (hour) {
-                        case "Entrada":
-                            Picasso.get().load(uri).into(activity.binding.imageFistHour);
-                            break;
-                        case "Almoço":
-                            Picasso.get().load(uri).into(activity.binding.imageDinnerStarHour);
-                            break;
-                        case "Saída":
-                            Picasso.get().load(uri).into(activity.binding.imageDinnerFinishHour);
-                            break;
-                        case "Fim":
-                            Picasso.get().load(uri).into(activity.binding.imageStop);
-                            break;
-                    }
-                }
-            }).addOnFailureListener(e -> {
-                if (context instanceof WorkHourActivity) {
-                    WorkHourActivity activity = (WorkHourActivity) context;
-                    switch (hour) {
-                        case "Entrada":
-                            activity.binding.imageFistHour.setImageResource(R.drawable.chegada);
-                            break;
-                        case "Almoço":
-                            activity.binding.imageDinnerStarHour.setImageResource(R.drawable.ialmouco);
-                            break;
-                        case "Saída":
-                            activity.binding.imageDinnerFinishHour.setImageResource(R.drawable.ialmouco);
-                            break;
-                        case "Fim":
-                            activity.binding.imageStop.setImageResource(R.drawable.fim);
-                            break;
-                    }
-                }
-            });
+            gsReference.getDownloadUrl()
+                    .addOnSuccessListener(uri -> {
+                        if (context instanceof WorkHourActivity) {
+                            WorkHourActivity activity = (WorkHourActivity) context;
+                            switch (hour) {
+                                case "Entrada":
+                                    Picasso.get().load(uri).into(activity.binding.imageFistHour);
+                                    break;
+                                case "Almoço":
+                                    Picasso.get().load(uri).into(activity.binding.imageDinnerStarHour);
+                                    break;
+                                case "Saída":
+                                    Picasso.get().load(uri).into(activity.binding.imageDinnerFinishHour);
+                                    break;
+                                case "Fim":
+                                    Picasso.get().load(uri).into(activity.binding.imageStop);
+                                    break;
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        if (context instanceof WorkHourActivity) {
+                            WorkHourActivity activity = (WorkHourActivity) context;
+                            switch (hour) {
+                                case "Entrada":
+                                    activity.binding.imageFistHour.setImageResource(R.drawable.chegada);
+                                    break;
+                                case "Almoço":
+                                    activity.binding.imageDinnerStarHour.setImageResource(R.drawable.ialmouco);
+                                    break;
+                                case "Saída":
+                                    activity.binding.imageDinnerFinishHour.setImageResource(R.drawable.ialmouco);
+                                    break;
+                                case "Fim":
+                                    activity.binding.imageStop.setImageResource(R.drawable.fim);
+                                    break;
+                            }
+                        }
+                    });
         }
     }
 

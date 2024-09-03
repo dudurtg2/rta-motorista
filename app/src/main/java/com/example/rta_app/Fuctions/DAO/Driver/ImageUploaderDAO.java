@@ -10,9 +10,9 @@ import android.widget.Toast;
 import com.example.rta_app.Activitys.User.Controler.RTADetailsActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,13 +35,6 @@ public class ImageUploaderDAO {
         this.firestore = FirebaseFirestore.getInstance();
     }
 
-    public void openFileChooser(RTADetailsActivity rtaDetailsActivity) {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        rtaDetailsActivity.startActivityForResult(intent, RTADetailsActivity.PICK_IMAGE_REQUEST);
-    }
-
     public void handleCameraResult(Uri photoUri, RTADetailsActivity rtaDetailsActivity) {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(rtaDetailsActivity.getContentResolver(), photoUri);
@@ -53,7 +46,11 @@ public class ImageUploaderDAO {
     }
 
     private void getRTA(String uid, GetRTACallback callback) {
-        firestore.collection("rota").document(currentUser.getUid()).collection("pacotes").document(uid).get()
+        firestore.collection("rota")
+                .document(currentUser.getUid())
+                .collection("pacotes")
+                .document(uid)
+                .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         String location = documentSnapshot.getString("Local");
@@ -69,7 +66,6 @@ public class ImageUploaderDAO {
         getRTA(hour, new GetRTACallback() {
             @Override
             public void onSuccess(String location) {
-                // Assuming GoogleDriveUploader handles the Google Drive upload
                 new GoogleDriveUploader(context, hour, location).uploadBitmap(bitmap);
             }
 
