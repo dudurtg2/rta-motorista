@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         QueryRTA queryRTA = new QueryRTA(this);
         queryRTA.readData(dishesDTO -> {
             binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-            binding.listRTAview.setAdapter(new AdapterViewRTA(0, getApplicationContext(), dishesDTO));
+            binding.listRTAview.setAdapter(new AdapterViewRTA(0, this, dishesDTO));
         });
     }
 
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addToTraver(String uid) {
+    public void addToTraver(String uid) {
         docRefRTA = firestore.collection("direcionado").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
         docRefRTA.get()
                 .addOnSuccessListener(documentSnapshotRTA -> {

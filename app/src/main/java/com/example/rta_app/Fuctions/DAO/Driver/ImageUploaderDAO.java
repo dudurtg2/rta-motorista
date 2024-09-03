@@ -38,7 +38,7 @@ public class ImageUploaderDAO {
     public void handleCameraResult(Uri photoUri, RTADetailsActivity rtaDetailsActivity) {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(rtaDetailsActivity.getContentResolver(), photoUri);
-            Bitmap resizedBitmap = resizeBitmap(bitmap, 720, 1280);
+            Bitmap resizedBitmap = resizeBitmap(bitmap, 768, 1024);
             uploadFile(resizedBitmap);
         } catch (IOException e) {
             Toast.makeText(context, "Falha ao carregar a imagem", Toast.LENGTH_SHORT).show();
