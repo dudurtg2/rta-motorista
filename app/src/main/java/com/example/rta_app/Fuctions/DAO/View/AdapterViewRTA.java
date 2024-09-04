@@ -28,12 +28,14 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
     private final List<ListRTADTO> list;
     private final Context context;
     private final int pipoca;
+
     private DocumentReference docRef, docRefRTA;
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
 
     public AdapterViewRTA(int item, Context context, List<ListRTADTO> listRTADTO) {
         this.context = context;
+
         this.list = listRTADTO;
         this.pipoca = item;
         mAuth = FirebaseAuth.getInstance();

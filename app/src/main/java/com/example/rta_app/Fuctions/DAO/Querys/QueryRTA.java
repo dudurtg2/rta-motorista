@@ -9,12 +9,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class QueryRTA {
   private Context context;
   private FirebaseFirestore db;
   private List<ListRTADTO> list;
+  private ArrayList<String> listRTA;
   private FirebaseAuth mAuth;
 
   public QueryRTA(Context context) {
@@ -22,6 +24,7 @@ public class QueryRTA {
     this.db = FirebaseFirestore.getInstance();
     this.list = new ArrayList<>();
     mAuth = FirebaseAuth.getInstance();
+    this.listRTA = new ArrayList<>();
   }
 
   public interface FirestoreCallback { void onCallback(List<ListRTADTO> listRTADTO); }
@@ -49,7 +52,7 @@ public class QueryRTA {
       }
     });
   }
-  public void readDataInTravel(final FirestoreCallback firestoreCallback) {
+  public void readDataInTravel(final FirestoreCallback firestoreCallback, String filter) {
     db.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").get().addOnCompleteListener(task -> {
       if (task.isSuccessful()) {
         list.clear();
@@ -61,7 +64,11 @@ public class QueryRTA {
           String city = document.getString("Local");
           String enterprise = document.getString("Empresa");
           ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status, data, city, enterprise);
-          list.add(listRTADTO);
+          if (filter.equals("Todas as cidades")) {
+            list.add(listRTADTO);
+          } else if (city.equals(filter)) {
+            list.add(listRTADTO);
+          }
         }
         if (list.isEmpty()) {
           ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível", "Indisponível", "Indisponível", "Indisponível");
@@ -73,4 +80,8 @@ public class QueryRTA {
       }
     });
   }
+
+
+
+
 }

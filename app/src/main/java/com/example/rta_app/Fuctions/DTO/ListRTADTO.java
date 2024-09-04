@@ -1,6 +1,8 @@
 package com.example.rta_app.Fuctions.DTO;
 
 
+import java.util.List;
+
 public class ListRTADTO {
     private String name;
     private String status;
@@ -23,7 +25,9 @@ public class ListRTADTO {
     public void setDate(String date) {
         this.date = date;
     }
-
+    public ListRTADTO(String city) {
+        this.city = city;
+    }
     public ListRTADTO(String name, String status, String date, String city, String enteprise) {
         this.name = name;
         this.status = status;
