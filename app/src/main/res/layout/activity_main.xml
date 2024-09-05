@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#474747"
-    tools:context=".Activitys.MainActivity">
+    tools:context=".SOLID.activitys.MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
@@ -30,15 +30,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour" />
 
-        <Button
+        <ImageView
             android:id="@+id/buttonList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="64dp"
+            android:layout_height="48dp"
             android:layout_margin="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/button_stroke_squad"
-            android:text="📷"
+            android:src="@drawable/camera"
             android:textSize="26sp"
             app:layout_constraintBottom_toTopOf="@+id/RTAprocura"
             app:layout_constraintEnd_toEndOf="parent"
@@ -55,27 +55,27 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="218dp"
-
-            android:layout_height="155dp"
+            android:layout_width="264dp"
+            android:layout_height="163dp"
+            android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintHorizontal_bias="0.496"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/rta" />
 
-
-        <Button
+        <ImageView
             android:id="@+id/buttonWorkHour"
             android:layout_width="0dp"
             android:layout_height="128dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
-            android:text="PONTOS"
-            android:textSize="18sp"
+            android:background="@drawable/button_stroke_squad_white"
+            android:src="@drawable/archive_clock"
             app:layout_constraintEnd_toStartOf="@+id/inTravelbutton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay" />
@@ -90,7 +90,7 @@
             android:text="TextView"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="18sp"
+            android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -127,18 +127,21 @@
             app:layout_constraintStart_toStartOf="@+id/listRTAview"
             app:layout_constraintTop_toBottomOf="@+id/listRTAview" />
 
-        <Button
+        <ImageView
             android:id="@+id/inTravelbutton"
             android:layout_width="0dp"
             android:layout_height="128dp"
             android:layout_marginEnd="16dp"
-            android:text="ROTA"
+            android:background="@drawable/button_stroke_squad_white"
+            android:src="@drawable/bus_marker"
+
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="@+id/buttonWorkHour"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toTopOf="@+id/buttonWorkHour" />
+            app:layout_constraintTop_toTopOf="@+id/buttonWorkHour"
+            app:layout_constraintVertical_bias="0.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

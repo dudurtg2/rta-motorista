@@ -1,17 +1,14 @@
-package com.example.rta_app.Fuctions.DAO.Querys;
-
-import static android.os.Build.VERSION_CODES.R;
+package com.example.rta_app.SOLID.services;
 
 import android.content.Context;
 import android.widget.Toast;
 
-import com.example.rta_app.Fuctions.DTO.ListRTADTO;
+import com.example.rta_app.SOLID.entities.ListRTADTO;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class QueryRTA {
@@ -45,7 +42,7 @@ public class QueryRTA {
           list.add(listRTADTO);
         }
         if (list.isEmpty()) {
-          ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível", "Indisponível", "Indisponível", "Indisponível");
+          ListRTADTO listRTADTO = new ListRTADTO("Não a carga no momento", "Espere por uma nova tarefa", "", "Cunsulte a base para mais informações", "");
           list.add(listRTADTO);
         }
         firestoreCallback.onCallback(list);
@@ -76,7 +73,7 @@ public class QueryRTA {
           }
         }
         if (list.isEmpty()) {
-          ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível", "Indisponível", "Indisponível", "Indisponível");
+          ListRTADTO listRTADTO = new ListRTADTO("Não a carga no momento", "Espere por uma nova tarefa", "", "Cunsulte a base para mais informações", "");
           list.add(listRTADTO);
         }
 

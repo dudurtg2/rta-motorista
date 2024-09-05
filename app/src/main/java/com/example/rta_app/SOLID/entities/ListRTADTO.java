@@ -1,7 +1,5 @@
-package com.example.rta_app.Fuctions.DTO;
+package com.example.rta_app.SOLID.entities;
 
-
-import java.util.List;
 
 public class ListRTADTO {
     private String name;

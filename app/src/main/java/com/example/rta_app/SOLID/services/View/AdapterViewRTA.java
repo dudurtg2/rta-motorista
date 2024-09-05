@@ -1,10 +1,9 @@
-package com.example.rta_app.Fuctions.DAO.View;
+package com.example.rta_app.SOLID.services.View;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.rta_app.Activitys.MainActivity;
-import com.example.rta_app.Activitys.User.Controler.RTADetailsActivity;
-import com.example.rta_app.Fuctions.DTO.ListRTADTO;
+import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
+import com.example.rta_app.SOLID.entities.ListRTADTO;
 import com.example.rta_app.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -84,13 +82,13 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
             holder.itemView.setOnClickListener(v -> {
                 switch (item.getStatus()) {
                     case "Finalizado":
-                        Toast.makeText(context, "RTA finalizada", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Carga finalizada", Toast.LENGTH_SHORT).show();
                         break;
                     case "Ocorrencia":
-                        Toast.makeText(context, "RTA em Ocorrência", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Carga em ocorrência", Toast.LENGTH_SHORT).show();
                         break;
-                    case "Indisponível":
-                        Toast.makeText(context, "RTA indisponível", Toast.LENGTH_SHORT).show();
+                    case "Espere por uma nova tarefa":
+                        Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
                         break;
                     default:
                         Intent intent = new Intent(context, RTADetailsActivity.class);
@@ -106,7 +104,7 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
                     Context itemViewContext = holder.itemView.getContext();
                     new AlertDialog.Builder(itemViewContext)
                             .setTitle("Confirmação")
-                            .setMessage("Você deseja realmente adicionar este RTA?")
+                            .setMessage("Você deseja realmente adicionar essa carga a rota?")
                             .setPositiveButton("Sim", (dialog, which) -> addToTraver(item.getName()))
                             .setNegativeButton("Não", null)
                             .show();

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#474747"
-    tools:context=".Activitys.User.LoginActivity">
+    tools:context=".SOLID.activitys.LoginActivity">
 
     <EditText
         android:id="@+id/loginEmailAddress"
@@ -58,7 +58,7 @@
         android:id="@+id/imageView2"
         android:layout_width="411dp"
         android:layout_height="342dp"
-        android:background="@drawable/baselayoutdishesdetails"
+        android:background="@drawable/button_stroke_squad"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

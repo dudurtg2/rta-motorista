@@ -1,4 +1,4 @@
-package com.example.rta_app.Activitys.User;
+package com.example.rta_app.SOLID.activitys;
 
 import android.Manifest;
 import android.content.Intent;
@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.example.rta_app.Activitys.MainActivity;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityLoginBinding;
 import com.google.firebase.auth.FirebaseAuth;

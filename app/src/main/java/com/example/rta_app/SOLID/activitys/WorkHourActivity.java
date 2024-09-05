@@ -1,4 +1,4 @@
-package com.example.rta_app.Activitys.User.Controler;
+package com.example.rta_app.SOLID.activitys;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -11,9 +11,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.rta_app.Fuctions.DAO.Controler.ImageUploaderDAO;
-import com.example.rta_app.Fuctions.DAO.User.UserDAO;
+import com.example.rta_app.SOLID.services.Controler.ImageUploaderDAO;
+import com.example.rta_app.SOLID.services.UserDAO;
 import com.example.rta_app.R;
+import com.example.rta_app.SOLID.repository.RTArepository;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,7 +57,9 @@ public class WorkHourActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         setupClickListeners();
-        getUser();
+        new RTArepository(this).getUserName(userName ->
+                binding.UserNameDisplay.setText(userName)
+        );
     }
 
     @Override
@@ -69,19 +72,7 @@ public class WorkHourActivity extends AppCompatActivity {
         loadInitialData();
     }
 
-    private void getUser() {
-        firestore.collection("usuarios")
-                .document(mAuth.getCurrentUser().getUid())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        binding.UserNameDisplay.setText("\uD83D\uDE9B " + documentSnapshot.getString("nome"));
-                    } else {
-                        binding.UserNameDisplay.setText(mAuth.getCurrentUser().getDisplayName());
-                    }
-                })
-                .addOnFailureListener(e -> { Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show(); });
-    }
+
 
     private void validateFields(String hour, OnValidationCompleteListener listener) {
         String currentDate = new SimpleDateFormat("dd-MM-yyyy").format(new Date());

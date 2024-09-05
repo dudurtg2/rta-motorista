@@ -1,5 +1,6 @@
-package com.example.rta_app.Activitys.User.Controler;
+package com.example.rta_app.SOLID.activitys;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.rta_app.Fuctions.DAO.Driver.ImageUploaderDAO;
+import com.example.rta_app.SOLID.services.Driver.ImageUploaderDAO;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityRtadetailsBinding;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,7 +54,13 @@ public class RTADetailsActivity extends AppCompatActivity {
         if (intent != null) {
             uid = intent.getStringExtra("uid");
         }
-        binding.buttonRecusar.setOnClickListener(v -> statusUpdate(uid, "Recusado"));
+        binding.buttonRecusar.setOnClickListener(v -> new AlertDialog.Builder(this)
+                .setTitle("Confirmação")
+                .setMessage("O entregador realmente não vai receber a saca de código " + uid + "?")
+                .setPositiveButton("Não vai receber", (dialog, which) ->  statusUpdate(uid, "Recusado"))
+                .setNegativeButton("Vai receber", null)
+                .show());
+
         binding.buttonFinalizar.setOnClickListener(v -> {
             QA = "Finalizado";
             openCamera(uid);

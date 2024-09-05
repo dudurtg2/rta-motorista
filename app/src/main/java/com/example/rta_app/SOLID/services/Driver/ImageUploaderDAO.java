@@ -1,20 +1,18 @@
-package com.example.rta_app.Fuctions.DAO.Driver;
+package com.example.rta_app.SOLID.services.Driver;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
-import com.example.rta_app.Activitys.User.Controler.RTADetailsActivity;
+import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -10,7 +10,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".Activitys.User.Controler.InTravelActivity">
+        tools:context=".SOLID.activitys.InTravelActivity">
 
         <TextView
             android:id="@+id/UserNameDisplay"
@@ -21,9 +21,10 @@
             android:text="TextView"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="18sp"
+            android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.473"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView2"
             app:layout_constraintVertical_bias="0.0" />
@@ -39,29 +40,31 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="218dp"
-            android:layout_height="155dp"
+            android:layout_width="264dp"
+            android:layout_height="163dp"
+            android:layout_marginTop="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintHorizontal_bias="0.496"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/rta" />
 
-        <Button
+
+        <ImageView
             android:id="@+id/buttonList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="64dp"
+            android:layout_height="48dp"
             android:layout_margin="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/button_stroke_squad"
-            android:text="📷"
+            android:src="@drawable/camera"
             android:textSize="26sp"
             app:layout_constraintBottom_toTopOf="@+id/RTAprocura"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/RTAprocura"
             app:layout_constraintTop_toBottomOf="@+id/RTAprocura" />
-
 
         <Spinner
             android:id="@+id/DishesCategorySpinner"
@@ -73,8 +76,7 @@
             android:background="@drawable/button_stroke_squad"
             android:textColor="@color/white"
             android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintEnd_toStartOf="@+id/QtdRTA"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/RTAprocura" />
 
@@ -98,24 +100,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="32dp"
             android:background="@drawable/button_stroke_squad"
             android:text="🔄 Atualizar lista"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/listRTATravelview"
-            app:layout_constraintTop_toBottomOf="@+id/buttonFinaliza" />
+            app:layout_constraintStart_toStartOf="@+id/buttonFinaliza"
+            app:layout_constraintTop_toBottomOf="@+id/buttonFinaliza"
+            app:layout_constraintVertical_bias="0.0" />
 
         <Button
             android:id="@+id/buttonFinaliza"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
             android:text="FINALIZAR ROTA"
             android:textSize="20sp"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/atualizar"
+            app:layout_constraintEnd_toEndOf="@+id/listRTATravelview"
+            app:layout_constraintStart_toStartOf="@+id/listRTATravelview"
             app:layout_constraintTop_toBottomOf="@+id/listRTATravelview" />
 
         <EditText
@@ -140,14 +145,15 @@
             android:id="@+id/QtdRTA"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="TextView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.1"
-            app:layout_constraintStart_toEndOf="@+id/buttonFinaliza"
-            app:layout_constraintTop_toBottomOf="@+id/listRTATravelview"
+            android:layout_marginEnd="24dp"
+            android:text="QTD: 0"
             android:textColor="@color/white"
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/DishesCategorySpinner"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/DishesCategorySpinner"
+            app:layout_constraintTop_toTopOf="@+id/DishesCategorySpinner" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

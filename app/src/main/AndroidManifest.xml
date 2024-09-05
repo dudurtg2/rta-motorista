@@ -22,23 +22,23 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".Activitys.User.Controler.RTADetailsActivity"
+            android:name=".SOLID.activitys.RTADetailsActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
-            android:name=".Activitys.User.Controler.InTravelActivity"
+            android:name=".SOLID.activitys.InTravelActivity"
             android:exported="false" />
         <activity
-            android:name=".Activitys.User.Controler.WorkHourActivity"
+            android:name=".SOLID.activitys.WorkHourActivity"
             android:exported="false" />
         <activity
-            android:name=".Activitys.User.ProfileActivity"
+            android:name=".SOLID.activitys.ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".Activitys.MainActivity"
+            android:name=".SOLID.activitys.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".Activitys.User.LoginActivity"
+            android:name=".SOLID.activitys.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

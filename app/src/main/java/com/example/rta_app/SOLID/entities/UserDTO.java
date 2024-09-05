@@ -1,4 +1,4 @@
-package com.example.rta_app.Fuctions.DTO;
+package com.example.rta_app.SOLID.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

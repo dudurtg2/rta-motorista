@@ -1,4 +1,4 @@
-package com.example.rta_app.Fuctions.DAO.User;
+package com.example.rta_app.SOLID.services.User;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +8,7 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 
-import com.example.rta_app.Activitys.User.ProfileActivity;
+import com.example.rta_app.SOLID.activitys.ProfileActivity;
 import com.example.rta_app.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
