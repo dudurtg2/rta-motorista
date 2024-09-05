@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class RTADetailsActivity extends AppCompatActivity {
@@ -99,11 +100,19 @@ public class RTADetailsActivity extends AppCompatActivity {
     }
 
     private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if (storageDir != null && !storageDir.exists()) {
+            if (!storageDir.mkdirs()) {
+                throw new IOException("Failed to create directory");
+            }
+        }
+
         return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
+
 
     private void downloadRTA(String uid) {
         docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);

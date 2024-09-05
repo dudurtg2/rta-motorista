@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:text="TextView"
             android:textAlignment="center"
             android:textColor="@color/white"
@@ -32,7 +32,7 @@
             android:id="@+id/imageView2"
             android:layout_width="419dp"
             android:layout_height="170dp"
-            android:background="@drawable/baselayoutdishesdetails"
+            android:background="@drawable/button_stroke_squad"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -49,23 +49,24 @@
 
         <Button
             android:id="@+id/buttonList"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/button_stroke_normal"
-            android:text="CLICE AQUI PARA LOCALIZAR RTA"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/button_stroke_squad"
+            android:text="📷"
+            android:textSize="26sp"
+            app:layout_constraintBottom_toTopOf="@+id/RTAprocura"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/RTAprocura"
-            app:layout_constraintTop_toBottomOf="@+id/buttonFinaliza"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toBottomOf="@+id/RTAprocura" />
 
 
         <Spinner
             android:id="@+id/DishesCategorySpinner"
             android:layout_width="0dp"
-            android:layout_height="24dp"
+            android:layout_height="28dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
@@ -97,46 +98,56 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="48dp"
+            android:layout_marginBottom="16dp"
             android:background="@drawable/button_stroke_squad"
             android:text="🔄 Atualizar lista"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/listRTATravelview"
-            app:layout_constraintTop_toBottomOf="@+id/listRTATravelview" />
+            app:layout_constraintTop_toBottomOf="@+id/buttonFinaliza" />
 
         <Button
             android:id="@+id/buttonFinaliza"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="32dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="4dp"
             android:text="FINALIZAR ROTA"
             android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay" />
+            app:layout_constraintTop_toBottomOf="@+id/listRTATravelview" />
 
         <EditText
             android:id="@+id/RTAprocura"
             android:layout_width="0dp"
-            android:layout_height="45dp"
+            android:layout_height="48dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="3dp"
-            android:background="@drawable/button_stroke"
+            android:background="@drawable/squad_stroke"
             android:ems="10"
-            android:hint="Digite o rta aqui"
+            android:hint="Digite o código de ficha"
             android:inputType="text"
             android:paddingLeft="15dp"
             android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="@+id/buttonList"
             app:layout_constraintEnd_toStartOf="@+id/buttonList"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonFinaliza" />
+            app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay" />
+
+        <TextView
+            android:id="@+id/QtdRTA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="TextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toEndOf="@+id/buttonFinaliza"
+            app:layout_constraintTop_toBottomOf="@+id/listRTATravelview"
+            android:textColor="@color/white"
+            android:textSize="18sp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

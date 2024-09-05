@@ -1,5 +1,7 @@
 package com.example.rta_app.Fuctions.DAO.Querys;
 
+import static android.os.Build.VERSION_CODES.R;
+
 import android.content.Context;
 import android.widget.Toast;
 
@@ -55,6 +57,7 @@ public class QueryRTA {
   public void readDataInTravel(final FirestoreCallback firestoreCallback, String filter) {
     db.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").get().addOnCompleteListener(task -> {
       if (task.isSuccessful()) {
+
         list.clear();
 
         for (QueryDocumentSnapshot document : task.getResult()) {
@@ -65,15 +68,18 @@ public class QueryRTA {
           String enterprise = document.getString("Empresa");
           ListRTADTO listRTADTO = new ListRTADTO(codigoDeFicha, status, data, city, enterprise);
           if (filter.equals("Todas as cidades")) {
+
             list.add(listRTADTO);
           } else if (city.equals(filter)) {
             list.add(listRTADTO);
+
           }
         }
         if (list.isEmpty()) {
           ListRTADTO listRTADTO = new ListRTADTO("Não a RTA no momento", "Indisponível", "Indisponível", "Indisponível", "Indisponível");
           list.add(listRTADTO);
         }
+
         firestoreCallback.onCallback(list);
       } else {
         Toast.makeText(context, "Erro ao obter documentos: " + task.getException(), Toast.LENGTH_SHORT).show();

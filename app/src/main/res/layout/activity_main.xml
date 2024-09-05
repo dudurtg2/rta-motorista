@@ -12,12 +12,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"> <!-- Changed to wrap_content -->
 
+        <EditText
+            android:id="@+id/RTAprocura"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/squad_stroke"
+            android:ems="10"
+            android:hint="Digite o código de ficha"
+            android:inputType="text"
+            android:paddingLeft="15dp"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/buttonList"
+            app:layout_constraintEnd_toStartOf="@+id/buttonList"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour" />
+
+        <Button
+            android:id="@+id/buttonList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/button_stroke_squad"
+            android:text="📷"
+            android:textSize="26sp"
+            app:layout_constraintBottom_toTopOf="@+id/RTAprocura"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/RTAprocura"
+            app:layout_constraintTop_toBottomOf="@+id/RTAprocura" />
+
         <ImageView
             android:id="@+id/imageView2"
             android:layout_width="419dp"
 
             android:layout_height="170dp"
-            android:background="@drawable/baselayoutdishesdetails"
+            android:background="@drawable/button_stroke_squad"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -35,22 +68,9 @@
 
 
         <Button
-            android:id="@+id/qrCodeImageView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/button_stroke_normal"
-            android:text="CLICE AQUI PARA INCLUIR RTA A ROTA"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour" />
-
-        <Button
             android:id="@+id/buttonWorkHour"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="128dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
@@ -89,8 +109,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/qrCodeImageView"
-            app:layout_constraintVertical_bias="0.0" >
+            app:layout_constraintTop_toBottomOf="@+id/RTAprocura"
+            app:layout_constraintVertical_bias="0.0">
 
         </androidx.recyclerview.widget.RecyclerView>
 
@@ -110,7 +130,7 @@
         <Button
             android:id="@+id/inTravelbutton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="128dp"
             android:layout_marginEnd="16dp"
             android:text="ROTA"
             android:textSize="18sp"

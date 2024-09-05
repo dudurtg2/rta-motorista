@@ -1,8 +1,11 @@
 package com.example.rta_app.Activitys;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -43,13 +46,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         getUser();
 
-        binding.qrCodeImageView.setOnClickListener(v -> {
+        binding.buttonList.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setCaptureActivity(CaptureActivity.class);
             integrator.setOrientationLocked(false);
             integrator.initiateScan();
         });
-
+        binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                if (event == null || !event.isShiftPressed()) {
+                    confirmDocExist(binding.RTAprocura.getText().toString().toUpperCase());
+                    return true;
+                }
+            }
+            return false;
+        });
         binding.UserNameDisplay.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
         binding.inTravelbutton.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
@@ -68,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void confirmDocExist(String uid) {
         if (mAuth.getCurrentUser() != null) {
-            docRef = firestore.collection("direcionado").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
+            docRef = firestore.collection("bipagem").document(uid);
             docRef.get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
@@ -84,26 +95,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addToTraver(String uid) {
-        docRefRTA = firestore.collection("direcionado").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
+        docRefRTA = firestore.collection("bipagem").document(uid);
         docRefRTA.get()
                 .addOnSuccessListener(documentSnapshotRTA -> {
                     if (documentSnapshotRTA.exists()) {
-                        if (documentSnapshotRTA.getString("Motorista").equals(mAuth.getCurrentUser().getUid()) && documentSnapshotRTA.getString("Status").equals("aguardando")) {
-                            docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
-                                    .addOnSuccessListener(aVoid -> {
-                                        docRefRTA.update("Status", "Retirado").addOnSuccessListener(aVoid2 -> {
-                                            moveDocumentToRotaFolder(uid);
-                                            Toast.makeText(this, uid + " adicionada a rota.", Toast.LENGTH_SHORT).show();
-                                        });
-                                    })
-                                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        } else if (documentSnapshotRTA.getString("Status").equals("Retirado")) {
-                            Toast.makeText(this, "Motorista já está em rota", Toast.LENGTH_SHORT).show();
-                        } else if (documentSnapshotRTA.getString("Status").equals("Finalizado")) {
-                            Toast.makeText(this, "Motorista já finalizou", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, "Motorista não corresponde a RTA", Toast.LENGTH_SHORT).show();
-                        }
+                        new AlertDialog.Builder(this)
+                                .setTitle("Confirmação")
+                                .setMessage("Você deseja realmente adicionar o RTA"+ uid +" a rota?")
+                                .setPositiveButton("Sim", (dialog, which) -> {if (documentSnapshotRTA.getString("Status").equals("aguardando")) {
+                                                                                        docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
+                                                                                                .addOnSuccessListener(aVoid -> {
+                                                                                                    docRefRTA.update("Status", "Retirado").addOnSuccessListener(aVoid2 -> {
+                                                                                                        moveDocumentToRotaFolder(uid);
+                                                                                                        Toast.makeText(this, uid + " adicionada a rota.", Toast.LENGTH_SHORT).show();
+                                                                                                    });
+                                                                                                })
+                                                                                                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                                                                    } else if (documentSnapshotRTA.getString("Status").equals("Retirado")) {
+                                                                                        Toast.makeText(this, "Motorista já está em rota", Toast.LENGTH_SHORT).show();
+                                                                                    } else if (documentSnapshotRTA.getString("Status").equals("Finalizado")) {
+                                                                                        Toast.makeText(this, "Motorista já finalizou", Toast.LENGTH_SHORT).show();
+                                                                                    }})
+                                .setNegativeButton("Não", null)
+                                .show();
+
                     } else {
                         Toast.makeText(this, "RTA não encontrado", Toast.LENGTH_SHORT).show();
                     }
@@ -112,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void moveDocumentToRotaFolder(String uid) {
-        DocumentReference sourceDocRef = firestore.collection("direcionado").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
+        DocumentReference sourceDocRef = firestore.collection("bipagem").document(uid);
         DocumentReference targetDocRef = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
 
         sourceDocRef.get()

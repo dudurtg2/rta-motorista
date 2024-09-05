@@ -191,10 +191,15 @@ public class InTravelActivity extends AppCompatActivity {
     public void queryItems(String filter) {
         QueryRTA queryRTATravel = new QueryRTA(this);
         queryRTATravel.readDataInTravel(dishesDTO -> {
+            int itemCount = dishesDTO.size();
+
+            binding.QtdRTA.setText(String.valueOf(itemCount));
+
             binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             binding.listRTATravelview.setAdapter(new AdapterViewRTA(1, getApplicationContext(), dishesDTO));
         }, filter);
     }
+
 
     private void confirmDocExist(String uid) {
         if (mAuth.getCurrentUser() != null) {

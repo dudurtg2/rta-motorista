@@ -49,6 +49,12 @@ public class ProfileActivity extends AppCompatActivity {
             finish();
             return;
         }
+        binding.singOut.setOnClickListener(v -> {
+            mAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
+
 
         binding.editNameUser.addTextChangedListener(new TextWatcher() {
             @Override

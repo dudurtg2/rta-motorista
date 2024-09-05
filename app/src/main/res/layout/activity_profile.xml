@@ -64,4 +64,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editNameUser"
         tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/singOut"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="s"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
