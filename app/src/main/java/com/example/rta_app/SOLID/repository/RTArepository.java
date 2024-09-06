@@ -25,74 +25,163 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
 public class RTArepository {
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
     private boolean ocorrerncias;
     private Context context;
-    private DocumentReference docRefRTA;
 
-    public RTArepository(Context context){
+    public RTArepository(Context context) {
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
         this.context = context;
     }
-    public void addToTraver(String uid) {
-        DocumentReference docRefRTA = firestore.collection("bipagem").document(uid);
-        docRefRTA.get()
-                .addOnSuccessListener(documentSnapshotRTA -> {
-                    if (documentSnapshotRTA.exists()) {
-                        new AlertDialog.Builder(context)
-                                .setTitle("Confirmação")
-                                .setMessage("Você deseja realmente adicionar o RTA " + uid + " a rota?")
-                                .setPositiveButton("Sim", (dialog, which) -> {
-                                    String status = documentSnapshotRTA.getString("Status");
-                                    if (status.equals("aguardando")) {
-                                        docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
-                                                .addOnSuccessListener(aVoid -> {
-                                                    docRefRTA.update("Status", "Retirado")
-                                                            .addOnSuccessListener(aVoid2 -> {
-                                                                moveDocumentToRotaFolder(uid);
-                                                                Toast.makeText(context, uid + " adicionada a rota.", Toast.LENGTH_SHORT).show();
-                                                            })
-                                                            .addOnFailureListener(e -> Toast.makeText(context, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                                                })
-                                                .addOnFailureListener(e -> Toast.makeText(context, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                                    } else if (status.equals("Retirado")) {
-                                        Toast.makeText(context, "Motorista já está em rota", Toast.LENGTH_SHORT).show();
-                                    } else if (status.equals("Finalizado")) {
-                                        Toast.makeText(context, "Motorista já finalizou", Toast.LENGTH_SHORT).show();
+    public void addToTraver(String uid, int p) {
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DocumentReference docRefBipagem = firestore.collection("bipagem").document(uid);
+        docRefBipagem.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        handleStatus(documentSnapshot.getString("Status"), docRefBipagem, uid, p);
+                    } else {
+
+                        DocumentReference docRefDirecionado = firestore.collection("direcionado")
+                                .document(mAuth.getCurrentUser().getUid())
+                                .collection("pacotes")
+                                .document(uid);
+
+                        docRefDirecionado.get()
+                                .addOnSuccessListener(documentSnapshotDirecionado -> {
+                                    if (documentSnapshotDirecionado.exists()) {
+                                        handleStatus(documentSnapshotDirecionado.getString("Status"), docRefDirecionado, uid, p);
+                                    } else {
+                                        Toast.makeText(context, "RTA não encontrado", Toast.LENGTH_SHORT).show();
                                     }
                                 })
-                                .setNegativeButton("Não", null)
-                                .show();
-                    } else {
-                        Toast.makeText(context, "RTA não encontrado", Toast.LENGTH_SHORT).show();
+                                .addOnFailureListener(e -> Toast.makeText(context, "Erro ao obter dados da coleção 'direcionado'", Toast.LENGTH_SHORT).show());
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(context, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(context, "Erro ao obter dados da coleção 'bipagem'", Toast.LENGTH_SHORT).show());
+    }
+
+    void handleStatus(String status, DocumentReference docRef, String uid, int p) {
+        if (status == null) {
+            Toast.makeText(context, "Status não encontrado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        switch (status) {
+            case "aguardando":
+                if (p == 1) {
+                    updateStatusAndMoveDocument(docRef, uid);
+                } else {
+                    showConfirmationDialog(docRef, uid);
+                }
+                break;
+
+            case "Retirado":
+                Toast.makeText(context, "Motorista já está em rota", Toast.LENGTH_SHORT).show();
+                break;
+
+            case "Finalizado":
+                Toast.makeText(context, "Motorista já finalizou", Toast.LENGTH_SHORT).show();
+                break;
+
+            default:
+                Toast.makeText(context, "Status desconhecido", Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    private void updateStatusAndMoveDocument(DocumentReference docRefRTA, String uid) {
+        docRefRTA.update("Motorista", mAuth.getCurrentUser().getUid())
+                .addOnSuccessListener(aVoid -> docRefRTA.update("Status", "Retirado")
+                        .addOnSuccessListener(aVoid2 -> {
+                            moveDocumentToRotaFolder(uid);
+                            Toast.makeText(context, uid + " adicionada a rota.", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(context, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show())
+                )
+                .addOnFailureListener(e -> Toast.makeText(context, "Erro ao adicionar RTA a rota. " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void showConfirmationDialog(DocumentReference docRefRTA, String uid) {
+        new AlertDialog.Builder(context)
+                .setTitle("Confirmação")
+                .setMessage("Você deseja realmente adicionar o RTA " + uid + " a rota?")
+                .setPositiveButton("Sim", (dialog, which) -> updateStatusAndMoveDocument(docRefRTA, uid))
+                .setNegativeButton("Não", null)
+                .show();
     }
 
     private void moveDocumentToRotaFolder(String uid) {
         DocumentReference sourceDocRef = firestore.collection("bipagem").document(uid);
-        DocumentReference targetDocRef = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
+        DocumentReference targetDocRef = firestore.collection("rota")
+                .document(mAuth.getCurrentUser().getUid())
+                .collection("pacotes")
+                .document(uid);
 
         sourceDocRef.get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        Map<String, Object> docData = documentSnapshot.getData();
+
+                        Map < String, Object > docData = documentSnapshot.getData();
                         if (docData != null) {
-                            targetDocRef.set(docData).addOnSuccessListener(aVoid -> {
-                                sourceDocRef.delete().addOnSuccessListener(aVoid1 -> {
-                                    if (context instanceof MainActivity) {
-                                        ((MainActivity) context).queryItems(); // Chama o método da atividade
-                                    }
-                                }).addOnFailureListener(e -> Log.d("Firestore", "Erro ao deletar documento original: " + e.getMessage()));
-                            }).addOnFailureListener(e -> Log.d("Firestore", "Erro ao mover documento: " + e.getMessage()));
+
+                            targetDocRef.set(docData)
+                                    .addOnSuccessListener(aVoid -> {
+
+                                        sourceDocRef.delete()
+                                                .addOnSuccessListener(aVoid1 -> {
+
+                                                    if (context instanceof MainActivity) {
+                                                        ((MainActivity) context).queryItems();
+                                                    }
+                                                })
+                                                .addOnFailureListener(e -> Log.d("Firestore", "Erro ao deletar documento original: " + e.getMessage()));
+                                    })
+                                    .addOnFailureListener(e -> Log.d("Firestore", "Erro ao mover documento: " + e.getMessage()));
+                        } else {
+                            Log.d("Firestore", "Dados do documento de origem são nulos");
                         }
                     } else {
-                        Log.d("Firestore", "Documento de origem não encontrado");
+
+                        DocumentReference directedDocRef = firestore.collection("direcionado")
+                                .document(mAuth.getCurrentUser().getUid())
+                                .collection("pacotes")
+                                .document(uid);
+
+                        directedDocRef.get()
+                                .addOnSuccessListener(directedDocSnapshot -> {
+                                    if (directedDocSnapshot.exists()) {
+
+                                        Map < String, Object > docData = directedDocSnapshot.getData();
+                                        if (docData != null) {
+
+                                            targetDocRef.set(docData)
+                                                    .addOnSuccessListener(aVoid -> {
+
+                                                        directedDocRef.delete()
+                                                                .addOnSuccessListener(aVoid1 -> {
+                                                                    if (context instanceof MainActivity) {
+                                                                        ((MainActivity) context).queryItems();
+                                                                    }
+                                                                })
+                                                                .addOnFailureListener(e -> Log.d("Firestore", "Erro ao deletar documento original: " + e.getMessage()));
+                                                    })
+                                                    .addOnFailureListener(e -> Log.d("Firestore", "Erro ao mover documento: " + e.getMessage()));
+                                        } else {
+                                            Log.d("Firestore", "Dados do documento de origem na coleção 'direcionado' são nulos");
+                                        }
+                                    } else {
+                                        Log.d("Firestore", "Documento de origem não encontrado na coleção 'direcionado'");
+                                    }
+                                })
+                                .addOnFailureListener(e -> Log.d("Firestore", "Erro ao obter documento de origem da coleção 'direcionado': " + e.getMessage()));
                     }
                 })
                 .addOnFailureListener(e -> Log.d("Firestore", "Erro ao obter documento de origem: " + e.getMessage()));
@@ -104,10 +193,10 @@ public class RTArepository {
                 .collection("pacotes")
                 .get()
                 .addOnCompleteListener(task -> {
-                    List<String> listRTA = new ArrayList<>();
+                    List < String > listRTA = new ArrayList < > ();
                     if (task.isSuccessful()) {
                         listRTA.add("Todas as cidades");
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                        for (QueryDocumentSnapshot document: task.getResult()) {
                             String city = document.getString("Local");
                             if (!listRTA.contains(city)) {
                                 listRTA.add(city);
@@ -128,10 +217,10 @@ public class RTArepository {
     }
 
     public interface FirestoreCallback {
-        void onCallback(List<String> listRTA);
+        void onCallback(List < String > listRTA);
     }
 
-    public Task<List<Task<?>>> removeFromTraver() {
+    public Task < List < Task < ? >>> removeFromTraver() {
         ocorrerncias = false;
 
         return firestore.collection("rota")
@@ -144,10 +233,10 @@ public class RTArepository {
                         return Tasks.forCanceled();
                     }
 
-                    List<DocumentSnapshot> documents = task.getResult().getDocuments();
-                    List<Task<Void>> removalTasks = new ArrayList<>();
+                    List < DocumentSnapshot > documents = task.getResult().getDocuments();
+                    List < Task < Void >> removalTasks = new ArrayList < > ();
 
-                    for (DocumentSnapshot document : documents) {
+                    for (DocumentSnapshot document: documents) {
                         String codigoDeFicha = document.getString("Codigo_de_ficha");
                         String status = document.getString("Status");
 
@@ -157,13 +246,14 @@ public class RTArepository {
                         }
 
                         if (status.equals("Finalizado")) {
-                            Task<Void> removalTask = firestore.collection("rota")
+                            Task < Void > removalTask = firestore.collection("rota")
                                     .document(mAuth.getCurrentUser().getUid())
                                     .collection("pacotes")
                                     .document(codigoDeFicha)
                                     .delete()
                                     .addOnSuccessListener(aVoid -> {
-                                        Map<String, Object> finalizadoData = new HashMap<>();
+                                        Map < String,
+                                                Object > finalizadoData = new HashMap < > ();
                                         finalizadoData.put(codigoDeFicha, new Timestamp(new Date()));
                                         firestore.collection("finalizados")
                                                 .document(mAuth.getCurrentUser().getUid())
@@ -216,20 +306,32 @@ public class RTArepository {
     }
 
     public void confirmDocExistMain(String uid) {
-        if (mAuth.getCurrentUser() != null) {
-            docRefRTA = firestore.collection("bipagem").document(uid);
-            docRefRTA.get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            addToTraver(uid);
-                        } else {
-                            Toast.makeText(context, "RTA não encontrado", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(context, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
-        } else {
+        if (mAuth.getCurrentUser() == null) {
             Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
+            return;
         }
+        DocumentReference docRef = firestore.collection("bipagem").document(uid);
+        docRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        addToTraver(uid, 0);
+                    } else {
+                        DocumentReference directedDocRef = firestore.collection("direcionado")
+                                .document(mAuth.getCurrentUser().getUid())
+                                .collection("pacotes")
+                                .document(uid);
+                        directedDocRef.get()
+                                .addOnSuccessListener(directedDocSnapshot -> {
+                                    if (directedDocSnapshot.exists()) {
+                                        addToTraver(uid, 1);
+                                    } else {
+                                        Toast.makeText(context, "RTA não" + uid + " encontrado", Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnFailureListener(e -> Toast.makeText(context, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(context, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }
 
     public void confirmDocExist(String uid) {

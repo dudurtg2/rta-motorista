@@ -57,7 +57,7 @@ public class RTADetailsActivity extends AppCompatActivity {
         binding.buttonRecusar.setOnClickListener(v -> new AlertDialog.Builder(this)
                 .setTitle("Confirmação")
                 .setMessage("O entregador realmente não vai receber a saca de código " + uid + "?")
-                .setPositiveButton("Não vai receber", (dialog, which) ->  statusUpdate(uid, "Recusado"))
+                .setPositiveButton("Não vai receber", (dialog, which) -> statusUpdate(uid, "Recusado"))
                 .setNegativeButton("Vai receber", null)
                 .show());
 
@@ -120,7 +120,6 @@ public class RTADetailsActivity extends AppCompatActivity {
         return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
 
-
     private void downloadRTA(String uid) {
         docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
 
@@ -138,7 +137,9 @@ public class RTADetailsActivity extends AppCompatActivity {
                         Toast.makeText(this, "Document does not exist", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .addOnFailureListener(e -> { Toast.makeText(this, "Failed to fetch document: " + e.getMessage(), Toast.LENGTH_SHORT).show(); });
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to fetch document: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void statusUpdate(String uid, String status) {
@@ -147,7 +148,7 @@ public class RTADetailsActivity extends AppCompatActivity {
         docRef.get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        Map<String, Object> updateData = new HashMap<>();
+                        Map < String, Object > updateData = new HashMap < > ();
                         updateData.put("Status", status);
 
                         if (status.equals("Ocorrencia")) {
@@ -161,6 +162,7 @@ public class RTADetailsActivity extends AppCompatActivity {
                         docRef.update(updateData)
                                 .addOnSuccessListener(aVoid -> {
                                     Toast.makeText(this, "Status atualizado para " + status, Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(this, InTravelActivity.class));
                                     finish();
                                 })
                                 .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status", Toast.LENGTH_SHORT).show());
@@ -183,10 +185,10 @@ public class RTADetailsActivity extends AppCompatActivity {
                         binding.textEntregador.setText("Entregador: " + documentSnapshot.getString("Entregador"));
                         binding.Empresa.setText("Empresa: " + documentSnapshot.getString("Empresa"));
 
-                        List<String> codes = (List<String>) documentSnapshot.get("Codigos inseridos");
+                        List < String > codes = (List < String > ) documentSnapshot.get("Codigos inseridos");
                         binding.textAllCodes.setText("Codigos inseridos:\n");
                         if (codes != null) {
-                            for (String code : codes) {
+                            for (String code: codes) {
                                 binding.textAllCodes.append(code + "\n");
                             }
                         }
@@ -200,6 +202,8 @@ public class RTADetailsActivity extends AppCompatActivity {
                         binding.Empresa.setText("");
                     }
                 })
-                .addOnFailureListener(e -> { Toast.makeText(getApplicationContext(), "Error fetching document: " + e.getMessage(), Toast.LENGTH_SHORT).show(); });
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getApplicationContext(), "Error fetching document: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }
