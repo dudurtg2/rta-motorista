@@ -1,135 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:background="#474747"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     tools:context=".SOLID.activitys.WorkHourActivity">
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="419dp"
-        android:layout_height="170dp"
-        android:background="@drawable/baselayoutdishesdetails"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="218dp"
-        android:layout_height="155dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/rta" />
-
-    <TextView
-        android:id="@+id/UserNameDisplay"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="TextView"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2"
-        app:layout_constraintVertical_bias="0.0" />
+        android:background="#474747">
 
-    <ImageView
-        android:id="@+id/imageStop"
-        android:layout_width="192dp"
-        android:layout_height="192dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/imageDinnerStarHour"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonFistHour"
-        tools:src="@drawable/fim" />
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="419dp"
+            android:layout_height="170dp"
+            android:background="@drawable/button_stroke_squad"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageDinnerFinishHour"
-        android:layout_width="192dp"
-        android:layout_height="192dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageFistHour"
-        app:layout_constraintTop_toBottomOf="@+id/buttonDinnerStarHour"
-        tools:src="@drawable/falmouco" />
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="218dp"
+            android:layout_height="155dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/rta" />
 
-    <TextView
-        android:id="@+id/buttonStop"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/imageStop"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/imageStop"
-        app:layout_constraintTop_toBottomOf="@+id/imageStop" />
+        <TextView
+            android:id="@+id/UserNameDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="TextView"
 
-    <TextView
-        android:id="@+id/buttonFistHour"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/imageFistHour"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/imageFistHour"
-        app:layout_constraintTop_toBottomOf="@+id/imageFistHour" />
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView2"
+            app:layout_constraintVertical_bias="0.0" />
 
-    <TextView
-        android:id="@+id/buttonDinnerFinishHour"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/imageDinnerFinishHour"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/imageDinnerFinishHour"
-        app:layout_constraintTop_toBottomOf="@+id/imageDinnerFinishHour" />
+        <ImageView
+            android:id="@+id/imageStop"
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_stroke_squad"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/imageDinnerFinishHour"
 
-    <ImageView
-        android:id="@+id/imageFistHour"
-        android:layout_width="192dp"
-        android:layout_height="192dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="224dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/imageDinnerFinishHour"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/chegada" />
+            app:layout_constraintStart_toStartOf="@+id/imageDinnerFinishHour"
+            app:layout_constraintTop_toBottomOf="@+id/buttonDinnerFinishHour" />
 
-    <TextView
-        android:id="@+id/buttonDinnerStarHour"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/imageDinnerStarHour"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/imageDinnerStarHour"
-        app:layout_constraintTop_toBottomOf="@+id/imageDinnerStarHour" />
+        <ImageView
+            android:id="@+id/imageDinnerFinishHour"
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_stroke_squad"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/imageDinnerStarHour"
+            app:layout_constraintStart_toStartOf="@+id/imageDinnerStarHour"
+            app:layout_constraintTop_toBottomOf="@+id/buttonDinnerStarHour" />
 
-    <ImageView
-        android:id="@+id/imageDinnerStarHour"
-        android:layout_width="192dp"
-        android:layout_height="192dp"
-        android:layout_marginTop="216dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageStop"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ialmouco" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/buttonStop"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Button"
+            android:textSize="24sp"
+            android:background="@drawable/squad_stroke"
+            android:textAlignment="center"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/imageStop"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/imageStop"
+            app:layout_constraintTop_toBottomOf="@+id/imageStop" />
+
+        <TextView
+            android:id="@+id/buttonFistHour"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/squad_stroke"
+            android:text="ENTRADA"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="@+id/imageFistHour"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/imageFistHour"
+            app:layout_constraintTop_toBottomOf="@+id/imageFistHour" />
+
+        <TextView
+            android:id="@+id/buttonDinnerFinishHour"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Button"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:background="@drawable/squad_stroke"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/imageDinnerFinishHour"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/imageDinnerFinishHour"
+            app:layout_constraintTop_toBottomOf="@+id/imageDinnerFinishHour" />
+
+        <ImageView
+            android:id="@+id/imageFistHour"
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/button_stroke_squad"
+            android:src="@drawable/clock_hour"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/UserNameDisplay"
+            />
+
+        <TextView
+            android:id="@+id/buttonDinnerStarHour"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Button"
+            android:textSize="24sp"
+            android:visibility="gone"
+            android:background="@drawable/squad_stroke"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="@+id/imageDinnerStarHour"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/imageDinnerStarHour"
+            app:layout_constraintTop_toBottomOf="@+id/imageDinnerStarHour" />
+
+        <ImageView
+            android:id="@+id/imageDinnerStarHour"
+            android:layout_width="256dp"
+            android:layout_height="256dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_stroke_squad"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/imageFistHour"
+            app:layout_constraintStart_toStartOf="@+id/imageFistHour"
+            app:layout_constraintTop_toBottomOf="@+id/buttonFistHour" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

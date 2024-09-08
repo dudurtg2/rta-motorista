@@ -1,12 +1,15 @@
 package com.example.rta_app.SOLID.activitys;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -30,9 +33,6 @@ public class WorkHourActivity extends AppCompatActivity {
     private DocumentReference docRef, docHour;
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
-    private ImageUploaderDAO imageUploader;
-    private Uri photoURI;
-    public static final int PICK_IMAGE_REQUEST = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     public ActivityWorkHourBinding binding;
     private String hourType;
@@ -43,6 +43,7 @@ public class WorkHourActivity extends AppCompatActivity {
         setContentView(R.layout.activity_work_hour);
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
+        EdgeToEdge.enable(this);
 
         if (mAuth.getCurrentUser() != null) {
             docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
@@ -65,10 +66,7 @@ public class WorkHourActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        new ImageUploaderDAO(this, "Entrada").loadImagem();
-        new ImageUploaderDAO(this, "Almoço").loadImagem();
-        new ImageUploaderDAO(this, "Saída").loadImagem();
-        new ImageUploaderDAO(this, "Fim").loadImagem();
+
         loadInitialData();
     }
 
@@ -76,18 +74,42 @@ public class WorkHourActivity extends AppCompatActivity {
 
     private void validateFields(String hour, OnValidationCompleteListener listener) {
         String currentDate = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        docHour = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).collection("work_hours").document(currentDate);
+        docHour = firestore.collection("usuarios")
+                .document(mAuth.getCurrentUser().getUid())
+                .collection("work_hours")
+                .document(currentDate);
 
-        docHour.get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    boolean fieldExists = false;
-                    if (documentSnapshot.exists()) {
-                        fieldExists = documentSnapshot.contains(hour);
-                    }
-                    listener.onComplete(!fieldExists);
-                })
-                .addOnFailureListener(e -> { listener.onComplete(true); });
+        docHour.get().addOnSuccessListener(documentSnapshot -> {
+            boolean isFieldValid = false;
+            boolean isPreviousFieldValid = true;
+
+            if (documentSnapshot.exists()) {
+
+                isFieldValid = !documentSnapshot.contains(hour);
+
+                switch (hour) {
+                    case "Almoço":
+                        isPreviousFieldValid = documentSnapshot.contains("Entrada");
+                        break;
+                    case "Saída":
+                        isPreviousFieldValid = documentSnapshot.contains("Almoço");
+                        break;
+                    case "Fim":
+                        isPreviousFieldValid = documentSnapshot.contains("Saída");
+                        break;
+                    default:
+                        isPreviousFieldValid = true;
+                }
+            } else {
+                isFieldValid = hour.equals("Entrada");
+            }
+            listener.onComplete(isFieldValid && isPreviousFieldValid);
+        }).addOnFailureListener(e -> {
+            listener.onComplete(false);
+        });
     }
+
+
 
     interface OnValidationCompleteListener {
         void onComplete(boolean isValid);
@@ -96,62 +118,62 @@ public class WorkHourActivity extends AppCompatActivity {
     private void setupClickListeners() {
         binding.imageFistHour.setOnClickListener(v -> validateFields("Entrada", isValid -> {
             if (isValid) {
-                openCamera("Entrada");
+
                 hourType = "Entrada";
+                openPonts(hourType);
             } else {
-                Toast.makeText(this, "O horário de entrada já foi registrado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "O horário de entrada já foi registrado.", Toast.LENGTH_SHORT).show();
             }
         }));
+
         binding.imageDinnerStarHour.setOnClickListener(v -> validateFields("Almoço", isValid -> {
             if (isValid) {
-                openCamera("Almoço");
+
                 hourType = "Almoço";
+                openPonts(hourType);
             } else {
-                Toast.makeText(this, "O horário de Almoço já foi registrado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "O horário de Almoço já foi registrado ou o ponto de Entrada não foi registrado.", Toast.LENGTH_SHORT).show();
             }
         }));
+
         binding.imageDinnerFinishHour.setOnClickListener(v -> validateFields("Saída", isValid -> {
             if (isValid) {
-                openCamera("Saída");
+
                 hourType = "Saída";
+                openPonts(hourType);
             } else {
-                Toast.makeText(this, "O horário de Saída do Almoço já foi registrado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "O horário de Saída já foi registrado ou o ponto de Almoço não foi registrado.", Toast.LENGTH_SHORT).show();
             }
         }));
+
         binding.imageStop.setOnClickListener(v -> validateFields("Fim", isValid -> {
             if (isValid) {
-                openCamera("Fim");
+
                 hourType = "Fim";
+                openPonts(hourType);
             } else {
-                Toast.makeText(this, "O horário de Fim de expediente já foi registrado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "O horário de Fim já foi registrado ou o ponto de Saída não foi registrado.", Toast.LENGTH_SHORT).show();
             }
         }));
     }
 
-    private void openCamera(String hour) {
-        imageUploader = new ImageUploaderDAO(this, hour);
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                Toast.makeText(this, "Erro ao criar arquivo de imagem", Toast.LENGTH_SHORT).show();
-            }
-            if (photoFile != null) {
-                photoURI = FileProvider.getUriForFile(this, "com.example.rta_app.provider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-            }
-        }
+
+    private void openPonts(String hour) {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar registro de hora")
+                .setMessage("Deseja registar o horário de " + hourType + "?" + "\nDia: " + new SimpleDateFormat("dd-MM-yyyy").format(new Date()) +" as "+ new SimpleDateFormat("HH:mm").format(new Date()))
+                .setPositiveButton("Sim", (dialog, which) -> {
+
+                    updateWorkHour(hour);
+
+                })
+                .setNegativeButton("Não", (dialog, which) -> {
+
+                    dialog.dismiss();
+                })
+                .show();
     }
 
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(imageFileName, ".jpg", storageDir);
-    }
 
     private void updateWorkHour(String hourType) {
         UpdateWorkHours(hourType).addOnSuccessListener(task -> docHour.get().addOnSuccessListener(documentSnapshot -> {
@@ -159,15 +181,19 @@ public class WorkHourActivity extends AppCompatActivity {
                 switch (hourType) {
                     case "Entrada":
                         binding.buttonFistHour.setText(documentSnapshot.getString("Entrada"));
+                        loadInitialData();
                         break;
                     case "Almoço":
                         binding.buttonDinnerStarHour.setText(documentSnapshot.getString("Almoço"));
+                        loadInitialData();
                         break;
                     case "Saída":
                         binding.buttonDinnerFinishHour.setText(documentSnapshot.getString("Saída"));
+                        loadInitialData();
                         break;
                     case "Fim":
                         binding.buttonStop.setText(documentSnapshot.getString("Fim"));
+                        loadInitialData();
                         break;
                 }
             }
@@ -179,29 +205,43 @@ public class WorkHourActivity extends AppCompatActivity {
         docHour = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).collection("work_hours").document(currentDate);
         docHour.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
+                if (documentSnapshot.contains("Entrada")) {
+                    binding.buttonFistHour.setText(documentSnapshot.getString("Entrada"));
+                    binding.imageFistHour.setImageResource(R.drawable.confirm_hour);
+                    binding.imageDinnerStarHour.setVisibility(View.VISIBLE);
+                    binding.buttonDinnerStarHour.setVisibility(View.VISIBLE);
+                    binding.imageDinnerStarHour.setImageResource(R.drawable.clock_hour);
+
+                } else {
+                    binding.buttonFistHour.setText("Entrada");
+                }
+                if (documentSnapshot.contains("Almoço")) {
+                    binding.buttonDinnerStarHour.setText(documentSnapshot.getString("Almoço"));
+                    binding.imageDinnerStarHour.setImageResource(R.drawable.confirm_hour);
+
+                    binding.imageDinnerFinishHour.setVisibility(View.VISIBLE);
+                    binding.buttonDinnerFinishHour.setVisibility(View.VISIBLE);
+                    binding.imageDinnerFinishHour.setImageResource(R.drawable.clock_hour);
+                } else {
+                    binding.buttonDinnerStarHour.setText("Almoço");
+                }
+                if (documentSnapshot.contains("Saída")) {
+                    binding.buttonDinnerFinishHour.setText(documentSnapshot.getString("Saída"));
+                    binding.imageDinnerFinishHour.setImageResource(R.drawable.confirm_hour);
+
+                    binding.imageStop.setVisibility(View.VISIBLE);
+                    binding.buttonStop.setVisibility(View.VISIBLE);
+                    binding.imageStop.setImageResource(R.drawable.clock_hour);
+                } else {
+                    binding.buttonDinnerFinishHour.setText("Saída");
+                }
                 if (documentSnapshot.contains("Fim")) {
                     binding.buttonStop.setText(documentSnapshot.getString("Fim"));
+                    binding.imageStop.setImageResource(R.drawable.confirm_hour);
                 } else {
                     binding.buttonStop.setText("Fim");
                 }
 
-                if (documentSnapshot.contains("Saída")) {
-                    binding.buttonDinnerFinishHour.setText(documentSnapshot.getString("Saída"));
-                } else {
-                    binding.buttonDinnerFinishHour.setText("Saída");
-                }
-
-                if (documentSnapshot.contains("Almoço")) {
-                    binding.buttonDinnerStarHour.setText(documentSnapshot.getString("Almoço"));
-                } else {
-                    binding.buttonDinnerStarHour.setText("Almoço");
-                }
-
-                if (documentSnapshot.contains("Entrada")) {
-                    binding.buttonFistHour.setText(documentSnapshot.getString("Entrada"));
-                } else {
-                    binding.buttonFistHour.setText("Entrada");
-                }
             } else {
                 binding.buttonStop.setText("Fim");
                 binding.buttonDinnerFinishHour.setText("Saída");
@@ -211,16 +251,6 @@ public class WorkHourActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            if (imageUploader != null) {
-                updateWorkHour(hourType);
-                imageUploader.handleCameraResult(photoURI, this);
-            }
-        }
-    }
 
     private Task<Void> UpdateWorkHours(String horario) {
         String dateString = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
