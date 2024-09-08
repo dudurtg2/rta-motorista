@@ -23,7 +23,7 @@ public class GoogleSheetsService {
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
     private static final String TAG = "GoogleSheetsService";
-    private static final String SERVICE_ACCOUNT_KEY_FILE = "lc-app-22a9e-7d54c207f59a.json"; // Nome do arquivo da conta de serviço
+    private static final String SERVICE_ACCOUNT_KEY_FILE = "google-sheets.json"; // Nome do arquivo da conta de serviço
     private static final String SPREADSHEET_ID = "1-MsLXdMmcjPEYSEJLv4W4YhBA0bbyHfO1Mcm-e9bCeA";
 
     private Context context;
@@ -66,11 +66,11 @@ public class GoogleSheetsService {
 
                 ValueRange body = new ValueRange()
                         .setValues(Arrays.asList(
-                                Arrays.asList(data, entrada, almoco, saida, fim) // Envia os dados
+                                Arrays.asList(data, entrada, almoco, saida, fim)
                         ));
 
                 sheetsService.spreadsheets().values()
-                        .append(SPREADSHEET_ID, uid + "!A2:E2", body) // Adiciona os dados na segunda linha
+                        .append(SPREADSHEET_ID, uid + "!A2:E2", body)
                         .setValueInputOption("RAW")
                         .execute();
 
