@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.rta_app.SOLID.services.Controler.ImageUploaderDAO;
 import com.example.rta_app.SOLID.services.UserDAO;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.repository.RTArepository;
@@ -73,11 +72,10 @@ public class WorkHourActivity extends AppCompatActivity {
 
 
     private void validateFields(String hour, OnValidationCompleteListener listener) {
-        String currentDate = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         docHour = firestore.collection("usuarios")
                 .document(mAuth.getCurrentUser().getUid())
                 .collection("work_hours")
-                .document(currentDate);
+                .document("cachehoras");
 
         docHour.get().addOnSuccessListener(documentSnapshot -> {
             boolean isFieldValid = false;
@@ -201,8 +199,7 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void loadInitialData() {
-        String currentDate = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        docHour = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).collection("work_hours").document(currentDate);
+        docHour = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).collection("work_hours").document("cachehoras");
         docHour.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 if (documentSnapshot.contains("Entrada")) {
@@ -253,9 +250,8 @@ public class WorkHourActivity extends AppCompatActivity {
 
 
     private Task<Void> UpdateWorkHours(String horario) {
-        String dateString = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         String timeString = new SimpleDateFormat("HH:mm").format(new Date());
 
-        return new UserDAO(this).updateWorkHours(mAuth.getCurrentUser().getUid(), dateString, timeString, horario);
+        return new UserDAO(this).updateWorkHours(binding.UserNameDisplay.getText().toString(),mAuth.getCurrentUser().getUid(), "cachehoras", timeString, horario);
     }
 }

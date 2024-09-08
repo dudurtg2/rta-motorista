@@ -68,6 +68,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'org.projectlombok:lombok:1.18.30'
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
+    implementation 'com.google.apis:google-api-services-sheets:v4-rev612-1.25.0'
 
     // Testes
     testImplementation libs.junit
