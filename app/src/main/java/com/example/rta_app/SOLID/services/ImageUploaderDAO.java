@@ -1,4 +1,4 @@
-package com.example.rta_app.SOLID.services.User;
+package com.example.rta_app.SOLID.services;
 
 import android.content.Context;
 import android.content.Intent;

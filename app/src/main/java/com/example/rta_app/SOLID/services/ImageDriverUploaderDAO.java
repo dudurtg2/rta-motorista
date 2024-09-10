@@ -1,4 +1,4 @@
-package com.example.rta_app.SOLID.services.Driver;
+package com.example.rta_app.SOLID.services;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,25 +10,19 @@ import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-public class ImageUploaderDAO {
+
+public class ImageDriverUploaderDAO {
     private final Context context;
-    private final StorageReference storageReference;
     private final FirebaseUser currentUser;
     private final String hour;
     private final FirebaseFirestore firestore;
 
-    public ImageUploaderDAO(Context context, String hour) {
+    public ImageDriverUploaderDAO(Context context, String hour) {
         this.context = context;
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         this.currentUser = mAuth.getCurrentUser();
-        this.storageReference = FirebaseStorage.getInstance().getReference().child("work_hours").child(currentUser.getUid()).child(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
         this.hour = hour;
         this.firestore = FirebaseFirestore.getInstance();
     }

@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.rta_app.SOLID.services.Driver.ImageUploaderDAO;
+import com.example.rta_app.SOLID.services.ImageDriverUploaderDAO;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityRtadetailsBinding;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,7 +35,7 @@ public class RTADetailsActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
     private String uid;
-    private ImageUploaderDAO imageUploader;
+    private ImageDriverUploaderDAO imageUploader;
     private Uri photoURI;
     public static final int PICK_IMAGE_REQUEST = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
@@ -89,7 +89,7 @@ public class RTADetailsActivity extends AppCompatActivity {
     }
 
     private void openCamera(String hour) {
-        imageUploader = new ImageUploaderDAO(this, hour);
+        imageUploader = new ImageDriverUploaderDAO(this, hour);
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;

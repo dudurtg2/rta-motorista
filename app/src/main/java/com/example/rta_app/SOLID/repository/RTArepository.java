@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.example.rta_app.SOLID.activitys.MainActivity;
 import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
+import com.example.rta_app.SOLID.services.GoogleSheetsService;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
@@ -17,7 +18,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -360,6 +363,56 @@ public class RTArepository {
         } else {
             Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
         }
+    }
+    public Task<Void> addUser(String name, String uid) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("nome", name);
+        user.put("uid", uid);
+
+        return firestore.collection("usuarios").document(uid).update(user);
+    }
+    public Task<Void> addFinal(String rota, String uid) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("nome", rota);
+        user.put("uid", uid);
+
+        return firestore.collection("finalizados").document(uid).update(user);
+    }
+
+
+
+    public Task<Void> updateWorkHours(String nome,String uid, String cachehour, String workHours, String hour) {
+        DocumentReference docRef = firestore.collection("usuarios")
+                .document(uid)
+                .collection("work_hours")
+                .document(cachehour);
+
+        return docRef.get().continueWithTask(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+
+                if (document != null && document.contains(hour)) {
+
+                    Toast.makeText(context, "Você já registrou este ponto hoje", Toast.LENGTH_SHORT).show();
+                    return null;
+                } else {
+                    Map<String, Object> workHoursMap = new HashMap<>();
+                    workHoursMap.put(hour, workHours);
+
+                    if (hour.equals("Entrada")) {
+                        Map<String, Object> date = new HashMap<>();
+                        date.put("dia_mes_ano", new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+                        workHoursMap.putAll(date);
+                    }
+                    if (hour.equals("Fim")) {
+                        new GoogleSheetsService(context).getGoogleSheet(nome);
+                    }
+                    return docRef.set(workHoursMap, SetOptions.merge());
+                }
+            } else {
+                throw task.getException();
+            }
+        });
     }
 
 }

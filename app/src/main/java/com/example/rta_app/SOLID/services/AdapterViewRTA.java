@@ -1,6 +1,5 @@
-package com.example.rta_app.SOLID.services.View;
+package com.example.rta_app.SOLID.services;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;

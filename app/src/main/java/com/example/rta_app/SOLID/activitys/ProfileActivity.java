@@ -11,8 +11,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.rta_app.SOLID.services.User.ImageUploaderDAO;
-import com.example.rta_app.SOLID.services.UserDAO;
+import com.example.rta_app.SOLID.repository.RTArepository;
+import com.example.rta_app.SOLID.services.ImageUploaderDAO;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityProfileBinding;
 import com.google.firebase.auth.FirebaseAuth;
@@ -103,10 +103,10 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateUser() {
         if (mAuth.getCurrentUser() != null) {
-            new UserDAO(this)
+            new RTArepository(this)
                     .addUser(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())
                     .addOnSuccessListener(aVoid -> {
-                        new UserDAO(this)
+                        new RTArepository(this)
                                 .addFinal(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())
                                 .addOnSuccessListener(aVoid1 -> {
                                     Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();

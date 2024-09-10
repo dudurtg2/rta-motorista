@@ -1,20 +1,13 @@
 package com.example.rta_app.SOLID.activitys;
 
 import android.app.AlertDialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
-import com.example.rta_app.SOLID.services.UserDAO;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.repository.RTArepository;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
@@ -23,18 +16,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.File;
-import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class WorkHourActivity extends AppCompatActivity {
-    private DocumentReference docRef, docHour;
+    private DocumentReference  docHour;
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
-    public static final int REQUEST_IMAGE_CAPTURE = 2;
     public ActivityWorkHourBinding binding;
-    private String hourType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +36,6 @@ public class WorkHourActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         if (mAuth.getCurrentUser() != null) {
-            docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
             docHour = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid()).collection("work_hours").document(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
         } else {
             Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
@@ -65,7 +55,6 @@ public class WorkHourActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
         loadInitialData();
     }
 
@@ -116,86 +105,101 @@ public class WorkHourActivity extends AppCompatActivity {
     private void setupClickListeners() {
         binding.imageFistHour.setOnClickListener(v -> validateFields("Entrada", isValid -> {
             if (isValid) {
-
-                hourType = "Entrada";
-                openPonts(hourType);
-            } else {
-                Toast.makeText(this, "O horário de entrada já foi registrado.", Toast.LENGTH_SHORT).show();
+                openPonts("Entrada","null");
             }
         }));
-
         binding.imageDinnerStarHour.setOnClickListener(v -> validateFields("Almoço", isValid -> {
             if (isValid) {
-
-                hourType = "Almoço";
-                openPonts(hourType);
-            } else {
-                Toast.makeText(this, "O horário de Almoço já foi registrado ou o ponto de Entrada não foi registrado.", Toast.LENGTH_SHORT).show();
+                openPonts("Almoço" , "Entrada");
             }
         }));
-
         binding.imageDinnerFinishHour.setOnClickListener(v -> validateFields("Saída", isValid -> {
             if (isValid) {
-
-                hourType = "Saída";
-                openPonts(hourType);
-            } else {
-                Toast.makeText(this, "O horário de Saída já foi registrado ou o ponto de Almoço não foi registrado.", Toast.LENGTH_SHORT).show();
+                openPonts("Saída", "Almoço");
             }
         }));
 
         binding.imageStop.setOnClickListener(v -> validateFields("Fim", isValid -> {
             if (isValid) {
-
-                hourType = "Fim";
-                openPonts(hourType);
-            } else {
-                Toast.makeText(this, "O horário de Fim já foi registrado ou o ponto de Saída não foi registrado.", Toast.LENGTH_SHORT).show();
+                openPonts("Fim", "Saída");
             }
         }));
     }
 
 
-    private void openPonts(String hour) {
+    private void openPonts(String hour,String hourAfter) {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar registro de hora")
-                .setMessage("Deseja registar o horário de " + hourType + "?" + "\nDia: " + new SimpleDateFormat("dd-MM-yyyy").format(new Date()) +" as "+ new SimpleDateFormat("HH:mm").format(new Date()))
-                .setPositiveButton("Sim", (dialog, which) -> {
-
-                    updateWorkHour(hour);
-
-                })
-                .setNegativeButton("Não", (dialog, which) -> {
-
-                    dialog.dismiss();
-                })
+                .setMessage("Deseja registar o horário de " + hour + "?" + "\nDia: " + new SimpleDateFormat("dd-MM-yyyy").format(new Date()) +" as "+ new SimpleDateFormat("HH:mm").format(new Date()))
+                .setPositiveButton("Sim", (dialog, which) -> updateWorkHour(hour, hourAfter))
+                .setNegativeButton("Não", (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
 
-    private void updateWorkHour(String hourType) {
-        UpdateWorkHours(hourType).addOnSuccessListener(task -> docHour.get().addOnSuccessListener(documentSnapshot -> {
+    private void updateWorkHour(String hourType, String hourTypeAfter) {
+        if (!hourTypeAfter.equals("null")) {
+        docHour.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
-                switch (hourType) {
-                    case "Entrada":
-                        binding.buttonFistHour.setText(documentSnapshot.getString("Entrada"));
-                        loadInitialData();
-                        break;
-                    case "Almoço":
-                        binding.buttonDinnerStarHour.setText(documentSnapshot.getString("Almoço"));
-                        loadInitialData();
-                        break;
-                    case "Saída":
-                        binding.buttonDinnerFinishHour.setText(documentSnapshot.getString("Saída"));
-                        loadInitialData();
-                        break;
-                    case "Fim":
-                        binding.buttonStop.setText(documentSnapshot.getString("Fim"));
-                        loadInitialData();
-                        break;
-                }
+                    if (documentSnapshot.contains(hourTypeAfter)) {
+                        String lastRecordedTimeString = documentSnapshot.getString(hourTypeAfter);
+                        if (lastRecordedTimeString != null) {
+                            SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                            try {
+                                Date currentTime = format.parse(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));
+                                Date lastRecordedTime = format.parse(lastRecordedTimeString);
+                                long diff = currentTime.getTime() - lastRecordedTime.getTime();
+                                long diffMinutes = diff / (60 * 1000);
+
+                                if (diffMinutes < 30) {
+                                    int remainingMinutes = 30 - (int) diffMinutes;
+                                    Toast.makeText(this, "Ainda falta " + remainingMinutes + " minutos para o próxima ponto", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                            } catch (ParseException e) {
+                                Toast.makeText(this, "Erro ao analisar o horário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                        }
+                    }
+
+                horasUpdate( hourType,hourTypeAfter);
+
             }
-        }));
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Falha ao recuperar dados atuais: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+        } else {
+            horasUpdate( hourType,hourTypeAfter);
+        }
+    }
+
+    private void horasUpdate(String hourType, String hourTypeAfter){
+        UpdateWorkHours(hourType, hourTypeAfter).addOnSuccessListener(aVoid -> {
+            docHour.get().addOnSuccessListener(updatedDocumentSnapshot -> {
+                if (updatedDocumentSnapshot.exists()) {
+                    switch (hourType) {
+                        case "Entrada":
+                            binding.buttonFistHour.setText(updatedDocumentSnapshot.getString("Entrada"));
+                            break;
+                        case "Almoço":
+                            binding.buttonDinnerStarHour.setText(updatedDocumentSnapshot.getString("Almoço"));
+                            break;
+                        case "Saída":
+                            binding.buttonDinnerFinishHour.setText(updatedDocumentSnapshot.getString("Saída"));
+                            break;
+                        case "Fim":
+                            binding.buttonStop.setText(updatedDocumentSnapshot.getString("Fim"));
+                            break;
+                    }
+                    loadInitialData();
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(this, "Falha ao recuperar dados atualizados: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Falha ao atualizar horário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void loadInitialData() {
@@ -205,6 +209,7 @@ public class WorkHourActivity extends AppCompatActivity {
                 if (documentSnapshot.contains("Entrada")) {
                     binding.buttonFistHour.setText(documentSnapshot.getString("Entrada"));
                     binding.imageFistHour.setImageResource(R.drawable.confirm_hour);
+
                     binding.imageDinnerStarHour.setVisibility(View.VISIBLE);
                     binding.buttonDinnerStarHour.setVisibility(View.VISIBLE);
                     binding.imageDinnerStarHour.setImageResource(R.drawable.clock_hour);
@@ -249,9 +254,11 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
 
-    private Task<Void> UpdateWorkHours(String horario) {
+    private Task<Void> UpdateWorkHours(String restistoDePonto, String resgistoAnterior) {
         String timeString = new SimpleDateFormat("HH:mm").format(new Date());
 
-        return new UserDAO(this).updateWorkHours(binding.UserNameDisplay.getText().toString(),mAuth.getCurrentUser().getUid(), "cachehoras", timeString, horario);
+
+
+        return new RTArepository(this).updateWorkHours(binding.UserNameDisplay.getText().toString(),mAuth.getCurrentUser().getUid(), "cachehoras", timeString, restistoDePonto);
     }
 }
