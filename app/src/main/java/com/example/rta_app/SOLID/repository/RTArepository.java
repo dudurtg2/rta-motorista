@@ -381,38 +381,6 @@ public class RTArepository {
 
 
 
-    public Task<Void> updateWorkHours(String nome,String uid, String cachehour, String workHours, String hour) {
-        DocumentReference docRef = firestore.collection("usuarios")
-                .document(uid)
-                .collection("work_hours")
-                .document(cachehour);
 
-        return docRef.get().continueWithTask(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-
-                if (document != null && document.contains(hour)) {
-
-                    Toast.makeText(context, "Você já registrou este ponto hoje", Toast.LENGTH_SHORT).show();
-                    return null;
-                } else {
-                    Map<String, Object> workHoursMap = new HashMap<>();
-                    workHoursMap.put(hour, workHours);
-
-                    if (hour.equals("Entrada")) {
-                        Map<String, Object> date = new HashMap<>();
-                        date.put("dia_mes_ano", new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
-                        workHoursMap.putAll(date);
-                    }
-                    if (hour.equals("Fim")) {
-                        new GoogleSheetsService(context).getGoogleSheet(nome);
-                    }
-                    return docRef.set(workHoursMap, SetOptions.merge());
-                }
-            } else {
-                throw task.getException();
-            }
-        });
-    }
 
 }

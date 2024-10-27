@@ -3,6 +3,8 @@ package com.example.rta_app.SOLID.services;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.rta_app.SOLID.entities.WorkerHous;
+import com.example.rta_app.SOLID.repository.WorkerHourRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -20,45 +22,20 @@ import java.util.List;
 import com.google.api.services.sheets.v4.model.*;
 
 public class GoogleSheetsService {
-    private FirebaseFirestore firestore;
-    private FirebaseAuth mAuth;
     private static final String TAG = "GoogleSheetsService";
-    private static final String SERVICE_ACCOUNT_KEY_FILE = "google-sheets.json"; // Nome do arquivo da conta de serviço
+    private static final String SERVICE_ACCOUNT_KEY_FILE = "google-sheets.json";
     private static final String SPREADSHEET_ID = "1-MsLXdMmcjPEYSEJLv4W4YhBA0bbyHfO1Mcm-e9bCeA";
-
+    private WorkerHous workerHous;
     private Context context;
 
     public GoogleSheetsService(Context context) {
-        mAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
         this.context = context;
     }
 
-    public void getGoogleSheet(String uid) {
-        firestore.collection("usuarios")
-                .document(mAuth.getCurrentUser().getUid())
-                .collection("work_hours")
-                .document("cachehoras")
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        sendToGoogleSheet(
-                                uid,
-                                documentSnapshot.getString("dia_mes_ano"),
-                                documentSnapshot.getString("Entrada"),
-                                documentSnapshot.getString("Almoço"),
-                                documentSnapshot.getString("Saída"),
-                                documentSnapshot.getString("Fim")
-                        );
-                    }
-                });
-    }
-
-    public void sendToGoogleSheet(String uid ,String data, String entrada, String almoco, String saida, String fim) {
+    public void getGoogleSheet(String uid, WorkerHous workerHous) {
         new Thread(() -> {
             try {
                 Sheets sheetsService = getSheetsService(context);
-
 
                 createSheetIfNotExists(sheetsService, uid);
 
@@ -66,7 +43,11 @@ public class GoogleSheetsService {
 
                 ValueRange body = new ValueRange()
                         .setValues(Arrays.asList(
-                                Arrays.asList(data, entrada, almoco, saida, fim)
+                                Arrays.asList(workerHous.getDate(),
+                                        workerHous.getHour_first(),
+                                        workerHous.getHour_dinner(),
+                                        workerHous.getHour_finish(),
+                                        workerHous.getHour_stop())
                         ));
 
                 sheetsService.spreadsheets().values()
@@ -74,7 +55,7 @@ public class GoogleSheetsService {
                         .setValueInputOption("RAW")
                         .execute();
 
-                Log.i(TAG, "Dados enviados para a planilha com sucesso!");
+                new WorkerHourRepository().saveWorkerHous(new WorkerHous("", "", "", "", ""));
             } catch (IOException | GeneralSecurityException e) {
                 Log.e(TAG, "Erro ao enviar dados para a planilha: " + e.getMessage());
             }
@@ -110,7 +91,7 @@ public class GoogleSheetsService {
     private void setHeaderRow(Sheets sheetsService, String uid) throws IOException {
         ValueRange header = new ValueRange()
                 .setValues(Arrays.asList(
-                        Arrays.asList("Data", "Entrada", "Almoço", "Saída", "Fim") // Cabeçalhos
+                        Arrays.asList("Data", "Entrada", "Almoço", "Saída", "Fim")
                 ));
 
         sheetsService.spreadsheets().values()

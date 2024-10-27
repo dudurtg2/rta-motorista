@@ -61,7 +61,6 @@ dependencies {
     implementation 'com.google.api-client:google-api-client:1.33.0'
     implementation 'com.google.http-client:google-http-client-gson:1.40.1'
     implementation 'com.google.code.gson:gson:2.10.1'
-
     // Outras dependências
     implementation 'com.journeyapps:zxing-android-embedded:4.1.0'
     implementation 'com.google.mlkit:barcode-scanning:17.0.0'
