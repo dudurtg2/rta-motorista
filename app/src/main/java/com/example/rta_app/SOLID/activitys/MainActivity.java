@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.repository.QueryRTA;
 import com.example.rta_app.SOLID.repository.UsersRepository;
-import com.example.rta_app.SOLID.services.AdapterViewRTA;
+import com.example.rta_app.SOLID.Views.AdapterViewRTA;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.repository.RTArepository;
 import com.example.rta_app.databinding.ActivityMainBinding;

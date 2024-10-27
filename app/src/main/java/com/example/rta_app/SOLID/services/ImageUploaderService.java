@@ -18,12 +18,12 @@ import com.squareup.picasso.Picasso;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class ImageUploaderDAO {
+public class ImageUploaderService {
   private final Context context;
   private final StorageReference storageReference;
   private final FirebaseUser currentUser;
 
-  public ImageUploaderDAO(Context context) {
+  public ImageUploaderService(Context context) {
     this.context = context;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     this.currentUser = mAuth.getCurrentUser();

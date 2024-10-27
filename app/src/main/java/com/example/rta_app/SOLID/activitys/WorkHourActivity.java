@@ -1,6 +1,7 @@
 package com.example.rta_app.SOLID.activitys;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -66,39 +67,48 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        binding.imageFistHour.setOnClickListener(v -> openPontsIsValidade("Entrada"));
-        binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsValidade("Almoço"));
-        binding.imageDinnerFinishHour.setOnClickListener(v -> openPontsIsValidade("Saída"));
-        binding.imageStop.setOnClickListener(v -> openPontsIsValidade("Fim"));
+
+        binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
+        binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsFinish("Almoço"));
+        binding.imageDinnerFinishHour.setOnClickListener(v -> openPontsIsFinish("Saída"));
+        binding.imageStop.setOnClickListener(v -> openPontsIsFinish("Fim"));
     }
-    private void openPontsIsValidade(String valueForHourUpdate) {
+
+    private void openPontsIsFinish(String valueForHourUpdate){
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 WorkerHous workerHous = task.getResult();
-                switch (valueForHourUpdate){
-                    case "Entrada":
-                        if (workerHous.getHour_first().isEmpty()) {
-                            openPonts(valueForHourUpdate);
-                        }
-                        break;
-                    case "Almoço":
-                        if (workerHous.getHour_dinner().isEmpty()) {
-                            openPonts(valueForHourUpdate);
-                        }
-                        break;
-                    case "Saída":
-                        if (workerHous.getHour_finish().isEmpty()) {
-                            openPonts(valueForHourUpdate);
-                        }
-                        break;
-                    case "Fim":
-                        if (workerHous.getHour_stop().isEmpty()) {
-                            openPonts(valueForHourUpdate);
-                        }
+                if (workerHous.getHour_stop().equals("")) {
+                    openPontsIsValidade(valueForHourUpdate, workerHous);
+                } else {
+                    updateToSheets(workerHous);
                 }
-
             }
         });
+    }
+
+    private void openPontsIsValidade(String valueForHourUpdate, WorkerHous workerHous) {
+        switch (valueForHourUpdate){
+            case "Entrada":
+                if (workerHous.getHour_first().isEmpty()) {
+                    openPonts(valueForHourUpdate);
+                }
+                break;
+            case "Almoço":
+                if (workerHous.getHour_dinner().isEmpty()) {
+                    openPonts(valueForHourUpdate);
+                }
+                break;
+            case "Saída":
+                if (workerHous.getHour_finish().isEmpty()) {
+                    openPonts(valueForHourUpdate);
+                }
+                break;
+            case "Fim":
+                if (workerHous.getHour_stop().isEmpty()) {
+                    openPonts(valueForHourUpdate);
+                }
+        }
     }
 
     private void openPonts(String valueForHourUpdate) {
@@ -121,15 +131,19 @@ public class WorkHourActivity extends AppCompatActivity {
                     updateButtonText(valueForHourUpdate, workerHous);
                     loadInitialData();
                     if (valueForHourUpdate == "Fim") {
-                        workerHourRepository.getWorkerHous();
-                        new GoogleSheetsService(this).getGoogleSheet(binding.UserNameDisplay.getText().toString(), workerHous);
+                        updateToSheets(workerHous);
                     }
                 });
             }
         });
 
     }
-
+    private void updateToSheets(WorkerHous workerHous){
+        workerHourRepository.getWorkerHous();
+        Toast.makeText(this, "Horário registrado com sucesso!", Toast.LENGTH_SHORT).show();
+        new GoogleSheetsService(this).getGoogleSheet(binding.UserNameDisplay.getText().toString(), workerHous);
+        finish();
+    }
     private void updateButtonText(String valueForHourUpdate, WorkerHous workerHous) {
         if (workerHous != null) {
             switch (valueForHourUpdate) {

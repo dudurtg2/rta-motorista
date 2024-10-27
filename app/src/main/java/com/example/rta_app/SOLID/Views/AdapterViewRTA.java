@@ -1,4 +1,4 @@
-package com.example.rta_app.SOLID.services;
+package com.example.rta_app.SOLID.Views;
 
 import android.app.AlertDialog;
 import android.content.Context;

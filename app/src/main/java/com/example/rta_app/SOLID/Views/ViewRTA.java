@@ -1,4 +1,4 @@
-package com.example.rta_app.SOLID.services;
+package com.example.rta_app.SOLID.Views;
 
 import android.view.View;
 import android.widget.TextView;

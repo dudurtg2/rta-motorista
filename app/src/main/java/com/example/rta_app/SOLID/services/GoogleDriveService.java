@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class GoogleDriveUploader {
+public class GoogleDriveService {
     // Variáveis que armazenam a hora e a cidade que serão usadas para nomear o arquivo e a pasta
     private String documentName;
     private String documentCity;
@@ -37,7 +37,7 @@ public class GoogleDriveUploader {
     private Context context;
 
     // Construtor da classe que inicializa o contexto, hora e cidade
-    public GoogleDriveUploader(Context context, String documentName, String documentCity) {
+    public GoogleDriveService(Context context, String documentName, String documentCity) {
         this.context = context;
         this.documentName = documentName;
         this.documentCity = documentCity;

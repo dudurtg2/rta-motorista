@@ -13,10 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.entities.Users;
-import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.repository.RTArepository;
 import com.example.rta_app.SOLID.repository.UsersRepository;
-import com.example.rta_app.SOLID.services.ImageUploaderDAO;
+import com.example.rta_app.SOLID.services.ImageUploaderService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityProfileBinding;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,14 +26,14 @@ public class ProfileActivity extends AppCompatActivity {
     private DocumentReference docRef;
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
-    private ImageUploaderDAO imageUploader;
+    private ImageUploaderService imageUploader;
     public static final int PICK_IMAGE_REQUEST = 1;
     private IUsersRepository usersRepository;
 
     public ProfileActivity() {
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        imageUploader = new ImageUploaderDAO(this);
+        imageUploader = new ImageUploaderService(this);
         usersRepository = new UsersRepository();
     }
 

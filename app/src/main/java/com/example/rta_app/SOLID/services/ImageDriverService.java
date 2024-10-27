@@ -13,13 +13,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.IOException;
 
 
-public class ImageDriverUploaderDAO {
+public class ImageDriverService {
     private final Context context;
     private final FirebaseUser currentUser;
     private final String hour;
     private final FirebaseFirestore firestore;
 
-    public ImageDriverUploaderDAO(Context context, String hour) {
+    public ImageDriverService(Context context, String hour) {
         this.context = context;
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         this.currentUser = mAuth.getCurrentUser();
@@ -58,7 +58,7 @@ public class ImageDriverUploaderDAO {
         getRTA(hour, new GetRTACallback() {
             @Override
             public void onSuccess(String location) {
-                new GoogleDriveUploader(context, hour, location).uploadBitmap(bitmap);
+                new GoogleDriveService(context, hour, location).uploadBitmap(bitmap);
             }
 
             @Override
