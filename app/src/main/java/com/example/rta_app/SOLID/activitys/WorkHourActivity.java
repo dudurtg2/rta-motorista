@@ -24,7 +24,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -88,26 +90,34 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void openPontsIsValidade(String valueForHourUpdate, WorkerHous workerHous) {
-        switch (valueForHourUpdate){
-            case "Entrada":
-                if (workerHous.getHour_first().isEmpty()) {
-                    openPonts(valueForHourUpdate);
-                }
-                break;
-            case "Almoço":
-                if (workerHous.getHour_dinner().isEmpty()) {
-                    openPonts(valueForHourUpdate);
-                }
-                break;
-            case "Saída":
-                if (workerHous.getHour_finish().isEmpty()) {
-                    openPonts(valueForHourUpdate);
-                }
-                break;
-            case "Fim":
-                if (workerHous.getHour_stop().isEmpty()) {
-                    openPonts(valueForHourUpdate);
-                }
+
+        if (isAfter20Minutes(workerHous.getHour_after())) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Alerta")
+                    .setMessage("Voçê não pode registrar mais de \n20 minutos após o horário anterior")
+                    .setNeutralButton("Ok", (dialog, which) -> dialog.dismiss()).show();
+        } else {
+            switch (valueForHourUpdate) {
+                case "Entrada":
+                    if (workerHous.getHour_first().isEmpty()) {
+                        openPonts(valueForHourUpdate);
+                    }
+                    break;
+                case "Almoço":
+                    if (workerHous.getHour_dinner().isEmpty()) {
+                        openPonts(valueForHourUpdate);
+                    }
+                    break;
+                case "Saída":
+                    if (workerHous.getHour_finish().isEmpty()) {
+                        openPonts(valueForHourUpdate);
+                    }
+                    break;
+                case "Fim":
+                    if (workerHous.getHour_stop().isEmpty()) {
+                        openPonts(valueForHourUpdate);
+                    }
+            }
         }
     }
 
@@ -123,21 +133,20 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void updateHours(String valueForHourUpdate) {
-        workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                UpdateWorkHours(valueForHourUpdate).addOnSuccessListener(aVoid -> {
-                    WorkerHous workerHous = task.getResult();
+        UpdateWorkHours(valueForHourUpdate).addOnSuccessListener(aVoid -> {
+            workerHourRepository.getWorkerHous().addOnSuccessListener(updatedTask -> {
+                WorkerHous updatedWorkerHous = updatedTask;
 
-                    updateButtonText(valueForHourUpdate, workerHous);
-                    loadInitialData();
-                    if (valueForHourUpdate == "Fim") {
-                        updateToSheets(workerHous);
-                    }
-                });
-            }
+                if (valueForHourUpdate.equals("Fim")) {
+                    updateToSheets(updatedWorkerHous);
+                }
+
+                updateButtonText(valueForHourUpdate, updatedWorkerHous);
+                loadInitialData();
+            });
         });
-
     }
+
     private void updateToSheets(WorkerHous workerHous){
         workerHourRepository.getWorkerHous();
         Toast.makeText(this, "Horário registrado com sucesso!", Toast.LENGTH_SHORT).show();
@@ -230,6 +239,21 @@ public class WorkHourActivity extends AppCompatActivity {
         binding.buttonFistHour.setText("Entrada");
     }
 
+    public boolean isAfter20Minutes(String previousHour) {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+        try {
+            Date previousDate = format.parse(previousHour);
+            Date currentDate = new Date();
+
+            long diffInMinutes = (currentDate.getTime() - previousDate.getTime()) / (1000 * 60);
+
+            return diffInMinutes >= 20;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private Task<Void> UpdateWorkHours(String registroDePonto) {
         String timeString = new SimpleDateFormat("HH:mm").format(new Date());
         String data = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
@@ -238,8 +262,10 @@ public class WorkHourActivity extends AppCompatActivity {
                 .continueWithTask(task -> {
                     WorkerHous workerHous = task.getResult();
 
+
+
                     if (workerHous == null || workerHous.getDate().isEmpty()) {
-                        workerHous = new WorkerHous(data, "", "", "", "");
+                        workerHous = new WorkerHous(data, "", "", "", "", timeString);
                     }
 
                     switch (registroDePonto) {
@@ -256,6 +282,7 @@ public class WorkHourActivity extends AppCompatActivity {
                             workerHous.setHour_stop(timeString);
                             break;
                     }
+                    workerHous.setHour_after(timeString);
 
                     return workerHourRepository.saveWorkerHous(workerHous);
                 });

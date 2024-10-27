@@ -43,7 +43,7 @@ public class WorkerHourRepository implements IWorkerHourRepository {
             DocumentSnapshot document = taskSnapshot.getResult();
 
             if (document == null || !document.exists()) {
-                return new WorkerHous("", "", "", "", "");
+                return new WorkerHous("", "", "", "", "", "");
             }
 
             String data = document.getString("date") == null ? "" : document.getString("date");
@@ -51,8 +51,9 @@ public class WorkerHourRepository implements IWorkerHourRepository {
             String almoco = document.getString("hour_dinner") == null ? "" : document.getString("hour_dinner");
             String saida = document.getString("hour_finish") == null ? "" : document.getString("hour_finish");
             String fim = document.getString("hour_stop") == null ? "" : document.getString("hour_stop");
+            String anterior = document.getString("hour_after") == null ? "" : document.getString("hour_after");
 
-            return new WorkerHous(data, entrada, almoco, saida, fim);
+            return new WorkerHous(data, entrada, almoco, saida, fim, anterior);
         });
     }
 
