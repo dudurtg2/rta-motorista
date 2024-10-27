@@ -2,6 +2,7 @@ package com.example.rta_app.SOLID.repository;
 
 import android.widget.Toast;
 
+import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
 import com.example.rta_app.SOLID.activitys.WorkHourActivity;
 import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.services.GoogleSheetsService;
@@ -17,14 +18,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class WorkerHourRepository {
+public class WorkerHourRepository implements IWorkerHourRepository {
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
 
 
     public WorkerHourRepository() {
         this.mAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
+        this.firestore = FirebaseFirestore.getInstance();
     }
 
     public Task<WorkerHous> getWorkerHous() {

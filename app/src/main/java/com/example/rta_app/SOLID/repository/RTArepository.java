@@ -284,29 +284,6 @@ public class RTArepository {
                 });
     }
 
-    public void getUserName(OnUserNameCallback callback) {
-        firestore.collection("usuarios")
-                .document(mAuth.getCurrentUser().getUid())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    String returnName;
-                    if (documentSnapshot.exists()) {
-                        returnName = documentSnapshot.getString("nome");
-                    } else {
-                        returnName = mAuth.getCurrentUser().getDisplayName();
-                    }
-
-                    callback.onUserNameReceived(returnName);
-                })
-                .addOnFailureListener(e -> {
-
-                    callback.onUserNameReceived("Erro ao buscar nome");
-                });
-    }
-
-    public interface OnUserNameCallback {
-        void onUserNameReceived(String userName);
-    }
 
     public void confirmDocExistMain(String uid) {
         if (mAuth.getCurrentUser() == null) {
@@ -364,23 +341,6 @@ public class RTArepository {
             Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
         }
     }
-    public Task<Void> addUser(String name, String uid) {
-        Map<String, Object> user = new HashMap<>();
-        user.put("nome", name);
-        user.put("uid", uid);
-
-        return firestore.collection("usuarios").document(uid).update(user);
-    }
-    public Task<Void> addFinal(String rota, String uid) {
-        Map<String, Object> user = new HashMap<>();
-        user.put("nome", rota);
-        user.put("uid", uid);
-
-        return firestore.collection("finalizados").document(uid).update(user);
-    }
-
-
-
 
 
 }

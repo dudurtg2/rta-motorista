@@ -41,6 +41,11 @@ public class RTADetailsActivity extends AppCompatActivity {
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     private String QA;
 
+    public RTADetailsActivity() {
+        firestore = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,8 +53,12 @@ public class RTADetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rtadetails);
         binding = ActivityRtadetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        firestore = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
+
+        SetupClickListeners();
+        getRTA(uid);
+    }
+
+    private void SetupClickListeners() {
         Intent intent = getIntent();
         if (intent != null) {
             uid = intent.getStringExtra("uid");
@@ -74,7 +83,6 @@ public class RTADetailsActivity extends AppCompatActivity {
             }
         });
         binding.textRTA.setOnClickListener(v -> downloadRTA(uid));
-        getRTA(uid);
     }
 
     @Override

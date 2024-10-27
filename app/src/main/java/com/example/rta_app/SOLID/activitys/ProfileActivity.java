@@ -11,7 +11,11 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
+import com.example.rta_app.SOLID.entities.Users;
+import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.repository.RTArepository;
+import com.example.rta_app.SOLID.repository.UsersRepository;
 import com.example.rta_app.SOLID.services.ImageUploaderDAO;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityProfileBinding;
@@ -26,21 +30,28 @@ public class ProfileActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ImageUploaderDAO imageUploader;
     public static final int PICK_IMAGE_REQUEST = 1;
+    private IUsersRepository usersRepository;
+
+    public ProfileActivity() {
+        firestore = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+        imageUploader = new ImageUploaderDAO(this);
+        usersRepository = new UsersRepository();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
-
         binding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.profileUserInsert.setVisibility(View.GONE);
+        SetupClickListeners();
+    }
 
-        imageUploader = new ImageUploaderDAO(this);
-        mAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();
+    private void SetupClickListeners() {
+        binding.profileUserInsert.setVisibility(View.GONE);
 
         if (mAuth.getCurrentUser() != null) {
             docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
@@ -89,34 +100,27 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void getUser() {
-        docRef.get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        binding.editNameUser.setHint(documentSnapshot.getString("nome"));
-
-                    } else {
-                        binding.editNameUser.setHint(mAuth.getCurrentUser().getDisplayName());
-                    }
+        usersRepository.getUser()
+                .addOnSuccessListener(users -> {
+                    binding.editNameUser.setHint(users.getName());
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }
 
+
     private void updateUser() {
-        if (mAuth.getCurrentUser() != null) {
-            new RTArepository(this)
-                    .addUser(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())
-                    .addOnSuccessListener(aVoid -> {
-                        new RTArepository(this)
-                                .addFinal(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())
-                                .addOnSuccessListener(aVoid1 -> {
-                                    Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
-                                    binding.profileUserInsert.setVisibility(View.GONE);
-                                    binding.editNameUser.setText("");
-                                    getUser();
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
+
+            usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())).addOnSuccessListener(aVoid1 -> {
+                        Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
+                        binding.profileUserInsert.setVisibility(View.GONE);
+                        binding.editNameUser.setText("");
+                        getUser();
                     })
                     .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
-        }
+
+
     }
+
+
+
 }

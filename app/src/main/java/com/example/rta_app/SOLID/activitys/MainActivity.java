@@ -11,7 +11,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.repository.QueryRTA;
+import com.example.rta_app.SOLID.repository.UsersRepository;
 import com.example.rta_app.SOLID.services.AdapterViewRTA;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.repository.RTArepository;
@@ -23,20 +25,37 @@ import com.journeyapps.barcodescanner.CaptureActivity;
 
 public class MainActivity extends AppCompatActivity {
     public ActivityMainBinding binding;
+    private IUsersRepository usersRepository;
 
+
+    public MainActivity(){
+        usersRepository = new UsersRepository();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         EdgeToEdge.enable(this);
-
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        new RTArepository(this).getUserName(userName ->
-            binding.UserNameDisplay.setText(userName)
-        );
 
+        getUser();
+        SetupBinding();
+        queryItems();
+    }
+
+    private void getUser() {
+        usersRepository.getUser()
+                .addOnSuccessListener(users -> {
+                    binding.UserNameDisplay.setText(users.getName());
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Erro ao obter usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void SetupBinding(){
         binding.buttonList.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setCaptureActivity(CaptureActivity.class);
@@ -57,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         binding.inTravelbutton.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
 
         binding.atualizar.setOnClickListener(v -> queryItems());
-        queryItems();
     }
 
     public void queryItems() {

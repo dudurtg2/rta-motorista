@@ -12,7 +12,10 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.repository.QueryRTA;
+import com.example.rta_app.SOLID.repository.UsersRepository;
 import com.example.rta_app.SOLID.services.AdapterViewRTA;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.repository.RTArepository;
@@ -28,8 +31,11 @@ import java.util.List;
 public class InTravelActivity extends AppCompatActivity {
     public ActivityInTravelBinding binding;
     private String filter = "Todas as cidades";
+    private IUsersRepository usersRepository;
 
-
+    public InTravelActivity(){
+        this.usersRepository = new UsersRepository();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +44,23 @@ public class InTravelActivity extends AppCompatActivity {
         binding = ActivityInTravelBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        setupBinding();
+        queryItems(filter);
+        queryFilter();
+        getUser();
+    }
+
+    private void getUser() {
+        usersRepository.getUser()
+                .addOnSuccessListener(users -> {
+                    binding.UserNameDisplay.setText(users.getName());
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Erro ao obter usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void setupBinding() {
 
         binding.buttonList.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(InTravelActivity.this);
@@ -56,11 +79,6 @@ public class InTravelActivity extends AppCompatActivity {
             }
             return false;
         });
-        queryItems(filter);
-        queryFilter();
-        new RTArepository(this).getUserName(userName ->
-                binding.UserNameDisplay.setText(userName)
-        );
     }
 
     private void queryFilter() {
