@@ -2,6 +2,7 @@ package com.example.rta_app.SOLID.repository;
 
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
+import com.example.rta_app.SOLID.services.NetworkService;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
@@ -349,6 +350,7 @@ public class PackingListRepository implements IPackingListRepository {
     }
 
     public Task<Void> movePackingListForDelivery(PackingList packingList) {
+
         if (packingList.getStatus().equals("aguardando")) {
             firestore.collection("direcionado")
                     .document(mAuth.getCurrentUser().getUid())
