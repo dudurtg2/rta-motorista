@@ -45,7 +45,7 @@ public class ImageDriverService {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        String location = documentSnapshot.getString("Local");
+                        String location = documentSnapshot.getString("Local") == null ? documentSnapshot.getString("local") : documentSnapshot.getString("Local");
                         callback.onSuccess(location);
                     } else {
                         callback.onFailure("Document does not exist");

@@ -13,6 +13,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
+import com.example.rta_app.SOLID.entities.PackingList;
+import com.example.rta_app.SOLID.repository.PackingListRepository;
 import com.example.rta_app.SOLID.services.ImageDriverService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityRtadetailsBinding;
@@ -30,20 +33,20 @@ import java.util.Locale;
 import java.util.Map;
 
 public class RTADetailsActivity extends AppCompatActivity {
+
     private ActivityRtadetailsBinding binding;
-    private DocumentReference docRef, docRefRTA;
-    private FirebaseFirestore firestore;
-    private FirebaseAuth mAuth;
-    private String uid;
+
+    PackingList uid2;
+    private String uii;
     private ImageDriverService imageUploader;
     private Uri photoURI;
     public static final int PICK_IMAGE_REQUEST = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     private String QA;
+    private IPackingListRepository packingListRepository;
 
     public RTADetailsActivity() {
-        firestore = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
+        this.packingListRepository = new PackingListRepository();
     }
 
     @Override
@@ -54,30 +57,40 @@ public class RTADetailsActivity extends AppCompatActivity {
         binding = ActivityRtadetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        SetupClickListeners();
-        getRTA(uid);
-    }
-
-    private void SetupClickListeners() {
         Intent intent = getIntent();
         if (intent != null) {
-            uid = intent.getStringExtra("uid");
+            uii = intent.getStringExtra("uid");
         }
+
+        packingListRepository.getPackingListToRota(uii).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                PackingList uid = task.getResult();
+                uid2 = uid;
+                SetupClickListeners(uid);
+                getRTA(uid);
+            } else {
+                Toast.makeText(this, "Falha ao obter Packing List", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    private void SetupClickListeners(PackingList uid) {
         binding.buttonRecusar.setOnClickListener(v -> new AlertDialog.Builder(this)
                 .setTitle("Confirmação")
-                .setMessage("O entregador realmente não vai receber a saca de código " + uid + "?")
+                .setMessage("O entregador realmente não vai receber a saca de código " + uid.getCodigodeficha() + "?")
                 .setPositiveButton("Não vai receber", (dialog, which) -> statusUpdate(uid, "Recusado"))
                 .setNegativeButton("Vai receber", null)
                 .show());
 
         binding.buttonFinalizar.setOnClickListener(v -> {
             QA = "Finalizado";
-            openCamera(uid);
+            openCamera(uid.getCodigodeficha());
         });
         binding.buttonOcorrencia.setOnClickListener(v -> {
             if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
                 QA = "Ocorrencia";
-                openCamera(uid);
+                openCamera(uid.getCodigodeficha());
             } else {
                 Toast.makeText(this, "Preencha o campo de ocorrencia", Toast.LENGTH_SHORT).show();
             }
@@ -90,14 +103,14 @@ public class RTADetailsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (imageUploader != null) {
-                statusUpdate(uid, QA);
+                statusUpdate(uid2, QA);
                 imageUploader.handleCameraResult(photoURI, this);
             }
         }
     }
 
-    private void openCamera(String hour) {
-        imageUploader = new ImageDriverService(this, hour);
+    private void openCamera(String uid) {
+        imageUploader = new ImageDriverService(this, uid);
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
@@ -128,90 +141,72 @@ public class RTADetailsActivity extends AppCompatActivity {
         return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
 
-    private void downloadRTA(String uid) {
-        docRefRTA = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
+    private void downloadRTA(PackingList uid) {
 
-        docRefRTA.get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String downloadLink = documentSnapshot.getString("Download_link");
-                        if (downloadLink != null) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink));
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(this, "Download link not available", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(this, "Document does not exist", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to fetch document: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        String downloadLink = uid.getDownloadlink();
+        if (downloadLink != null) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink));
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Download link not available", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
-    private void statusUpdate(String uid, String status) {
-        docRef = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
+    private void statusUpdate(PackingList documentSnapshot, String status) {
 
-        docRef.get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        Map < String, Object > updateData = new HashMap < > ();
-                        updateData.put("Status", status);
+        if (!documentSnapshot.getCodigodeficha().equals("")) {
+            String occurrence = "";
 
-                        if (status.equals("Ocorrencia")) {
-                            if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
-                                updateData.put("Ocorrencia", binding.multiAutoCompleteTextView.getText().toString());
-                            } else {
-                                Toast.makeText(this, "Preencha o campo de ocorrencia", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                        }
-                        docRef.update(updateData)
-                                .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(this, "Status atualizado para " + status, Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(this, InTravelActivity.class));
-                                    finish();
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status", Toast.LENGTH_SHORT).show());
-                    } else {
-                        Toast.makeText(this, "Documento não encontrado", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
+            if (status.equals("Ocorrencia")) {
+                if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
+                    occurrence = binding.multiAutoCompleteTextView.getText().toString();
+                    Toast.makeText(this, "Ocorrência: " + occurrence, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Preencha o campo de ocorrência", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            packingListRepository.updateStatusPackingList(documentSnapshot, occurrence, status)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Status atualizado para " + status, Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(this, InTravelActivity.class));
+                        finish();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status", Toast.LENGTH_SHORT).show());
+
+        } else {
+            Toast.makeText(this, "Documento não encontrado", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void getRTA(String uid) {
-        docRef = firestore.collection("rota").document(mAuth.getCurrentUser().getUid()).collection("pacotes").document(uid);
-        docRef.get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        binding.textRTA.setText(uid + " \uD83D\uDCBE");
-                        binding.TextCidade.setText("Cidade: " + documentSnapshot.getString("Local"));
-                        binding.textDate.setText("Data: " + documentSnapshot.getString("Hora_e_Dia"));
-                        binding.textCount.setText(documentSnapshot.getString("Quantidade"));
-                        binding.textEntregador.setText("Entregador: " + documentSnapshot.getString("Entregador"));
-                        binding.Empresa.setText("Empresa: " + documentSnapshot.getString("Empresa"));
 
-                        List < String > codes = (List < String > ) documentSnapshot.get("Codigos inseridos");
-                        binding.textAllCodes.setText("Codigos inseridos:\n");
-                        if (codes != null) {
-                            for (String code: codes) {
-                                binding.textAllCodes.append(code + "\n");
-                            }
-                        }
-                    } else {
-                        binding.textRTA.setText("Document does not exist");
-                        binding.TextCidade.setText("");
-                        binding.textDate.setText("");
-                        binding.textCount.setText("");
-                        binding.textEntregador.setText("");
-                        binding.textAllCodes.setText("");
-                        binding.Empresa.setText("");
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getApplicationContext(), "Error fetching document: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+    private void getRTA(PackingList documentSnapshot) {
+
+        if (!documentSnapshot.getCodigodeficha().equals("")) {
+            binding.textRTA.setText(documentSnapshot.getCodigodeficha() + " \uD83D\uDCBE");
+            binding.TextCidade.setText("Cidade: " + documentSnapshot.getLocal());
+            binding.textDate.setText("Data: " + documentSnapshot.getHoraedia());
+            binding.textCount.setText("Quantidade: " + documentSnapshot.getQuantidade());
+            binding.textTelefone.setText("Entregador: " + documentSnapshot.getTelefone());
+            binding.textEntregador.setText("Entregador: " + documentSnapshot.getEntregador());
+            binding.Empresa.setText("Empresa: " + documentSnapshot.getEmpresa());
+            binding.textAllCodes.setText("Codigos inseridos:\n");
+            if (documentSnapshot.getCodigosinseridos() != null) {
+                for (String code : documentSnapshot.getCodigosinseridos()) {
+                    binding.textAllCodes.append(code + "\n");
+                }
+            }
+        } else {
+            binding.textRTA.setText("Document does not exist");
+            binding.TextCidade.setText("");
+            binding.textDate.setText("");
+            binding.textCount.setText("");
+            binding.textEntregador.setText("");
+            binding.textAllCodes.setText("");
+            binding.Empresa.setText("");
+        }
+
     }
+
 }

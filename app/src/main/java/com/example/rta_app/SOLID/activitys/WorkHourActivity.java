@@ -1,7 +1,6 @@
 package com.example.rta_app.SOLID.activitys;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -12,21 +11,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
-import com.example.rta_app.SOLID.entities.Users;
 import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.repository.RTArepository;
 import com.example.rta_app.SOLID.repository.UsersRepository;
 import com.example.rta_app.SOLID.repository.WorkerHourRepository;
 import com.example.rta_app.SOLID.services.GoogleSheetsService;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -91,7 +83,7 @@ public class WorkHourActivity extends AppCompatActivity {
 
     private void openPontsIsValidade(String valueForHourUpdate, WorkerHous workerHous) {
 
-        if (isAfter20Minutes(workerHous.getHour_after())) {
+        if (!workerHous.getHour_after().equals("") && !isAfter20Minutes(workerHous.getDate(), workerHous.getHour_after())) {
             new AlertDialog.Builder(this)
                     .setTitle("Alerta")
                     .setMessage("Voçê não pode registrar mais de \n20 minutos após o horário anterior")
@@ -239,13 +231,18 @@ public class WorkHourActivity extends AppCompatActivity {
         binding.buttonFistHour.setText("Entrada");
     }
 
-    public boolean isAfter20Minutes(String previousHour) {
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+    public boolean isAfter20Minutes(String previousDate, String previousHour) {
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         try {
-            Date previousDate = format.parse(previousHour);
+
+            String previousDateTime = previousDate + " " + previousHour;
+
+
+            Date previousDateTimeParsed = format.parse(previousDateTime);
             Date currentDate = new Date();
 
-            long diffInMinutes = (currentDate.getTime() - previousDate.getTime()) / (1000 * 60);
+
+            long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
             return diffInMinutes >= 20;
         } catch (ParseException e) {
