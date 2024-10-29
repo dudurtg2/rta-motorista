@@ -88,6 +88,7 @@ public class PackingListRepository implements IPackingListRepository {
         packingLists.put("quantidade", packingList.getQuantidade());
         packingLists.put("downloadlink", packingList.getDownloadlink());
         packingLists.put("codigosinseridos", packingList.getCodigosinseridos());
+        packingLists.put("endereco", packingList.getEndereco());
 
         return docRef.set(packingLists);
     }
@@ -107,7 +108,7 @@ public class PackingListRepository implements IPackingListRepository {
             DocumentSnapshot document = taskSnapshot.getResult();
 
             if (document == null || !document.exists()) {
-                return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null);
+                return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null, null);
             }
 
             String Codigo_de_ficha = document.getString("codigodeficha");
@@ -122,6 +123,7 @@ public class PackingListRepository implements IPackingListRepository {
             String Quantidade = document.getString("quantidade");
             String Status = document.getString("status");
             String Telefone = document.getString("telefone");
+            String Endereco = document.getString("endereco");
 
             return new PackingList(
                     Empresa,
@@ -135,7 +137,8 @@ public class PackingListRepository implements IPackingListRepository {
                     Status,
                     Motorista,
                     Codigos_inseridos,
-                    Download_link
+                    Download_link,
+                    Endereco
             );
 
         });
@@ -156,7 +159,7 @@ public class PackingListRepository implements IPackingListRepository {
             DocumentSnapshot document = taskSnapshot.getResult();
 
             if (document == null || !document.exists()) {
-                return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null);
+                return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null,null);
             }
 
             String Codigo_de_ficha = document.getString("codigodeficha");
@@ -171,6 +174,7 @@ public class PackingListRepository implements IPackingListRepository {
             String Quantidade = document.getString("quantidade");
             String Status = document.getString("status");
             String Telefone = document.getString("telefone");
+            String Endereco = document.getString("endereco");
 
             return new PackingList(
                     Empresa,
@@ -184,7 +188,8 @@ public class PackingListRepository implements IPackingListRepository {
                     Status,
                     Motorista,
                     Codigos_inseridos,
-                    Download_link
+                    Download_link,
+                    Endereco
             );
 
         });
@@ -212,6 +217,7 @@ public class PackingListRepository implements IPackingListRepository {
                         String Quantidade = document.getString("quantidade");
                         String Status = document.getString("status");
                         String Telefone = document.getString("telefone");
+                        String Endereco = document.getString("endereco");
 
                         PackingList packingList = new PackingList(
                                 Empresa,
@@ -225,7 +231,8 @@ public class PackingListRepository implements IPackingListRepository {
                                 Status,
                                 Motorista,
                                 Codigos_inseridos,
-                                Download_link
+                                Download_link,
+                                Endereco
                         );
 
                         taskCompletionSource.setResult(packingList);
@@ -261,6 +268,7 @@ public class PackingListRepository implements IPackingListRepository {
                             String Quantidade = document.getString("quantidade");
                             String Status = document.getString("status");
                             String Telefone = document.getString("telefone");
+                            String Endereco = document.getString("endereco");
 
                             PackingList packingList = new PackingList(
                                     Empresa,
@@ -274,7 +282,8 @@ public class PackingListRepository implements IPackingListRepository {
                                     Status,
                                     Motorista,
                                     Codigos_inseridos,
-                                    Download_link
+                                    Download_link,
+                                    Endereco
                             );
                             list.add(packingList);
                         }
@@ -311,6 +320,7 @@ public class PackingListRepository implements IPackingListRepository {
                             String Quantidade = document.getString("quantidade");
                             String Status = document.getString("status");
                             String Telefone = document.getString("telefone");
+                            String Endereco = document.getString("endereco");
 
                             PackingList packingList = new PackingList(
                                     Empresa,
@@ -324,7 +334,8 @@ public class PackingListRepository implements IPackingListRepository {
                                     Status,
                                     Motorista,
                                     Codigos_inseridos,
-                                    Download_link
+                                    Download_link,
+                                    Endereco
                             );
                             list.add(packingList);
                         }
@@ -393,6 +404,7 @@ public class PackingListRepository implements IPackingListRepository {
             packingLists.put("quantidade", packingList.getQuantidade());
             packingLists.put("downloadlink", packingList.getDownloadlink());
             packingLists.put("codigosinseridos", packingList.getCodigosinseridos());
+            packingLists.put("endereco", packingList.getEndereco());
 
             return docRef.set(packingLists);
         } else {

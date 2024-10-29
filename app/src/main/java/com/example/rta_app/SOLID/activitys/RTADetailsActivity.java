@@ -190,6 +190,7 @@ public class RTADetailsActivity extends AppCompatActivity {
             binding.textTelefone.setText("Entregador: " + documentSnapshot.getTelefone());
             binding.textEntregador.setText("Entregador: " + documentSnapshot.getEntregador());
             binding.Empresa.setText("Empresa: " + documentSnapshot.getEmpresa());
+            binding.textEndereco.setText("Endereço: " + documentSnapshot.getEndereco());
             binding.textAllCodes.setText("Codigos inseridos:\n");
             if (documentSnapshot.getCodigosinseridos() != null) {
                 for (String code : documentSnapshot.getCodigosinseridos()) {

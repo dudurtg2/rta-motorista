@@ -16,11 +16,12 @@ public class PackingList {
     private List<String> codigosinseridos;
     private String downloadlink;
     private String empresa;
+    private String endereco;
 
     public PackingList() {
     }
 
-    public PackingList(String empresa, String funcionario, String entregador, String telefone, String local, String codigodeficha, String horaedia, String quantidade, String status, String motorista, List<String> codigosinseridos, String downloadlink) {
+    public PackingList(String empresa, String funcionario, String entregador, String telefone, String local, String codigodeficha, String horaedia, String quantidade, String status, String motorista, List<String> codigosinseridos, String downloadlink, String endereco) {
         this.funcionario = funcionario;
         this.entregador = entregador;
         this.telefone = telefone;
@@ -33,6 +34,15 @@ public class PackingList {
         this.codigosinseridos = codigosinseridos;
         this.downloadlink = downloadlink;
         this.empresa = empresa;
+        this.endereco = endereco;
+    }
+
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
     }
 
     public String getEmpresa() {

@@ -1,5 +1,6 @@
 package com.example.rta_app.SOLID.activitys;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -113,8 +114,16 @@ public class MainActivity extends AppCompatActivity {
                     if (packingList != null) {
                         String codigodeficha = packingList.getCodigodeficha();
                         if (codigodeficha != null && !codigodeficha.isEmpty()) {
-                            Toast.makeText(this, codigodeficha, Toast.LENGTH_SHORT).show();
-                            packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(va -> queryItems());
+                            new AlertDialog.Builder(this)
+                                    .setTitle("Confirmação")
+                                    .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: "+ packingList.getLocal() + "\nData: "+ packingList.getHoraedia())
+                                    .setPositiveButton("Adciona a rota", (dialog, which) ->  packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
+                                        queryItems();
+                                        Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();
+                                    }))
+                                    .setNegativeButton("Vai receber", null)
+                                    .show();
+
                         } else {
                             Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
                         }
@@ -125,8 +134,9 @@ public class MainActivity extends AppCompatActivity {
                     if (packingList != null) {
                         String codigodeficha = packingList.getCodigodeficha();
                         if (codigodeficha != null && !codigodeficha.isEmpty()) {
-                            Toast.makeText(this, codigodeficha, Toast.LENGTH_SHORT).show();
-                            packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> queryItems());
+                            Toast.makeText(this, codigodeficha + "\n recebido e adicionado a rota", Toast.LENGTH_SHORT).show();
+                            packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vad -> queryItems());
+
                         } else {
                             Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
                         }
