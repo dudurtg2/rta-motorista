@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 public class InTravelActivity extends AppCompatActivity {
+
     public ActivityInTravelBinding binding;
     private String filter = "Todas as cidades";
     private IUsersRepository usersRepository;
@@ -73,7 +74,7 @@ public class InTravelActivity extends AppCompatActivity {
 
         binding.buttonFinaliza.setOnClickListener(v -> {
             packingListRepository.finishPackingList().addOnSuccessListener(v1 -> {
-                    queryItems(filter);
+                queryItems(filter);
             });
         });
 
@@ -81,12 +82,12 @@ public class InTravelActivity extends AppCompatActivity {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 if (event == null || !event.isShiftPressed()) {
                     packingListRepository.getPackingListToDirect(binding.RTAprocura.getText().toString().toUpperCase()).addOnSuccessListener(packingList -> {
-                        Toast.makeText(this,packingList.getFuncionario(),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, packingList.getFuncionario(), Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(this, RTADetailsActivity.class);
                         intent.putExtra("uid", packingList.getCodigodeficha());
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         this.startActivity(intent);
-                    }).addOnFailureListener(va -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
+                    }).addOnFailureListener(va  -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
                     return true;
                 }
             }
@@ -101,7 +102,8 @@ public class InTravelActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
     }
@@ -132,7 +134,6 @@ public class InTravelActivity extends AppCompatActivity {
         });
     }
 
-
     private void queryItems(String filter) {
         packingListRepository.getListPackingListBase().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -141,8 +142,8 @@ public class InTravelActivity extends AppCompatActivity {
 
                 if (packingList != null) {
                     for (PackingList packing : packingList) {
-                        if (packing != null && (filter.equals("Todas as cidades") ||
-                                (packing.getLocal() != null && packing.getLocal().equals(filter)))) {
+                        if (packing != null && (filter.equals("Todas as cidades")
+                                || (packing.getLocal() != null && packing.getLocal().equals(filter)))) {
                             filteredList.add(packing);
                         }
                     }
@@ -151,7 +152,6 @@ public class InTravelActivity extends AppCompatActivity {
                 int itemCount = filteredList.size();
                 binding.QtdRTA.setText("QTD: " + itemCount);
 
-
                 binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
                 binding.listRTATravelview.setAdapter(new AdapterViewRTA(1, getApplicationContext(), filteredList));
             } else {
@@ -159,8 +159,6 @@ public class InTravelActivity extends AppCompatActivity {
             }
         });
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -171,12 +169,12 @@ public class InTravelActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cancelado", Toast.LENGTH_LONG).show();
             } else {
                 packingListRepository.getPackingListToDirect(result.getContents()).addOnSuccessListener(packingList -> {
-                    Toast.makeText(this,packingList.getCodigodeficha(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, packingList.getCodigodeficha(), Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(this, RTADetailsActivity.class);
                     intent.putExtra("uid", packingList.getCodigodeficha());
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     this.startActivity(intent);
-                }).addOnFailureListener(va -> Toast.makeText(this, result.getContents() + " não encontrado", Toast.LENGTH_SHORT).show());
+                }).addOnFailureListener(va  -> Toast.makeText(this, result.getContents() + " não encontrado", Toast.LENGTH_SHORT).show());
 
             }
         } else {

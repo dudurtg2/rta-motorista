@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.rta_app.R;
 
 public class ViewRTA extends RecyclerView.ViewHolder {
+
     protected TextView nameRTAText;
     protected TextView stsRTAtext;
     protected TextView dateRTAtext;

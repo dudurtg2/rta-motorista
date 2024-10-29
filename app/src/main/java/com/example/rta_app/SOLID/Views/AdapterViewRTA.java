@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
+
     private final List<PackingList> packingList;
     private final Context context;
     private final int pipoca;
@@ -75,44 +76,44 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
             }
             holder.stsRTAtext.setTextColor(color);
 
-        if (pipoca == 1) {
-            holder.itemView.setOnClickListener(v -> {
-                switch (item.getStatus()) {
-                    case "Finalizado":
-                        Toast.makeText(context, "Carga finalizada", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "Ocorrencia":
-                        Toast.makeText(context, "Carga em ocorrência", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "Espere por uma nova tarefa":
-                        Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        Intent intent = new Intent(context, RTADetailsActivity.class);
-                        intent.putExtra("uid", item.getCodigodeficha());
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                        break;
-                }
-            });
-        } else {
-            holder.itemView.setOnClickListener(v -> {
-                if (!holder.stsRTAtext.getText().toString().equals("Status indisponível")){
-                    if (item.getStatus().equals("aguardando")) {
-                        Context itemViewContext = holder.itemView.getContext();
-                        new AlertDialog.Builder(itemViewContext)
-                                .setTitle("Confirmação")
-                                .setMessage("Você deseja realmente adicionar essa carga a rota?")
-                                .setPositiveButton("Sim", (dialog, which) -> addToTraver(item.getCodigodeficha(), holder.getAdapterPosition()))
-                                .setNegativeButton("Não", null)
-                                .show();
+            if (pipoca == 1) {
+                holder.itemView.setOnClickListener(v -> {
+                    switch (item.getStatus()) {
+                        case "Finalizado":
+                            Toast.makeText(context, "Carga finalizada", Toast.LENGTH_SHORT).show();
+                            break;
+                        case "Ocorrencia":
+                            Toast.makeText(context, "Carga em ocorrência", Toast.LENGTH_SHORT).show();
+                            break;
+                        case "Espere por uma nova tarefa":
+                            Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            Intent intent = new Intent(context, RTADetailsActivity.class);
+                            intent.putExtra("uid", item.getCodigodeficha());
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
+                            break;
                     }
-                } else {
-                    Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
-                }
-            });
+                });
+            } else {
+                holder.itemView.setOnClickListener(v -> {
+                    if (!holder.stsRTAtext.getText().toString().equals("Status indisponível")) {
+                        if (item.getStatus().equals("aguardando")) {
+                            Context itemViewContext = holder.itemView.getContext();
+                            new AlertDialog.Builder(itemViewContext)
+                                    .setTitle("Confirmação")
+                                    .setMessage("Você deseja realmente adicionar essa carga a rota?")
+                                    .setPositiveButton("Sim", (dialog, which) -> addToTraver(item.getCodigodeficha(), holder.getAdapterPosition()))
+                                    .setNegativeButton("Não", null)
+                                    .show();
+                        }
+                    } else {
+                        Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-        }
+            }
         } else {
 
             holder.itemView.setVisibility(View.GONE);
@@ -133,6 +134,5 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
     public int getItemCount() {
         return packingList.size();
     }
-
 
 }

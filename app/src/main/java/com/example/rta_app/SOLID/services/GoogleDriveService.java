@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GoogleDriveService {
+
     // Variáveis que armazenam a hora e a cidade que serão usadas para nomear o arquivo e a pasta
     private String documentName;
     private String documentCity;
@@ -70,7 +71,7 @@ public class GoogleDriveService {
 
     // Método que cria ou obtém a pasta da cidade dentro da pasta de data
     private String createOrGetCityFolder(Drive driveService) throws IOException {
-        String dateFolderId = getOrCreateFolder(driveService,  // Obtém ou cria a pasta da data dentro da pasta principal no Google Drive
+        String dateFolderId = getOrCreateFolder(driveService, // Obtém ou cria a pasta da data dentro da pasta principal no Google Drive
                 new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date()), // Cria um nome de pasta baseado na data atual no formato "dd-MM-yyyy"
                 PARENT_FOLDER_ID);
 
@@ -81,7 +82,9 @@ public class GoogleDriveService {
     private String getOrCreateFolder(Drive driveService, String folderName, String parentId) throws IOException {
         String folderId = getFolderId(driveService, folderName, parentId);
         // Se a pasta não existir, cria uma nova pasta com o nome e ID do pai fornecidos
-        if (folderId != null) { return folderId; }
+        if (folderId != null) {
+            return folderId;
+        }
 
         // Cria a pasta no Google Drive e retorna o ID da nova pasta criada
         return driveService.files()
@@ -104,7 +107,9 @@ public class GoogleDriveService {
                 .execute();
 
         // Retorna o ID da pasta se existir, caso contrário, retorna null
-        if (result.getFiles().isEmpty()) { return null; }
+        if (result.getFiles().isEmpty()) {
+            return null;
+        }
 
         return result.getFiles().get(0).getId();
     }
@@ -119,12 +124,12 @@ public class GoogleDriveService {
         // Faz o upload do arquivo para o Google Drive e obtém o ID do arquivo enviado
         driveService.files()
                 .create(new File() // Define os metadados do arquivo, incluindo nome, tipo MIME e pasta pai
-                                .setName(documentName + ".png") // Nome do arquivo baseado na RTA
-                                .setMimeType("image/png")
-                                .setParents(Collections.singletonList(folderId)), // Pasta onde o arquivo será armazenado
+                        .setName(documentName + ".png") // Nome do arquivo baseado na RTA
+                        .setMimeType("image/png")
+                        .setParents(Collections.singletonList(folderId)), // Pasta onde o arquivo será armazenado
                         new ByteArrayContent("image/png", bitmapData))
-                                            .setFields("id")
-                                            .execute();
+                .setFields("id")
+                .execute();
     }
 
     // Método que configura o serviço do Google Drive usando as credenciais da conta de serviço
@@ -133,11 +138,11 @@ public class GoogleDriveService {
         return new Drive.Builder(GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory
                         .getDefaultInstance(), GoogleCredential // Cria as credenciais do Google Drive com escopo de acesso ao Drive
-                .fromStream(context // Carrega o arquivo de credenciais da conta de serviço do Google Drive
-                        .getAssets()
-                        .open(SERVICE_ACCOUNT_KEY_FILE))
-                .createScoped(Collections
-                        .singleton(DriveScopes.DRIVE_FILE)))
+                        .fromStream(context // Carrega o arquivo de credenciais da conta de serviço do Google Drive
+                                .getAssets()
+                                .open(SERVICE_ACCOUNT_KEY_FILE))
+                        .createScoped(Collections
+                                .singleton(DriveScopes.DRIVE_FILE)))
                 .setApplicationName("RTA App") // Nome do aplicativo para identificação nas requisições do Google Drive
                 .build();
     }

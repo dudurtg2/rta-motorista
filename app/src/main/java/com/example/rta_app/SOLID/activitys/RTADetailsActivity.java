@@ -180,7 +180,6 @@ public class RTADetailsActivity extends AppCompatActivity {
         }
     }
 
-
     private void getRTA(PackingList documentSnapshot) {
 
         if (!documentSnapshot.getCodigodeficha().equals("")) {

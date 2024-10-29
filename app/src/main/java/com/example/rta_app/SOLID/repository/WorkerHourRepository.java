@@ -17,11 +17,10 @@ import com.google.firebase.firestore.SetOptions;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
 public class WorkerHourRepository implements IWorkerHourRepository {
+
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
-
 
     public WorkerHourRepository() {
         this.mAuth = FirebaseAuth.getInstance();
@@ -57,7 +56,6 @@ public class WorkerHourRepository implements IWorkerHourRepository {
         });
     }
 
-
     public Task<Void> saveWorkerHous(WorkerHous workerHous) {
         DocumentReference docRef = firestore.collection("usuarios")
                 .document(mAuth.getCurrentUser().getUid())
@@ -66,6 +64,5 @@ public class WorkerHourRepository implements IWorkerHourRepository {
 
         return docRef.set(workerHous);
     }
-
 
 }

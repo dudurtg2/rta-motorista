@@ -23,11 +23,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class WorkHourActivity extends AppCompatActivity {
+
     public ActivityWorkHourBinding binding;
     private IWorkerHourRepository workerHourRepository;
     private IUsersRepository usersRepository;
 
-    public WorkHourActivity(){
+    public WorkHourActivity() {
         workerHourRepository = new WorkerHourRepository();
         usersRepository = new UsersRepository();
 
@@ -68,7 +69,7 @@ public class WorkHourActivity extends AppCompatActivity {
         binding.imageStop.setOnClickListener(v -> openPontsIsFinish("Fim"));
     }
 
-    private void openPontsIsFinish(String valueForHourUpdate){
+    private void openPontsIsFinish(String valueForHourUpdate) {
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 WorkerHous workerHous = task.getResult();
@@ -139,12 +140,13 @@ public class WorkHourActivity extends AppCompatActivity {
         });
     }
 
-    private void updateToSheets(WorkerHous workerHous){
+    private void updateToSheets(WorkerHous workerHous) {
         workerHourRepository.getWorkerHous();
         Toast.makeText(this, "Horário registrado com sucesso!", Toast.LENGTH_SHORT).show();
         new GoogleSheetsService(this).getGoogleSheet(binding.UserNameDisplay.getText().toString(), workerHous);
         finish();
     }
+
     private void updateButtonText(String valueForHourUpdate, WorkerHous workerHous) {
         if (workerHous != null) {
             switch (valueForHourUpdate) {
@@ -237,10 +239,8 @@ public class WorkHourActivity extends AppCompatActivity {
 
             String previousDateTime = previousDate + " " + previousHour;
 
-
             Date previousDateTimeParsed = format.parse(previousDateTime);
             Date currentDate = new Date();
-
 
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
@@ -258,8 +258,6 @@ public class WorkHourActivity extends AppCompatActivity {
         return workerHourRepository.getWorkerHous()
                 .continueWithTask(task -> {
                     WorkerHous workerHous = task.getResult();
-
-
 
                     if (workerHous == null || workerHous.getDate().isEmpty()) {
                         workerHous = new WorkerHous(data, "", "", "", "", timeString);

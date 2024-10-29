@@ -26,14 +26,13 @@ import com.journeyapps.barcodescanner.CaptureActivity;
 
 import java.util.List;
 
-
 public class MainActivity extends AppCompatActivity {
+
     public ActivityMainBinding binding;
     private IUsersRepository usersRepository;
     private IPackingListRepository packingListRepository;
 
-
-    public MainActivity(){
+    public MainActivity() {
         this.packingListRepository = new PackingListRepository();
         this.usersRepository = new UsersRepository();
     }
@@ -61,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void SetupBinding(){
+    private void SetupBinding() {
         binding.buttonList.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setCaptureActivity(CaptureActivity.class);
@@ -72,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 if (event == null || !event.isShiftPressed()) {
                     packingListRepository.getPackingListToBase(binding.RTAprocura.getText().toString().toUpperCase()).addOnSuccessListener(packingList -> {
-                        Toast.makeText(this,packingList.getCodigodeficha(),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, packingList.getCodigodeficha(), Toast.LENGTH_SHORT).show();
                         packingListRepository.movePackingListForDelivery(packingList);
-                    }).addOnFailureListener(va -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
+                    }).addOnFailureListener(va  -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
                     return true;
                 }
             }
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cancelado", Toast.LENGTH_LONG).show();
             } else {
                 packingListRepository.getPackingListToBase(result.getContents()).addOnSuccessListener(packingList -> {
-                    Toast.makeText(this,packingList.getCodigodeficha(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, packingList.getCodigodeficha(), Toast.LENGTH_SHORT).show();
                     packingListRepository.movePackingListForDelivery(packingList);
                 }).addOnFailureListener(v -> Toast.makeText(this, result.getContents() + " não encontrado", Toast.LENGTH_SHORT).show());
             }
@@ -116,6 +115,5 @@ public class MainActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-
 
 }

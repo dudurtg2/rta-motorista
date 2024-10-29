@@ -12,8 +12,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.IOException;
 
-
 public class ImageDriverService {
+
     private final Context context;
     private final FirebaseUser currentUser;
     private final String hour;
@@ -73,7 +73,9 @@ public class ImageDriverService {
     }
 
     private interface GetRTACallback {
+
         void onSuccess(String location);
+
         void onFailure(String error);
     }
 }

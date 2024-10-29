@@ -3,6 +3,7 @@ package com.example.rta_app.SOLID.entities;
 import java.util.List;
 
 public class PackingList {
+
     private String funcionario;
     private String entregador;
     private String telefone;
@@ -15,7 +16,6 @@ public class PackingList {
     private List<String> codigosinseridos;
     private String downloadlink;
     private String empresa;
-
 
     public PackingList() {
     }
@@ -131,6 +131,4 @@ public class PackingList {
         this.downloadlink = downloadlink;
     }
 
-
-    
 }

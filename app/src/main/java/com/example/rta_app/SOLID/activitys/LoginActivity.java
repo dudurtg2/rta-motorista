@@ -21,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
+
     private ActivityLoginBinding binding;
     private FirebaseAuth mAuth;
     private DocumentReference docRef;

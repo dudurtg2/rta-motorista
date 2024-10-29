@@ -20,21 +20,20 @@ import java.util.Map;
 
 public interface IPackingListRepository {
 
-   Task<Void> finishPackingList();
+    Task<Void> finishPackingList();
 
-   Task<Void> updateStatusPackingList(PackingList packingList, String ocorrencia, String status);
+    Task<Void> updateStatusPackingList(PackingList packingList, String ocorrencia, String status);
 
-   Task<PackingList> getPackingListToDirect(String uid) ;
+    Task<PackingList> getPackingListToDirect(String uid);
 
-   Task<PackingList> getPackingListToRota(String uid) ;
+    Task<PackingList> getPackingListToRota(String uid);
 
-   Task<PackingList> getPackingListToBase(String uid) ;
+    Task<PackingList> getPackingListToBase(String uid);
 
-   Task<List<PackingList>> getListPackingListToDirect();
+    Task<List<PackingList>> getListPackingListToDirect();
 
-   Task<List<PackingList>> getListPackingListBase();
+    Task<List<PackingList>> getListPackingListBase();
 
-   Task<Void> movePackingListForDelivery(PackingList packingList);
-
+    Task<Void> movePackingListForDelivery(PackingList packingList);
 
 }

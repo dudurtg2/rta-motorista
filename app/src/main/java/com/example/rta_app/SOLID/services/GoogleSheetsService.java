@@ -22,6 +22,7 @@ import java.util.List;
 import com.google.api.services.sheets.v4.model.*;
 
 public class GoogleSheetsService {
+
     private static final String TAG = "GoogleSheetsService";
     private static final String SERVICE_ACCOUNT_KEY_FILE = "google-sheets.json";
     private static final String SPREADSHEET_ID = "1-MsLXdMmcjPEYSEJLv4W4YhBA0bbyHfO1Mcm-e9bCeA";
@@ -111,4 +112,3 @@ public class GoogleSheetsService {
                 .build();
     }
 }
-

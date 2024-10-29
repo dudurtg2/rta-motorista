@@ -22,6 +22,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileActivity extends AppCompatActivity {
+
     public ActivityProfileBinding binding;
     private DocumentReference docRef;
     private FirebaseFirestore firestore;
@@ -64,7 +65,6 @@ public class ProfileActivity extends AppCompatActivity {
             finish();
         });
 
-
         binding.editNameUser.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -105,20 +105,16 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }
 
-
     private void updateUser() {
 
-            usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())).addOnSuccessListener(aVoid1 -> {
-                        Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
-                        binding.profileUserInsert.setVisibility(View.GONE);
-                        binding.editNameUser.setText("");
-                        getUser();
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
-
+        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())).addOnSuccessListener(aVoid1 -> {
+            Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
+            binding.profileUserInsert.setVisibility(View.GONE);
+            binding.editNameUser.setText("");
+            getUser();
+        })
+                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar o usuário", Toast.LENGTH_SHORT).show());
 
     }
-
-
 
 }

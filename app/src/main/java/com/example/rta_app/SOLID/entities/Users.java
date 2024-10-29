@@ -1,9 +1,10 @@
 package com.example.rta_app.SOLID.entities;
 
-
 public class Users {
+
     private String name;
     private String uid;
+
     public Users(String name, String uid) {
         this.name = name;
         this.uid = uid;

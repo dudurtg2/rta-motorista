@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PackingListRepository implements IPackingListRepository {
+
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
 
@@ -29,8 +30,6 @@ public class PackingListRepository implements IPackingListRepository {
         this.mAuth = FirebaseAuth.getInstance();
         this.firestore = FirebaseFirestore.getInstance();
     }
-
-
 
     public Task<Void> finishPackingList() {
         String userId = mAuth.getCurrentUser().getUid();
@@ -57,9 +56,7 @@ public class PackingListRepository implements IPackingListRepository {
                                     .document(userId)
                                     .update(finalizadoData);
 
-
                             tasks.add(updateTask);
-
 
                             Task<Void> deleteTask = document.getReference().delete();
 
@@ -67,12 +64,9 @@ public class PackingListRepository implements IPackingListRepository {
                         }
                     }
 
-
                     return Tasks.whenAll(tasks);
                 });
     }
-
-
 
     public Task<Void> updateStatusPackingList(PackingList packingList, String ocorrencia, String status) {
         DocumentReference docRef = firestore.collection("rota")
@@ -101,7 +95,6 @@ public class PackingListRepository implements IPackingListRepository {
         return docRef.set(packingLists);
     }
 
-
     public Task<PackingList> getPackingListToDirect(String uid) {
         Task<DocumentSnapshot> task = firestore.collection("direcionado")
                 .document(mAuth.getCurrentUser().getUid())
@@ -117,7 +110,7 @@ public class PackingListRepository implements IPackingListRepository {
             DocumentSnapshot document = taskSnapshot.getResult();
 
             if (document == null || !document.exists()) {
-            return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null);
+                return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null);
             }
 
             String Codigo_de_ficha = document.getString("codigodeficha");
@@ -127,7 +120,7 @@ public class PackingListRepository implements IPackingListRepository {
             String Entregador = document.getString("entregador");
             String Funcionario = document.getString("funcionario");
             String Hora_e_Dia = document.getString("horaedia");
-            String Local = document.getString("local") ;
+            String Local = document.getString("local");
             String Motorista = document.getString("motorista");
             String Quantidade = document.getString("quantidade");
             String Status = document.getString("status");
@@ -176,7 +169,7 @@ public class PackingListRepository implements IPackingListRepository {
             String Entregador = document.getString("entregador");
             String Funcionario = document.getString("funcionario");
             String Hora_e_Dia = document.getString("horaedia");
-            String Local = document.getString("local") ;
+            String Local = document.getString("local");
             String Motorista = document.getString("motorista");
             String Quantidade = document.getString("quantidade");
             String Status = document.getString("status");
@@ -217,7 +210,7 @@ public class PackingListRepository implements IPackingListRepository {
                         String Entregador = document.getString("entregador");
                         String Funcionario = document.getString("funcionario");
                         String Hora_e_Dia = document.getString("horaedia");
-                        String Local = document.getString("local") ;
+                        String Local = document.getString("local");
                         String Motorista = document.getString("motorista");
                         String Quantidade = document.getString("quantidade");
                         String Status = document.getString("status");
@@ -266,7 +259,7 @@ public class PackingListRepository implements IPackingListRepository {
                             String Entregador = document.getString("entregador");
                             String Funcionario = document.getString("funcionario");
                             String Hora_e_Dia = document.getString("horaedia");
-                            String Local = document.getString("local") ;
+                            String Local = document.getString("local");
                             String Motorista = document.getString("motorista");
                             String Quantidade = document.getString("quantidade");
                             String Status = document.getString("status");
@@ -316,7 +309,7 @@ public class PackingListRepository implements IPackingListRepository {
                             String Entregador = document.getString("entregador");
                             String Funcionario = document.getString("funcionario");
                             String Hora_e_Dia = document.getString("horaedia");
-                            String Local = document.getString("local") ;
+                            String Local = document.getString("local");
                             String Motorista = document.getString("motorista");
                             String Quantidade = document.getString("quantidade");
                             String Status = document.getString("status");
@@ -349,17 +342,17 @@ public class PackingListRepository implements IPackingListRepository {
 
     public Task<Void> movePackingListForDelivery(PackingList packingList) {
         if (packingList.getStatus().equals("aguardando")) {
-             firestore.collection("direcionado")
+            firestore.collection("direcionado")
                     .document(mAuth.getCurrentUser().getUid())
                     .collection("pacotes")
                     .document(packingList.getCodigodeficha()).get().addOnSuccessListener(value -> {
-                        if (value.exists()) {
-                            firestore.collection("direcionado")
-                                    .document(mAuth.getCurrentUser().getUid())
-                                    .collection("pacotes")
-                                    .document(packingList.getCodigodeficha()).delete();
-                        }
-                     });
+                if (value.exists()) {
+                    firestore.collection("direcionado")
+                            .document(mAuth.getCurrentUser().getUid())
+                            .collection("pacotes")
+                            .document(packingList.getCodigodeficha()).delete();
+                }
+            });
             firestore.collection("bipagem")
                     .document(packingList.getCodigodeficha())
                     .get().addOnSuccessListener(value -> {
@@ -368,30 +361,29 @@ public class PackingListRepository implements IPackingListRepository {
                                     .document(packingList.getCodigodeficha()).delete();
                         }
                     });
-            }
+        }
 
         DocumentReference docRef = firestore.collection("rota")
                 .document(mAuth.getCurrentUser().getUid())
                 .collection("pacotes")
                 .document(packingList.getCodigodeficha());
 
-            Map<String, Object> packingLists = new HashMap<>();
+        Map<String, Object> packingLists = new HashMap<>();
 
-            packingLists.put("status", "Retirado");
-            packingLists.put("horaedia", packingList.getHoraedia());
-            packingLists.put("codigodeficha", packingList.getCodigodeficha());
-            packingLists.put("local", packingList.getLocal());
-            packingLists.put("empresa", packingList.getEmpresa());
-            packingLists.put("funcionario", packingList.getFuncionario());
-            packingLists.put("entregador", packingList.getEntregador());
-            packingLists.put("motorista", mAuth.getCurrentUser().getUid());
-            packingLists.put("telefone", packingList.getTelefone());
-            packingLists.put("quantidade", packingList.getQuantidade());
-            packingLists.put("downloadlink", packingList.getDownloadlink());
-            packingLists.put("codigosinseridos", packingList.getCodigosinseridos());
+        packingLists.put("status", "Retirado");
+        packingLists.put("horaedia", packingList.getHoraedia());
+        packingLists.put("codigodeficha", packingList.getCodigodeficha());
+        packingLists.put("local", packingList.getLocal());
+        packingLists.put("empresa", packingList.getEmpresa());
+        packingLists.put("funcionario", packingList.getFuncionario());
+        packingLists.put("entregador", packingList.getEntregador());
+        packingLists.put("motorista", mAuth.getCurrentUser().getUid());
+        packingLists.put("telefone", packingList.getTelefone());
+        packingLists.put("quantidade", packingList.getQuantidade());
+        packingLists.put("downloadlink", packingList.getDownloadlink());
+        packingLists.put("codigosinseridos", packingList.getCodigosinseridos());
 
         return docRef.set(packingLists);
     }
-
 
 }
