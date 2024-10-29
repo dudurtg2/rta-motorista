@@ -122,13 +122,27 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
 
     public void addToTraver(String uid, int position) {
         packingListRepository.getPackingListToDirect(uid).addOnSuccessListener(documentSnapshot -> {
-            if (!documentSnapshot.getCodigodeficha().equals("")) {
-                if (documentSnapshot.getMotorista().equals(mAuth.getCurrentUser().getUid()) && documentSnapshot.getStatus().equals("aguardando")) {
-                    packingListRepository.movePackingListForDelivery(documentSnapshot).addOnSuccessListener(vo -> notifyItemRemoved(position));
+            if (documentSnapshot != null) {
+                String codigoDeFicha = documentSnapshot.getCodigodeficha();
+                String motorista = documentSnapshot.getMotorista();
+                String status = documentSnapshot.getStatus();
+
+                if (codigoDeFicha != null && !codigoDeFicha.isEmpty()) {
+
+                    if (motorista != null && motorista.equals(mAuth.getCurrentUser().getUid()) &&
+                            "aguardando".equals(status)) {
+                        packingListRepository.movePackingListForDelivery(documentSnapshot)
+                                .addOnSuccessListener(vo -> notifyItemRemoved(position));
+                    }
+                } else {
+                    Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
             }
-        });
+        }).addOnFailureListener(va -> Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show());
     }
+
 
     @Override
     public int getItemCount() {

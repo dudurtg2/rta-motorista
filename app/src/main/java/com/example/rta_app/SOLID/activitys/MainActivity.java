@@ -72,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
                 if (event == null || !event.isShiftPressed()) {
                     packingListRepository.getPackingListToBase(binding.RTAprocura.getText().toString().toUpperCase()).addOnSuccessListener(packingList -> {
                         Toast.makeText(this, packingList.getCodigodeficha(), Toast.LENGTH_SHORT).show();
-                        packingListRepository.movePackingListForDelivery(packingList);
+                        packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(va -> queryItems());
+
                     }).addOnFailureListener(va  -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
                     return true;
                 }
@@ -102,18 +103,48 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
         if (result != null) {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelado", Toast.LENGTH_LONG).show();
             } else {
-                packingListRepository.getPackingListToBase(result.getContents()).addOnSuccessListener(packingList -> {
-                    Toast.makeText(this, packingList.getCodigodeficha(), Toast.LENGTH_SHORT).show();
-                    packingListRepository.movePackingListForDelivery(packingList);
-                }).addOnFailureListener(v -> Toast.makeText(this, result.getContents() + " não encontrado", Toast.LENGTH_SHORT).show());
+                String scannedCode = result.getContents().toUpperCase();
+                packingListRepository.getPackingListToBase(scannedCode).addOnSuccessListener(packingList -> {
+                    if (packingList != null) {
+                        String codigodeficha = packingList.getCodigodeficha();
+                        if (codigodeficha != null && !codigodeficha.isEmpty()) {
+                            Toast.makeText(this, codigodeficha, Toast.LENGTH_SHORT).show();
+                            packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(va -> queryItems());
+                        } else {
+                            Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(va -> { packingListRepository.getPackingListToDirect(scannedCode).addOnSuccessListener(packingList -> {
+                    if (packingList != null) {
+                        String codigodeficha = packingList.getCodigodeficha();
+                        if (codigodeficha != null && !codigodeficha.isEmpty()) {
+                            Toast.makeText(this, codigodeficha, Toast.LENGTH_SHORT).show();
+                            packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> queryItems());
+                        } else {
+                            Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(vaa -> {
+                    String message = scannedCode + " não encontrado";
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                });
+            });
             }
+
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
+
 
 }

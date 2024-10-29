@@ -79,20 +79,38 @@ public class InTravelActivity extends AppCompatActivity {
         });
 
         binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+
                 if (event == null || !event.isShiftPressed()) {
-                    packingListRepository.getPackingListToDirect(binding.RTAprocura.getText().toString().toUpperCase()).addOnSuccessListener(packingList -> {
-                        Toast.makeText(this, packingList.getFuncionario(), Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(this, RTADetailsActivity.class);
-                        intent.putExtra("uid", packingList.getCodigodeficha());
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        this.startActivity(intent);
-                    }).addOnFailureListener(va  -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
+                    String searchText = binding.RTAprocura.getText().toString().toUpperCase();
+
+                    packingListRepository.getPackingListToRota(searchText).addOnSuccessListener(packingList -> {
+                        if (packingList != null) {
+                            String funcionario = packingList.getFuncionario();
+                            if (funcionario != null && !funcionario.isEmpty()) {
+                                Toast.makeText(this, funcionario, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "Funcionário não disponível", Toast.LENGTH_SHORT).show();
+                            }
+
+                            Intent intent = new Intent(this, RTADetailsActivity.class);
+                            intent.putExtra("uid", packingList.getCodigodeficha());
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            this.startActivity(intent);
+                        } else {
+                            Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(va ->
+                            Toast.makeText(this, searchText + " não encontrado", Toast.LENGTH_SHORT).show()
+                    );
+
                     return true;
                 }
             }
             return false;
         });
+
 
         binding.DishesCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -168,17 +186,29 @@ public class InTravelActivity extends AppCompatActivity {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Cancelado", Toast.LENGTH_LONG).show();
             } else {
-                packingListRepository.getPackingListToDirect(result.getContents()).addOnSuccessListener(packingList -> {
-                    Toast.makeText(this, packingList.getCodigodeficha(), Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, RTADetailsActivity.class);
-                    intent.putExtra("uid", packingList.getCodigodeficha());
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    this.startActivity(intent);
-                }).addOnFailureListener(va  -> Toast.makeText(this, result.getContents() + " não encontrado", Toast.LENGTH_SHORT).show());
-
+                String scannedCode = result.getContents();
+                packingListRepository.getPackingListToRota(scannedCode).addOnSuccessListener(packingList -> {
+                    if (packingList != null) {
+                        String codigodeficha = packingList.getCodigodeficha();
+                        if (codigodeficha != null && !codigodeficha.isEmpty()) {
+                            Toast.makeText(this, codigodeficha, Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(this, RTADetailsActivity.class);
+                            intent.putExtra("uid", codigodeficha);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(this, "Código de ficha não disponível", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(this, scannedCode + " não encontrado", Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(va ->
+                        Toast.makeText(this, scannedCode + " não encontrado", Toast.LENGTH_SHORT).show()
+                );
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
 }

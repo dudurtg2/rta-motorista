@@ -1,10 +1,7 @@
 package com.example.rta_app.SOLID.repository;
 
-import android.widget.Toast;
-
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.entities.Users;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
@@ -15,11 +12,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PackingListRepository implements IPackingListRepository {
 
@@ -361,29 +358,46 @@ public class PackingListRepository implements IPackingListRepository {
                                     .document(packingList.getCodigodeficha()).delete();
                         }
                     });
+
         }
 
-        DocumentReference docRef = firestore.collection("rota")
+        AtomicBoolean exists = new AtomicBoolean(false);
+
+        firestore.collection("rota")
                 .document(mAuth.getCurrentUser().getUid())
                 .collection("pacotes")
-                .document(packingList.getCodigodeficha());
+                .document(packingList.getCodigodeficha()).get().addOnSuccessListener(value -> {
+                    if (value.exists()) {
+                        exists.set(true);
+                    }
+                });
 
-        Map<String, Object> packingLists = new HashMap<>();
+        if (!exists.get()) {
 
-        packingLists.put("status", "Retirado");
-        packingLists.put("horaedia", packingList.getHoraedia());
-        packingLists.put("codigodeficha", packingList.getCodigodeficha());
-        packingLists.put("local", packingList.getLocal());
-        packingLists.put("empresa", packingList.getEmpresa());
-        packingLists.put("funcionario", packingList.getFuncionario());
-        packingLists.put("entregador", packingList.getEntregador());
-        packingLists.put("motorista", mAuth.getCurrentUser().getUid());
-        packingLists.put("telefone", packingList.getTelefone());
-        packingLists.put("quantidade", packingList.getQuantidade());
-        packingLists.put("downloadlink", packingList.getDownloadlink());
-        packingLists.put("codigosinseridos", packingList.getCodigosinseridos());
+            DocumentReference docRef = firestore.collection("rota")
+                    .document(mAuth.getCurrentUser().getUid())
+                    .collection("pacotes")
+                    .document(packingList.getCodigodeficha());
 
-        return docRef.set(packingLists);
+            Map<String, Object> packingLists = new HashMap<>();
+
+            packingLists.put("status", "Retirado");
+            packingLists.put("horaedia", packingList.getHoraedia());
+            packingLists.put("codigodeficha", packingList.getCodigodeficha());
+            packingLists.put("local", packingList.getLocal());
+            packingLists.put("empresa", packingList.getEmpresa());
+            packingLists.put("funcionario", packingList.getFuncionario());
+            packingLists.put("entregador", packingList.getEntregador());
+            packingLists.put("motorista", mAuth.getCurrentUser().getUid());
+            packingLists.put("telefone", packingList.getTelefone());
+            packingLists.put("quantidade", packingList.getQuantidade());
+            packingLists.put("downloadlink", packingList.getDownloadlink());
+            packingLists.put("codigosinseridos", packingList.getCodigosinseridos());
+
+            return docRef.set(packingLists);
+        } else {
+            return Tasks.forResult(null);
+        }
     }
 
 }
