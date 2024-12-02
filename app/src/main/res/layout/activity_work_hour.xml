@@ -142,7 +142,8 @@
                     android:background="@drawable/button_stroke_squad"
                     android:src="@drawable/clock_hour"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:ignore="MissingConstraints" />
 
                 <TextView
                     android:id="@+id/buttonDinnerStarHour"

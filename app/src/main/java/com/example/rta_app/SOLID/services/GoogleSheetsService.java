@@ -56,7 +56,7 @@ public class GoogleSheetsService {
                         .setValueInputOption("RAW")
                         .execute();
 
-                new WorkerHourRepository().saveWorkerHous(new WorkerHous("", "", "", "", "", ""));
+
             } catch (IOException | GeneralSecurityException e) {
                 Log.e(TAG, "Erro ao enviar dados para a planilha: " + e.getMessage());
             }

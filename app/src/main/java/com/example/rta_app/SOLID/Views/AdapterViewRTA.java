@@ -48,8 +48,8 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
     @Override
     public void onBindViewHolder(@NonNull ViewRTA holder, int position) {
         PackingList item = packingList.get(position);
-
         if (item != null) {
+
             holder.nameRTAText.setText(item.getCodigodeficha() != null ? item.getCodigodeficha() : "Código indisponível");
             holder.stsRTAtext.setText(item.getStatus() != null ? item.getStatus() : "Status indisponível");
             holder.dateRTAtext.setText(item.getHoraedia() != null ? item.getHoraedia() : "Data indisponível");
