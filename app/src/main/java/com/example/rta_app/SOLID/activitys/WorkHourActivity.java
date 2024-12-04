@@ -39,11 +39,9 @@ public class WorkHourActivity extends AppCompatActivity {
     private Boolean isValidate = true;
 
     public WorkHourActivity() {
-        workerHourRepository = new WorkerHourRepository();
+        workerHourRepository = new WorkerHourRepository(this);
         usersRepository = new UsersRepository();
         workerAplication = new WorkerAplication(this);
-
-
     }
 
     @Override
@@ -96,7 +94,7 @@ public class WorkHourActivity extends AppCompatActivity {
                 if (workerHous.getHour_stop().equals("")) {
                     openPontsIsValidade(valueForHourUpdate, workerHous);
                 } else {
-                    updateToSheets(workerHous);
+                    updateToSheets();
                 }
             }
         });
@@ -128,7 +126,12 @@ public class WorkHourActivity extends AppCompatActivity {
                     }
                     break;
                 case "Fim":
-                    if (workerHous.getHour_stop().isEmpty()) {
+                    if(!isNetworkConnected(this)){
+                        new AlertDialog.Builder(this)
+                                .setTitle("Alerta")
+                                .setMessage("Para registrar o ponto de saida,\nVocê precisa estar conectado\na internet")
+                                .setNeutralButton("Ok, Entendi", (dialog, which) -> finish()).show();
+                    } else if (workerHous.getHour_stop().isEmpty()) {
                         openPonts(valueForHourUpdate);
                     }
             }
@@ -136,8 +139,10 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void openPonts(String valueForHourUpdate) {
-        if(isNetworkConnected(this)) {
-            new AlertDialog.Builder(this)
+
+        if(valueForHourUpdate == "Fim" && !isNetworkConnected(this)) {
+            return;
+        }  new AlertDialog.Builder(this)
                     .setTitle("Confirmar registro de hora")
                     .setMessage("Deseja registrar o horário de " + valueForHourUpdate + "?\nDia: "
                             + new SimpleDateFormat("dd-MM-yyyy").format(new Date())
@@ -145,39 +150,30 @@ public class WorkHourActivity extends AppCompatActivity {
                     .setPositiveButton("Sim", (dialog, which) -> updateHours(valueForHourUpdate))
                     .setNegativeButton("Não", (dialog, which) -> dialog.dismiss())
                     .show();
-        } else {
-            new AlertDialog.Builder(this)
-                    .setTitle("Alerta")
-                    .setMessage("Você não está conectado a internet")
-                    .setNeutralButton("Sair", (dialog, which) -> finish()).show();
-        }
     }
 
     private void updateHours(String valueForHourUpdate) {
         UpdateWorkHours(valueForHourUpdate).addOnSuccessListener(aVoid -> {
             workerHourRepository.getWorkerHous().addOnSuccessListener(updatedTask -> {
                 WorkerHous updatedWorkerHous = updatedTask;
-
                 if (valueForHourUpdate.equals("Fim")) {
-                    updateToSheets(updatedWorkerHous);
+                    updateToSheets();
                 }
-
                 updateButtonText(valueForHourUpdate, updatedWorkerHous);
                 loadInitialData();
             });
         });
     }
 
-    private void updateToSheets(WorkerHous workerHous) {
+    private void updateToSheets() {
         Toast.makeText(this, "Horário registrado com sucesso!", Toast.LENGTH_SHORT).show();
         isValidate = false;
         try {
             if(isNetworkConnected(this)){
-                workerAplication.Finish(binding.UserNameDisplay.getText().toString(), workerHous);
+                workerAplication.Finish(binding.UserNameDisplay.getText().toString());
             } else {
-
                 Toast.makeText(this, "Você não está conectado a internet", Toast.LENGTH_SHORT).show();
-            }
+           }
         } catch (Exception e){
 
         }
@@ -206,12 +202,6 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void loadInitialData() {
-        if(!isNetworkConnected(this)){
-            new AlertDialog.Builder(this)
-                    .setTitle("Alerta")
-                    .setMessage("Você não está conectado a internet")
-                    .setNeutralButton("Sair", (dialog, which) -> finish()).show();
-        }
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 WorkerHous workerHous = task.getResult();
@@ -261,20 +251,13 @@ public class WorkHourActivity extends AppCompatActivity {
         }
 
         if (!workerHous.getHour_stop().isEmpty()) {
-            binding.buttonStop.setText(workerHous.getHour_stop());
-            binding.imageStop.setImageResource(R.drawable.confirm_hour);
-        } else {
-            binding.buttonStop.setText("Fim");
-
-            if (!isValidate){
-                binding.buttonDinnerStarHour.setVisibility(View.GONE);
-                binding.buttonDinnerFinishHour.setVisibility(View.GONE);
-                binding.buttonStop.setVisibility(View.GONE);
-                binding.imageDinnerStarHour.setVisibility(View.GONE);
-                binding.imageDinnerFinishHour.setVisibility(View.GONE);
-                binding.imageStop.setVisibility(View.GONE);
-            binding.buttonFistHour.setText("Descansa");
-            }
+             binding.buttonDinnerStarHour.setVisibility(View.GONE);
+             binding.buttonDinnerFinishHour.setVisibility(View.GONE);
+             binding.buttonStop.setVisibility(View.GONE);
+             binding.imageDinnerStarHour.setVisibility(View.GONE);
+             binding.imageDinnerFinishHour.setVisibility(View.GONE);
+             binding.imageStop.setVisibility(View.GONE);
+             binding.buttonFistHour.setText("Descansa");
         }
     }
 

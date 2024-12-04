@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.repository.WorkerHourRepository;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -33,22 +35,30 @@ public class GoogleSheetsService {
         this.context = context;
     }
 
-    public void getGoogleSheet(String uid, WorkerHous workerHous) {
+    public Task<Void> getGoogleSheetTask(String uid, WorkerHous workerHous) {
+        // Cria uma fonte de conclusão para o Task
+        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+
         new Thread(() -> {
             try {
                 Sheets sheetsService = getSheetsService(context);
 
+                // Cria a aba caso não exista
                 createSheetIfNotExists(sheetsService, uid);
 
+                // Define o cabeçalho da aba
                 setHeaderRow(sheetsService, uid);
 
+                // Insere os dados
                 ValueRange body = new ValueRange()
                         .setValues(Arrays.asList(
-                                Arrays.asList(workerHous.getDate(),
+                                Arrays.asList(
+                                        workerHous.getDate(),
                                         workerHous.getHour_first(),
                                         workerHous.getHour_dinner(),
                                         workerHous.getHour_finish(),
-                                        workerHous.getHour_stop())
+                                        workerHous.getHour_stop()
+                                )
                         ));
 
                 sheetsService.spreadsheets().values()
@@ -56,11 +66,16 @@ public class GoogleSheetsService {
                         .setValueInputOption("RAW")
                         .execute();
 
-
+                // Indica que a tarefa foi concluída com sucesso
+                taskCompletionSource.setResult(null);
             } catch (IOException | GeneralSecurityException e) {
+                // Em caso de erro, sinaliza o Task como falhado
                 Log.e(TAG, "Erro ao enviar dados para a planilha: " + e.getMessage());
+                taskCompletionSource.setException(e);
             }
         }).start();
+
+        return taskCompletionSource.getTask(); // Retorna o Task
     }
 
     private void createSheetIfNotExists(Sheets sheetsService, String uid) throws IOException {
