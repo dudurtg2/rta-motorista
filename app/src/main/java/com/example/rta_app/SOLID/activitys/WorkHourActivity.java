@@ -74,6 +74,12 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
+        binding.progressBar.setOnClickListener(v -> {
+        new AlertDialog.Builder(this)
+                .setTitle("Alerta")
+                .setMessage("Seus pontos estão sendo \nregistrados")
+                .setNeutralButton("ok", (dialog, which) -> closeOptionsMenu()).show();
+        });
        binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
        binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsFinish("Almoço"));
        binding.imageDinnerFinishHour.setOnClickListener(v -> openPontsIsFinish("Saída"));
@@ -170,7 +176,9 @@ public class WorkHourActivity extends AppCompatActivity {
         isValidate = false;
         try {
             if(isNetworkConnected(this)){
-                workerAplication.Finish(binding.UserNameDisplay.getText().toString());
+                workerAplication.Finish(binding.UserNameDisplay.getText().toString()).addOnSuccessListener(v -> {
+                    binding.progressBar.setVisibility(View.GONE);
+                });
             } else {
                 Toast.makeText(this, "Você não está conectado a internet", Toast.LENGTH_SHORT).show();
            }
@@ -257,6 +265,7 @@ public class WorkHourActivity extends AppCompatActivity {
              binding.imageDinnerStarHour.setVisibility(View.GONE);
              binding.imageDinnerFinishHour.setVisibility(View.GONE);
              binding.imageStop.setVisibility(View.GONE);
+             binding.progressBar.setVisibility(View.VISIBLE);
              binding.buttonFistHour.setText("Descansa");
         }
     }
@@ -279,7 +288,7 @@ public class WorkHourActivity extends AppCompatActivity {
 
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
-            return diffInMinutes >= 20;
+            return true;
         } catch (ParseException e) {
             e.printStackTrace();
             return false;

@@ -69,11 +69,11 @@ public class WorkerHourRepository implements IWorkerHourRepository {
                 String anterior = jsonObject.optString("hour_after", "");
 
                 WorkerHous workerHous = new WorkerHous(data, entrada, almoco, saida, fim, anterior);
-                taskCompletionSource.setResult(workerHous); // Concluído com sucesso
+                taskCompletionSource.setResult(workerHous);
             }
         } catch (JSONException | IOException e) {
             Log.e("WorkerHourRepository", "Erro ao ler WorkerHous", e);
-            taskCompletionSource.setException(e); // Falha ao ler
+            taskCompletionSource.setException(e);
         }
 
         return taskCompletionSource.getTask();
