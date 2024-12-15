@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -58,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         String email = binding.loginEmailAddress.getText().toString().trim();
         String password = binding.loginPassword.getText().toString().trim();
         if (!email.isEmpty() && !password.isEmpty()) {
+            binding.progressBarLogin.setVisibility(View.VISIBLE);
             FireBaseLoginAccount(email, password);
         } else {
             Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
@@ -70,6 +72,7 @@ public class LoginActivity extends AppCompatActivity {
                 checkStoreData();
             } else {
                 Toast.makeText(this, "Email não cadastrado", Toast.LENGTH_SHORT).show();
+                binding.progressBarLogin.setVisibility(View.GONE);
             }
         });
     }

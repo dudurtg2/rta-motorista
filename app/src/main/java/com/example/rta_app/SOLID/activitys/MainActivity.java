@@ -92,6 +92,22 @@ public class MainActivity extends AppCompatActivity {
         packingListRepository.getListPackingListToDirect().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<PackingList> packingList = task.getResult();
+                if(packingList.isEmpty()){
+                    packingList.add(new PackingList(
+                            "LC HUB-01",
+                            "indisponível",
+                            "indisponível",
+                            "indisponível",
+                            "Favor esperar para novos remessas",
+                            "Sacas em espera",
+                            "",
+                            "a",
+                            "Status indisponível",
+                            "indisponível",
+                            null,
+                            "indisponível",
+                            "indisponível"));
+                }
                 binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
                 binding.listRTAview.setAdapter(new AdapterViewRTA(0, this, packingList));
             } else {
