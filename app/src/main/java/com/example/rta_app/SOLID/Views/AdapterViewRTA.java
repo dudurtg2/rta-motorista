@@ -47,6 +47,8 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewRTA holder, int position) {
+
+
         PackingList item = packingList.get(position);
         if (item != null) {
 
@@ -109,7 +111,12 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
                                     .show();
                         }
                     } else {
-                        Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(context)
+                                .setTitle("Alerta")
+                                .setMessage("Não há carga disponível no momento.\nDirija-se à base para mais detalhes.")
+                                .setNegativeButton("OK", null)
+                                .show();
+
                     }
                 });
 

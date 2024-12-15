@@ -109,7 +109,7 @@ public class PackingListRepository implements IPackingListRepository {
             DocumentSnapshot document = taskSnapshot.getResult();
 
             if (document == null || !document.exists()) {
-                return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null, null);
+                return new PackingList();
             }
 
             String Codigo_de_ficha = document.getString("codigodeficha");
@@ -160,7 +160,7 @@ public class PackingListRepository implements IPackingListRepository {
             DocumentSnapshot document = taskSnapshot.getResult();
 
             if (document == null || !document.exists()) {
-                return new PackingList(null, null, null, null, null, null, null, null, null, null, null, null,null);
+                return new PackingList();
             }
 
             String Codigo_de_ficha = document.getString("codigodeficha");

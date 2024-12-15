@@ -172,13 +172,15 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void updateToSheets() {
-        Toast.makeText(this, "Horário registrado com sucesso!", Toast.LENGTH_SHORT).show();
         isValidate = false;
         try {
             if(isNetworkConnected(this)){
                 workerAplication.Finish(binding.UserNameDisplay.getText().toString()).addOnSuccessListener(v -> {
                     binding.progressBar.setVisibility(View.GONE);
-                });
+                    binding.buttonFistHour.setVisibility(View.VISIBLE);
+                    binding.imageFistHour.setVisibility(View.VISIBLE);
+                    Toast.makeText(this, "Horário registrado com sucesso!", Toast.LENGTH_SHORT).show();
+                }).addOnFailureListener(v -> Toast.makeText(this, "Registro de hora falhou!", Toast.LENGTH_SHORT).show());
             } else {
                 Toast.makeText(this, "Você não está conectado a internet", Toast.LENGTH_SHORT).show();
            }
@@ -267,6 +269,10 @@ public class WorkHourActivity extends AppCompatActivity {
              binding.imageStop.setVisibility(View.GONE);
              binding.progressBar.setVisibility(View.VISIBLE);
              binding.buttonFistHour.setText("Descansa");
+             binding.buttonFistHour.setVisibility(View.GONE);
+             binding.imageFistHour.setVisibility(View.GONE);
+        }else {
+            binding.buttonStop.setText("Fim do Expediente");
         }
     }
 
@@ -288,7 +294,7 @@ public class WorkHourActivity extends AppCompatActivity {
 
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
-            return true;
+            return diffInMinutes >= 20;
         } catch (ParseException e) {
             e.printStackTrace();
             return false;
