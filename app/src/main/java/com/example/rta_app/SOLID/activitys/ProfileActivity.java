@@ -13,29 +13,22 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.entities.Users;
-import com.example.rta_app.SOLID.repository.UsersRepository;
+import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.services.ImageUploaderService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityProfileBinding;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileActivity extends AppCompatActivity {
 
     public ActivityProfileBinding binding;
-    private DocumentReference docRef;
-    private FirebaseFirestore firestore;
-    private FirebaseAuth mAuth;
     private ImageUploaderService imageUploader;
     public static final int PICK_IMAGE_REQUEST = 1;
     private IUsersRepository usersRepository;
 
     public ProfileActivity() {
-        firestore = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
-        imageUploader = new ImageUploaderService(this);
-        usersRepository = new UsersRepository();
+
+       // imageUploader = new ImageUploaderService(this);
+        usersRepository = new UsersRepository(this);
     }
 
     @Override
@@ -52,18 +45,18 @@ public class ProfileActivity extends AppCompatActivity {
     private void SetupClickListeners() {
         binding.profileUserInsert.setVisibility(View.GONE);
 
-        if (mAuth.getCurrentUser() != null) {
-            docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
-        } else {
-            Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-        binding.singOut.setOnClickListener(v -> {
-            mAuth.signOut();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        });
+        //if (mAuth.getCurrentUser() != null) {
+        //    docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
+        //} else {
+        //    Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
+        //    finish();
+        //    return;
+        //}
+        //binding.singOut.setOnClickListener(v -> {
+        //    mAuth.signOut();
+        //    startActivity(new Intent(this, LoginActivity.class));
+        //    finish();
+        //});
 
         binding.editNameUser.addTextChangedListener(new TextWatcher() {
             @Override
@@ -84,10 +77,10 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        imageUploader.loadImagem();
+        //imageUploader.loadImagem();
         getUser();
 
-        binding.UserImagenView.setOnClickListener(v -> imageUploader.openFileChooser(this));
+      //  binding.UserImagenView.setOnClickListener(v -> imageUploader.openFileChooser(this));
         binding.profileUserInsert.setOnClickListener(v -> updateUser());
     }
 
@@ -107,7 +100,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateUser() {
 
-        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())).addOnSuccessListener(aVoid1 -> {
+        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid())).addOnSuccessListener(aVoid1 -> {
             Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
             binding.profileUserInsert.setVisibility(View.GONE);
             binding.editNameUser.setText("");

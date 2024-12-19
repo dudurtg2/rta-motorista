@@ -17,7 +17,7 @@ import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.repository.PackingListRepository;
-import com.example.rta_app.SOLID.repository.UsersRepository;
+import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.Views.AdapterViewRTA;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityMainBinding;
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     public MainActivity() {
         this.packingListRepository = new PackingListRepository();
-        this.usersRepository = new UsersRepository();
+        this.usersRepository = new UsersRepository(this);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         getUser();
         SetupBinding();
-        queryItems();
+        //queryItems();
     }
 
     private void getUser() {
