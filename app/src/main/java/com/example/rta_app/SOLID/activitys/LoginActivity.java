@@ -63,10 +63,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void ApiLoginAccount(String email, String password) {
-        // Faz login utilizando o repositório de usuários
         usersRepository.loginUser(email, password).addOnSuccessListener(aVoid -> {
-            binding.progressBarLogin.setVisibility(View.GONE); // Oculta a barra de progresso em caso de sucesso
-            checkCameraPermission(); // Verifica a permissão da câmera
+            binding.progressBarLogin.setVisibility(View.GONE);
+            checkCameraPermission();
         }).addOnFailureListener(e -> {
             binding.progressBarLogin.setVisibility(View.GONE);
             new AlertDialog.Builder(this)
@@ -78,12 +77,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void checkCameraPermission() {
-        // Verifica se a permissão de câmera já foi concedida
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         } else {
-            // Solicita a permissão de câmera
             requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
         }
     }
