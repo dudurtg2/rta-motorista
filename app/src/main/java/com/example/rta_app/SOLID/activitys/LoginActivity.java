@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -15,8 +16,15 @@ import androidx.core.content.ContextCompat;
 
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.api.UsersRepository;
+import com.example.rta_app.SOLID.services.TokenService;
 import com.example.rta_app.databinding.ActivityLoginBinding;
 
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -24,6 +32,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
     private UsersRepository usersRepository;
+    private static final String FILE_NAME = "user_data.json";
 
     public LoginActivity(){
         this.usersRepository = new UsersRepository(this);
@@ -42,8 +51,15 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        asLogin();
         binding.loginButton.setOnClickListener(view -> validateData());
+    }
+
+    private void asLogin(){
+        File file = getFileStreamPath(FILE_NAME);
+        if (file.exists()) {
+                checkCameraPermission();
+            }
     }
 
     private void validateData() {

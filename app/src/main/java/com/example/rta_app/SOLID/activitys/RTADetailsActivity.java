@@ -103,8 +103,8 @@ public class RTADetailsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (imageUploader != null) {
-                statusUpdate(uid2, QA);
                 imageUploader.handleCameraResult(photoURI, this);
+                statusUpdate(uid2, QA);
             }
         }
     }

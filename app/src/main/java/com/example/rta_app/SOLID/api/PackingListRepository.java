@@ -40,10 +40,53 @@ public class PackingListRepository implements IPackingListRepository {
         this.tokenService = new TokenService(context);
     }
 
-
+//Fazer essa parte de finalizar a saca
     @Override
     public Task<Void> finishPackingList() {
     return null;
+    }
+
+
+    @Override
+    public Task<PackingList> getPackingListToDirect(String id) {
+        String accessToken = getAccessTokenFromLocalFile();
+        return getPackingListToApi(id, "alocado", accessToken);
+    }
+
+    @Override
+    public Task<PackingList> getPackingListToRota(String id) {
+        String accessToken = getAccessTokenFromLocalFile();
+        return getPackingListToApi(id, "retirado", accessToken);
+    }
+
+    @Override
+    public Task<PackingList> getPackingListToBase(String id) {
+        String accessToken = getAccessTokenFromLocalFile();
+        return getPackingListToApi(id, "aguardando", accessToken);
+    }
+
+    @Override
+    public Task<List<PackingList>> getListPackingListToDirect() {
+        String accessToken = getAccessTokenFromLocalFile();
+        return getPackingListToApiList("alocado", accessToken);
+    }
+
+    @Override
+    public Task<List<PackingList>> getListPackingListBase() {
+        String accessToken = getAccessTokenFromLocalFile();
+        return getPackingListToApiList("retirado", accessToken);
+    }
+
+    @Override
+    public Task<Void> movePackingListForDelivery(PackingList packingList) {
+        tokenService.validateAndRefreshToken();
+        try {
+            updateRomaneiosNome(packingList);
+            return Tasks.forResult(null);
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao salvar o usuário", e);
+            return Tasks.forException(e);
+        }
     }
 
     @Override
@@ -142,7 +185,6 @@ public class PackingListRepository implements IPackingListRepository {
             return null;
         }
     }
-
     private Task<PackingList>  getPackingListToApi(String id, String sts, String accessToken) {
         TaskCompletionSource<PackingList> taskCompletionSource = new TaskCompletionSource<>();
         Request request = new Request.Builder()
@@ -204,7 +246,6 @@ public class PackingListRepository implements IPackingListRepository {
 
         return taskCompletionSource.getTask();
     }
-
     public Task<List<PackingList>> getPackingListToApiList(String sts, String accessToken) {
 
         TaskCompletionSource<List<PackingList>> taskCompletionSource = new TaskCompletionSource<>();
@@ -281,48 +322,6 @@ public class PackingListRepository implements IPackingListRepository {
 
         return taskCompletionSource.getTask(); // Retorna a Task criada
     }
-
-    @Override
-    public Task<PackingList> getPackingListToDirect(String id) {
-        String accessToken = getAccessTokenFromLocalFile();
-        return getPackingListToApi(id, "alocado", accessToken);
-    }
-
-    @Override
-    public Task<PackingList> getPackingListToRota(String id) {
-        String accessToken = getAccessTokenFromLocalFile();
-        return getPackingListToApi(id, "retirado", accessToken);
-    }
-
-    @Override
-    public Task<PackingList> getPackingListToBase(String id) {
-        String accessToken = getAccessTokenFromLocalFile();
-        return getPackingListToApi(id, "aguardando", accessToken);
-    }
-
-    @Override
-    public Task<List<PackingList>> getListPackingListToDirect() {
-        String accessToken = getAccessTokenFromLocalFile();
-        return getPackingListToApiList("alocado", accessToken);
-    }
-
-    @Override
-    public Task<List<PackingList>> getListPackingListBase() {
-        String accessToken = getAccessTokenFromLocalFile();
-        return getPackingListToApiList("retirado", accessToken);
-    }
-
-    @Override
-    public Task<Void> movePackingListForDelivery(PackingList packingList) {
-        tokenService.validateAndRefreshToken();
-        try {
-            updateRomaneiosNome(packingList);
-            return Tasks.forResult(null);
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao salvar o usuário", e);
-            return Tasks.forException(e);
-        }
-    }
     private void updateRomaneiosNome(PackingList packingList) {
         JSONObject jsonBody = new JSONObject();
         try {
@@ -355,8 +354,6 @@ public class PackingListRepository implements IPackingListRepository {
             }
         }).start();
     }
-
-
     private String readFile(String fileName) throws IOException {
         try (FileInputStream fis = context.openFileInput(fileName)) {
             byte[] buffer = new byte[fis.available()];

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.repository.WorkerHourRepository;
+import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -28,7 +28,6 @@ public class GoogleSheetsService {
     private static final String TAG = "GoogleSheetsService";
     private static final String SERVICE_ACCOUNT_KEY_FILE = "google-sheets.json";
     private static final String SPREADSHEET_ID = "1-MsLXdMmcjPEYSEJLv4W4YhBA0bbyHfO1Mcm-e9bCeA";
-    private WorkerHous workerHous;
     private Context context;
 
     public GoogleSheetsService(Context context) {
@@ -36,20 +35,13 @@ public class GoogleSheetsService {
     }
 
     public Task<Void> getGoogleSheetTask(String uid, WorkerHous workerHous) {
-        // Cria uma fonte de conclusão para o Task
         TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
 
         new Thread(() -> {
             try {
                 Sheets sheetsService = getSheetsService(context);
-
-                // Cria a aba caso não exista
                 createSheetIfNotExists(sheetsService, uid);
-
-                // Define o cabeçalho da aba
                 setHeaderRow(sheetsService, uid);
-
-                // Insere os dados
                 ValueRange body = new ValueRange()
                         .setValues(Arrays.asList(
                                 Arrays.asList(
@@ -65,17 +57,14 @@ public class GoogleSheetsService {
                         .append(SPREADSHEET_ID, uid + "!A2:E2", body)
                         .setValueInputOption("RAW")
                         .execute();
-
-                // Indica que a tarefa foi concluída com sucesso
                 taskCompletionSource.setResult(null);
             } catch (IOException | GeneralSecurityException e) {
-                // Em caso de erro, sinaliza o Task como falhado
                 Log.e(TAG, "Erro ao enviar dados para a planilha: " + e.getMessage());
                 taskCompletionSource.setException(e);
             }
         }).start();
 
-        return taskCompletionSource.getTask(); // Retorna o Task
+        return taskCompletionSource.getTask();
     }
 
     private void createSheetIfNotExists(Sheets sheetsService, String uid) throws IOException {

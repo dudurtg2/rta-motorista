@@ -6,25 +6,22 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
+import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.rta_app.SOLID.api.PackingListRepository;
 import java.io.IOException;
 
 public class ImageDriverService {
 
     private final Context context;
-    private final FirebaseUser currentUser;
     private final String hour;
-    private final FirebaseFirestore firestore;
+    private IPackingListRepository packingListRepository;
+
 
     public ImageDriverService(Context context, String hour) {
         this.context = context;
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        this.currentUser = mAuth.getCurrentUser();
         this.hour = hour;
-        this.firestore = FirebaseFirestore.getInstance();
+        this.packingListRepository = new PackingListRepository(context);
     }
 
     public void handleCameraResult(Uri photoUri, RTADetailsActivity rtaDetailsActivity) {
@@ -38,14 +35,10 @@ public class ImageDriverService {
     }
 
     private void getRTA(String uid, GetRTACallback callback) {
-        firestore.collection("rota")
-                .document(currentUser.getUid())
-                .collection("pacotes")
-                .document(uid)
-                .get()
+        packingListRepository.getPackingListToRota(uid)
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String location = documentSnapshot.getString("Local") == null ? documentSnapshot.getString("local") : documentSnapshot.getString("Local");
+                    if (!documentSnapshot.getCodigodeficha().isEmpty()) {
+                        String location = documentSnapshot.getLocal();
                         callback.onSuccess(location);
                     } else {
                         callback.onFailure("Document does not exist");

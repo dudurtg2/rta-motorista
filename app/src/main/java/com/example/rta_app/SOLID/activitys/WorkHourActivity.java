@@ -15,8 +15,8 @@ import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
 import com.example.rta_app.SOLID.aplication.WorkerAplication;
 import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.repository.UsersRepository;
-import com.example.rta_app.SOLID.repository.WorkerHourRepository;
+import com.example.rta_app.SOLID.api.UsersRepository;
+import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.example.rta_app.SOLID.services.GoogleSheetsService;
 import com.example.rta_app.SOLID.services.NetworkService;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
@@ -40,7 +40,7 @@ public class WorkHourActivity extends AppCompatActivity {
 
     public WorkHourActivity() {
         workerHourRepository = new WorkerHourRepository(this);
-        usersRepository = new UsersRepository();
+        usersRepository = new UsersRepository(this);
         workerAplication = new WorkerAplication(this);
     }
 

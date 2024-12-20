@@ -35,8 +35,8 @@ public class InTravelActivity extends AppCompatActivity {
 
     public ActivityInTravelBinding binding;
     private String filter = "Todas as cidades";
-    private UsersRepository usersRepository;
-    private PackingListRepository packingListRepository;
+    private IUsersRepository usersRepository;
+    private IPackingListRepository packingListRepository;
 
     public InTravelActivity() {
         this.packingListRepository = new PackingListRepository(this);
@@ -71,12 +71,6 @@ public class InTravelActivity extends AppCompatActivity {
         });
 
         binding.atualizar.setOnClickListener(v -> queryItems(filter));
-
-        binding.buttonFinaliza.setOnClickListener(v -> {
-            packingListRepository.finishPackingList().addOnSuccessListener(v1 -> {
-                queryItems(filter);
-            });
-        });
 
         binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
@@ -166,7 +160,6 @@ public class InTravelActivity extends AppCompatActivity {
                         }
                     }
                 }
-
                 int itemCount = filteredList.size();
                 binding.QtdRTA.setText("QTD: " + itemCount);
 

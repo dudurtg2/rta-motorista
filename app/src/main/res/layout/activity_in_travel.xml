@@ -21,7 +21,7 @@
             android:text="TextView"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="24sp"
+            android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.473"
@@ -99,29 +99,17 @@
             android:id="@+id/atualizar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="32dp"
             android:background="@drawable/button_stroke_squad"
             android:text="🔄 Atualizar lista"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/buttonFinaliza"
-            app:layout_constraintTop_toBottomOf="@+id/buttonFinaliza"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <Button
-            android:id="@+id/buttonFinaliza"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
-            android:text="FINALIZAR ROTA"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toTopOf="@+id/atualizar"
-            app:layout_constraintEnd_toEndOf="@+id/listRTATravelview"
             app:layout_constraintStart_toStartOf="@+id/listRTATravelview"
-            app:layout_constraintTop_toBottomOf="@+id/listRTATravelview" />
+            app:layout_constraintTop_toBottomOf="@+id/listRTATravelview"
+            app:layout_constraintVertical_bias="0.0" />
 
         <EditText
             android:id="@+id/RTAprocura"

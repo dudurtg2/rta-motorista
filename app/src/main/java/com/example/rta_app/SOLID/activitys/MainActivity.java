@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     public ActivityMainBinding binding;
     private IUsersRepository usersRepository;
-    private PackingListRepository packingListRepository;
+    private IPackingListRepository packingListRepository;
 
     public MainActivity() {
         this.packingListRepository = new PackingListRepository(this);
@@ -133,11 +133,11 @@ public class MainActivity extends AppCompatActivity {
                             new AlertDialog.Builder(this)
                                     .setTitle("Confirmação")
                                     .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: "+ packingList.getLocal() + "\nData: "+ packingList.getHoraedia())
-                                    .setPositiveButton("Adciona a rota", (dialog, which) ->  packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
+                                    .setPositiveButton("Coletar", (dialog, which) ->  packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
                                         queryItems();
                                         Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();
                                     }))
-                                    .setNegativeButton("Vai receber", null)
+                                    .setNegativeButton("Não coletar", null)
                                     .show();
 
                         } else {
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Saca não encontrada", Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(vaa -> {
                     String message = scannedCode + " não encontrado";

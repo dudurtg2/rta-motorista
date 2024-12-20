@@ -1,9 +1,11 @@
 package com.example.rta_app.SOLID.activitys;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -18,12 +20,17 @@ import com.example.rta_app.SOLID.services.ImageUploaderService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityProfileBinding;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class ProfileActivity extends AppCompatActivity {
 
     public ActivityProfileBinding binding;
     private ImageUploaderService imageUploader;
     public static final int PICK_IMAGE_REQUEST = 1;
     private IUsersRepository usersRepository;
+    private static final String FILE_NAME = "user_data.json";
 
     public ProfileActivity() {
 
@@ -45,18 +52,11 @@ public class ProfileActivity extends AppCompatActivity {
     private void SetupClickListeners() {
         binding.profileUserInsert.setVisibility(View.GONE);
 
-        //if (mAuth.getCurrentUser() != null) {
-        //    docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
-        //} else {
-        //    Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
-        //    finish();
-        //    return;
-        //}
-        //binding.singOut.setOnClickListener(v -> {
-        //    mAuth.signOut();
-        //    startActivity(new Intent(this, LoginActivity.class));
-        //    finish();
-        //});
+        binding.singOut.setOnClickListener(v -> {
+            eraseToFile();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        });
 
         binding.editNameUser.addTextChangedListener(new TextWatcher() {
             @Override
@@ -82,6 +82,24 @@ public class ProfileActivity extends AppCompatActivity {
 
       //  binding.UserImagenView.setOnClickListener(v -> imageUploader.openFileChooser(this));
         binding.profileUserInsert.setOnClickListener(v -> updateUser());
+    }
+
+    private void eraseToFile() {
+        try {
+            File file = getFileStreamPath(FILE_NAME);
+            if (file.exists()) {
+                boolean isDeleted = this.deleteFile(FILE_NAME);
+                if (isDeleted) {
+                    Log.d("Arquivo", "Arquivo deletado com sucesso: " + FILE_NAME);
+                } else {
+                    Log.e("Arquivo", "Erro ao deletar o arquivo.");
+                }
+            } else {
+                Log.d("Arquivo", "Arquivo não existe: " + FILE_NAME);
+            }
+        } catch (Exception e){
+            Log.e("Arquivo", "Erro ao deletar o arquivo.", e);
+        }
     }
 
     @Override
