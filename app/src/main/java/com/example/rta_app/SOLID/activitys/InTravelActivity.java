@@ -19,8 +19,8 @@ import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.Views.AdapterViewRTA;
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.repository.PackingListRepository;
-import com.example.rta_app.SOLID.repository.UsersRepository;
+import com.example.rta_app.SOLID.api.PackingListRepository;
+import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.databinding.ActivityInTravelBinding;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -35,12 +35,12 @@ public class InTravelActivity extends AppCompatActivity {
 
     public ActivityInTravelBinding binding;
     private String filter = "Todas as cidades";
-    private IUsersRepository usersRepository;
-    private IPackingListRepository packingListRepository;
+    private UsersRepository usersRepository;
+    private PackingListRepository packingListRepository;
 
     public InTravelActivity() {
-        this.packingListRepository = new PackingListRepository();
-        this.usersRepository = new UsersRepository();
+        this.packingListRepository = new PackingListRepository(this);
+        this.usersRepository = new UsersRepository(this);
     }
 
     @Override

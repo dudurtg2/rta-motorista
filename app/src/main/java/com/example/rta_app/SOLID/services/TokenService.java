@@ -18,7 +18,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class TokenService {
-    private static final String TAG = "TokenService";
+    private static final String TAG = "API";
     private static final String FILE_NAME = "user_data.json";
     private static final String URL_REFRESH_TOKEN = "http://carlo4664.c44.integrator.host:10500/auth/refresh-token";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");

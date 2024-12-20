@@ -23,9 +23,11 @@ import java.util.Date;
 public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
-    private UsersRepository usersRepository; // Repositório inicializado no onCreate
+    private UsersRepository usersRepository;
 
-    // Inicializador para a permissão de câmera
+    public LoginActivity(){
+        this.usersRepository = new UsersRepository(this);
+    }
     private final ActivityResultLauncher<String> requestCameraPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         if (isGranted) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -41,22 +43,16 @@ public class LoginActivity extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Inicializando o repositório após o ciclo de vida ter iniciado
-        usersRepository = new UsersRepository(this);
-
-        // Configura o botão de login
         binding.loginButton.setOnClickListener(view -> validateData());
     }
 
     private void validateData() {
-        // Obtenção dos dados de email e senha
         String email = binding.loginEmailAddress.getText().toString().trim();
         String password = binding.loginPassword.getText().toString().trim();
 
-        // Verifica se os campos não estão vazios
         if (!email.isEmpty() && !password.isEmpty()) {
-            binding.progressBarLogin.setVisibility(View.VISIBLE); // Mostra a barra de progresso
-            ApiLoginAccount(email, password); // Chama o método de login
+            binding.progressBarLogin.setVisibility(View.VISIBLE);
+            ApiLoginAccount(email, password);
         } else {
             Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
         }
@@ -68,11 +64,7 @@ public class LoginActivity extends AppCompatActivity {
             checkCameraPermission();
         }).addOnFailureListener(e -> {
             binding.progressBarLogin.setVisibility(View.GONE);
-            new AlertDialog.Builder(this)
-                    .setTitle("ERRO")
-                    .setMessage(e.getMessage())
-                    .setNegativeButton("Não", (dialog, which) -> dialog.dismiss())
-                    .show();
+
         });
     }
 

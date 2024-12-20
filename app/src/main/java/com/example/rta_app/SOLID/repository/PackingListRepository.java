@@ -380,10 +380,10 @@ public class PackingListRepository implements IPackingListRepository {
                 .document(mAuth.getCurrentUser().getUid())
                 .collection("pacotes")
                 .document(packingList.getCodigodeficha()).get().addOnSuccessListener(value -> {
-                    if (value.exists()) {
-                        exists.set(true);
-                    }
-                });
+            if (value.exists()) {
+                exists.set(true);
+            }
+        });
 
         if (!exists.get()) {
 

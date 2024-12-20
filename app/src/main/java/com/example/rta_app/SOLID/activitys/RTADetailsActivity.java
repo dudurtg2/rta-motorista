@@ -15,7 +15,7 @@ import androidx.core.content.FileProvider;
 
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.repository.PackingListRepository;
+import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.services.ImageDriverService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityRtadetailsBinding;
@@ -43,10 +43,10 @@ public class RTADetailsActivity extends AppCompatActivity {
     public static final int PICK_IMAGE_REQUEST = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     private String QA;
-    private IPackingListRepository packingListRepository;
+    private PackingListRepository packingListRepository;
 
     public RTADetailsActivity() {
-        this.packingListRepository = new PackingListRepository();
+        this.packingListRepository = new PackingListRepository(this);
     }
 
     @Override
@@ -79,17 +79,17 @@ public class RTADetailsActivity extends AppCompatActivity {
         binding.buttonRecusar.setOnClickListener(v -> new AlertDialog.Builder(this)
                 .setTitle("Confirmação")
                 .setMessage("O entregador realmente não vai receber a saca de código " + uid.getCodigodeficha() + "?")
-                .setPositiveButton("Não vai receber", (dialog, which) -> statusUpdate(uid, "Recusado"))
+                .setPositiveButton("Não vai receber", (dialog, which) -> statusUpdate(uid, "recusado"))
                 .setNegativeButton("Vai receber", null)
                 .show());
 
         binding.buttonFinalizar.setOnClickListener(v -> {
-            QA = "Finalizado";
+            QA = "finalizado";
             openCamera(uid.getCodigodeficha());
         });
         binding.buttonOcorrencia.setOnClickListener(v -> {
             if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
-                QA = "Ocorrencia";
+                QA = "ocorrencia";
                 openCamera(uid.getCodigodeficha());
             } else {
                 Toast.makeText(this, "Preencha o campo de ocorrencia", Toast.LENGTH_SHORT).show();
@@ -158,7 +158,7 @@ public class RTADetailsActivity extends AppCompatActivity {
         if (!documentSnapshot.getCodigodeficha().equals("")) {
             String occurrence = "";
 
-            if (status.equals("Ocorrencia")) {
+            if (status.equals("ocorrencia")) {
                 if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
                     occurrence = binding.multiAutoCompleteTextView.getText().toString();
                     Toast.makeText(this, "Ocorrência: " + occurrence, Toast.LENGTH_SHORT).show();

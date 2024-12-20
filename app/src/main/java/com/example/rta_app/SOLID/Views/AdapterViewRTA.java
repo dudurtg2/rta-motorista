@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.repository.PackingListRepository;
+import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,7 +31,7 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
     private FirebaseAuth mAuth;
 
     public AdapterViewRTA(int item, Context context, List<PackingList> packingList) {
-        this.packingListRepository = new PackingListRepository();
+        this.packingListRepository = new PackingListRepository(context);
         this.context = context;
         this.packingList = packingList;
         this.pipoca = item;
@@ -101,7 +101,7 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
             } else {
                 holder.itemView.setOnClickListener(v -> {
                     if (!holder.stsRTAtext.getText().toString().equals("Status indisponível")) {
-                        if (item.getStatus().equals("aguardando")) {
+                        if (item.getStatus().equals("alocado")) {
                             Context itemViewContext = holder.itemView.getContext();
                             new AlertDialog.Builder(itemViewContext)
                                     .setTitle("Confirmação")
@@ -109,6 +109,8 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
                                     .setPositiveButton("Sim", (dialog, which) -> addToTraver(item.getCodigodeficha(), holder.getAdapterPosition()))
                                     .setNegativeButton("Não", null)
                                     .show();
+                        } else {
+                            Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         new AlertDialog.Builder(context)
@@ -136,11 +138,10 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
 
                 if (codigoDeFicha != null && !codigoDeFicha.isEmpty()) {
 
-                    if (motorista != null && motorista.equals(mAuth.getCurrentUser().getUid()) &&
-                            "aguardando".equals(status)) {
+
                         packingListRepository.movePackingListForDelivery(documentSnapshot)
                                 .addOnSuccessListener(vo -> notifyItemRemoved(position));
-                    }
+
                 } else {
                     Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
                 }

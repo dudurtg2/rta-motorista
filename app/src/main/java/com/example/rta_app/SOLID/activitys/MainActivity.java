@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.repository.PackingListRepository;
+import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.Views.AdapterViewRTA;
 import com.example.rta_app.R;
@@ -31,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
 
     public ActivityMainBinding binding;
     private IUsersRepository usersRepository;
-    private IPackingListRepository packingListRepository;
+    private PackingListRepository packingListRepository;
 
     public MainActivity() {
-        this.packingListRepository = new PackingListRepository();
+        this.packingListRepository = new PackingListRepository(this);
         this.usersRepository = new UsersRepository(this);
     }
 
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         getUser();
         SetupBinding();
-        //queryItems();
+        queryItems();
     }
 
     private void getUser() {
