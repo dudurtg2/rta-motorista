@@ -40,12 +40,11 @@ public class PackingListRepository implements IPackingListRepository {
         this.tokenService = new TokenService(context);
     }
 
-//Fazer essa parte de finalizar a saca
+    // Fazer essa parte de finalizar a saca
     @Override
     public Task<Void> finishPackingList() {
-    return null;
+        return null;
     }
-
 
     @Override
     public Task<PackingList> getPackingListToDirect(String id) {
@@ -124,8 +123,7 @@ public class PackingListRepository implements IPackingListRepository {
                 } else {
                     Log.e(TAG, "Erro na requisição PUT: " + response.code() + " " + response.message());
                     taskCompletionSource.setException(
-                            new Exception("Erro na requisição PUT: " + response.code() + " " + response.message())
-                    );
+                            new Exception("Erro na requisição PUT: " + response.code() + " " + response.message()));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao fazer a requisição PUT", e);
@@ -159,6 +157,7 @@ public class PackingListRepository implements IPackingListRepository {
             return null;
         }
     }
+
     private String getIdDriveFromLocalFile() {
 
         try {
@@ -185,7 +184,8 @@ public class PackingListRepository implements IPackingListRepository {
             return null;
         }
     }
-    private Task<PackingList>  getPackingListToApi(String id, String sts, String accessToken) {
+
+    private Task<PackingList> getPackingListToApi(String id, String sts, String accessToken) {
         TaskCompletionSource<PackingList> taskCompletionSource = new TaskCompletionSource<>();
         Request request = new Request.Builder()
                 .url(URL_API + "api/romaneios/findBySearch/" + id)
@@ -207,7 +207,6 @@ public class PackingListRepository implements IPackingListRepository {
                         packingList.setFuncionario(jsonObject.optJSONObject("funcionario").optString("nome", ""));
                         packingList.setEntregador(jsonObject.optJSONObject("entregador").optString("nome", ""));
                         packingList.setTelefone(jsonObject.optJSONObject("entregador").optString("telefone", ""));
-                        packingList.setLocal(jsonObject.optJSONObject("cidade").optString("nome", ""));
                         packingList.setCodigodeficha(jsonObject.optString("codigoUid", ""));
                         packingList.setHoraedia(jsonObject.optString("data", ""));
                         packingList.setQuantidade(String.valueOf(jsonObject.optInt("quantidade", 0)));
@@ -217,6 +216,31 @@ public class PackingListRepository implements IPackingListRepository {
                         packingList.setEmpresa(jsonObject.optJSONObject("empresa").optString("nome", ""));
                         packingList.setEndereco(jsonObject.optJSONObject("entregador").optString("endereco", ""));
 
+                        JSONArray localArray = jsonObject.optJSONArray("cidade");
+
+                        JSONArray locallist = jsonObject.optJSONArray("cidade");
+
+                        String local = ""; // Inicializar uma string vazia
+
+                        if (locallist != null) {
+                            // Iterar sobre cada objeto no array de cidades
+                            for (int o = 0; o < locallist.length(); o++) {
+                                JSONObject cidadeObject = locallist.optJSONObject(o);
+                                if (cidadeObject != null) {
+                                    String cidadeNome = cidadeObject.optString("nome", "");
+                                    if (!cidadeNome.isEmpty()) {
+                                        // Adicionar o nome da cidade e uma vírgula
+                                        if (!local.isEmpty()) {
+                                            local += ", ";
+                                        }
+                                        local += cidadeNome;
+                                    }
+                                }
+                            }
+                        }
+
+
+
                         JSONArray codigosArray = jsonObject.optJSONArray("codigos");
                         List<String> codigosInseridos = new ArrayList<>();
                         if (codigosArray != null) {
@@ -224,19 +248,19 @@ public class PackingListRepository implements IPackingListRepository {
                                 codigosInseridos.add(codigosArray.getJSONObject(i).optString("codigo", ""));
                             }
                         }
+
+                        packingList.setLocal(local);
                         packingList.setCodigosinseridos(codigosInseridos);
 
                         taskCompletionSource.setResult(packingList);
                     } else {
                         taskCompletionSource.setException(
-                                new Exception("Erro na requisição GET: " + response.code() + " " + response.message())
-                        );
+                                new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
                     }
                 } else {
                     Log.e(TAG, "Erro na requisição GET: " + response.code() + " " + response.message());
                     taskCompletionSource.setException(
-                            new Exception("Erro na requisição GET: " + response.code() + " " + response.message())
-                    );
+                            new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao fazer a requisição GET", e);
@@ -246,6 +270,7 @@ public class PackingListRepository implements IPackingListRepository {
 
         return taskCompletionSource.getTask();
     }
+
     public Task<List<PackingList>> getPackingListToApiList(String sts, String accessToken) {
 
         TaskCompletionSource<List<PackingList>> taskCompletionSource = new TaskCompletionSource<>();
@@ -283,7 +308,7 @@ public class PackingListRepository implements IPackingListRepository {
                             packingList.setFuncionario(jsonObject.optJSONObject("funcionario").optString("nome", ""));
                             packingList.setEntregador(jsonObject.optJSONObject("entregador").optString("nome", ""));
                             packingList.setTelefone(jsonObject.optJSONObject("entregador").optString("telefone", ""));
-                            packingList.setLocal(jsonObject.optJSONObject("cidade").optString("nome", ""));
+
                             packingList.setCodigodeficha(jsonObject.optString("codigoUid", ""));
                             packingList.setHoraedia(jsonObject.optString("data", ""));
                             packingList.setQuantidade(String.valueOf(jsonObject.optInt("quantidade", 0)));
@@ -301,6 +326,30 @@ public class PackingListRepository implements IPackingListRepository {
                                     codigosInseridos.add(codigosArray.getJSONObject(j).optString("codigo", ""));
                                 }
                             }
+
+
+                            JSONArray locallist = jsonObject.optJSONArray("cidade");
+
+                            String local = ""; // Inicializar uma string vazia
+
+                            if (locallist != null) {
+                                // Iterar sobre cada objeto no array de cidades
+                                for (int o = 0; o < locallist.length(); o++) {
+                                    JSONObject cidadeObject = locallist.optJSONObject(o);
+                                    if (cidadeObject != null) {
+                                        String cidadeNome = cidadeObject.optString("nome", "");
+                                        if (!cidadeNome.isEmpty()) {
+                                            // Adicionar o nome da cidade e uma vírgula
+                                            if (!local.isEmpty()) {
+                                                local += ", ";
+                                            }
+                                            local += cidadeNome;
+                                        }
+                                    }
+                                }
+                            }
+
+                            packingList.setLocal(local);
                             packingList.setCodigosinseridos(codigosInseridos);
 
                             // Adicionando o PackingList à lista
@@ -311,8 +360,7 @@ public class PackingListRepository implements IPackingListRepository {
                 } else {
                     Log.e(TAG, "Erro na requisição GET: " + response.code() + " " + response.message());
                     taskCompletionSource.setException(
-                            new Exception("Erro na requisição GET: " + response.code() + " " + response.message())
-                    );
+                            new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao fazer a requisição GET", e);
@@ -322,6 +370,7 @@ public class PackingListRepository implements IPackingListRepository {
 
         return taskCompletionSource.getTask(); // Retorna a Task criada
     }
+
     private void updateRomaneiosNome(PackingList packingList) {
         JSONObject jsonBody = new JSONObject();
         try {
@@ -354,6 +403,7 @@ public class PackingListRepository implements IPackingListRepository {
             }
         }).start();
     }
+
     private String readFile(String fileName) throws IOException {
         try (FileInputStream fis = context.openFileInput(fileName)) {
             byte[] buffer = new byte[fis.available()];
