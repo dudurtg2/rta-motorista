@@ -239,8 +239,6 @@ public class PackingListRepository implements IPackingListRepository {
                             }
                         }
 
-
-
                         JSONArray codigosArray = jsonObject.optJSONArray("codigos");
                         List<String> codigosInseridos = new ArrayList<>();
                         if (codigosArray != null) {
