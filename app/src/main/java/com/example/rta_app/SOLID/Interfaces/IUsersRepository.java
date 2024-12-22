@@ -8,4 +8,6 @@ public interface IUsersRepository {
     Task<Users> getUser();
 
     Task<Void> saveUser(Users user);
+
+    public Task<Void> loginUser(String nome, String senha);
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
+import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.entities.Users;
 import com.example.rta_app.SOLID.services.TokenService;
 import com.google.android.gms.tasks.Task;
@@ -74,6 +75,7 @@ public class UsersRepository implements IUsersRepository {
             return Tasks.forException(e);
         }
     }
+    @Override
     public Task<Void> loginUser(String nome, String senha) {
         String jsonBody = String.format("{\"login\": \"%s\", \"senha\": \"%s\"}", nome, senha);
         RequestBody body = RequestBody.create(jsonBody, JSON);
@@ -90,7 +92,9 @@ public class UsersRepository implements IUsersRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     String responseBody = response.body().string();
                     Log.d(TAG, "Resposta do servidor: " + responseBody);
+                    JSONObject jsonObject = new JSONObject(responseBody);
 
+                    if (!jsonObject.optJSONObject("data").optString("cargo").equals("MOTORISTA")) throw new RuntimeException("Usuário não é motorista");
 
                     saveApiResponse(responseBody);
 
