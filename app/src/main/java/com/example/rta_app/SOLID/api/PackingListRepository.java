@@ -17,8 +17,11 @@ import org.json.JSONObject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import okhttp3.MediaType;
@@ -29,18 +32,16 @@ import okhttp3.Response;
 
 public class PackingListRepository implements IPackingListRepository {
 
-    private static final String TAG = "API";
+    private static final String TAG = "RTAAPITEST";
     private static final String URL_API = "http://carlo4664.c44.integrator.host:10500/";
     private static final String FILE_NAME = "user_data.json";
     private Context context;
     private TokenService tokenService;
-
     public PackingListRepository(Context context) {
         this.context = context;
         this.tokenService = new TokenService(context);
     }
 
-    // Fazer essa parte de finalizar a saca
     @Override
     public Task<Void> finishPackingList() {
         return null;
@@ -99,6 +100,7 @@ public class PackingListRepository implements IPackingListRepository {
                 jsonBody.put("ocorrencia", ocorrencia);
             }
             jsonBody.put("status", status);
+            jsonBody.put("dataFinal", new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date()));
             Log.e(TAG, jsonBody.toString());
         } catch (Exception e) {
             Log.e(TAG, "Erro ao criar o corpo da requisição", e);
@@ -106,170 +108,26 @@ public class PackingListRepository implements IPackingListRepository {
             return taskCompletionSource.getTask();
         }
 
-        String accessToken = getAccessTokenFromLocalFile();
-        RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json; charset=utf-8"));
-
-        Request request = new Request.Builder()
-                .url(URL_API + "api/romaneios/update/codigo/" + packingList.getCodigodeficha())
-                .put(body)
-                .addHeader("Authorization", "Bearer " + accessToken)
-                .build();
-
-        new Thread(() -> {
-            try (Response response = new OkHttpClient().newCall(request).execute()) {
-                if (response.isSuccessful()) {
-                    Log.d(TAG, "Motorista atualizado com sucesso: " + response.body().string());
-                    taskCompletionSource.setResult(null);
-                } else {
-                    Log.e(TAG, "Erro na requisição PUT: " + response.code() + " " + response.message());
-                    taskCompletionSource.setException(
-                            new Exception("Erro na requisição PUT: " + response.code() + " " + response.message()));
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao fazer a requisição PUT", e);
-                taskCompletionSource.setException(e);
-            }
-        }).start();
-
-        return taskCompletionSource.getTask();
+        return putPackingList(jsonBody, packingList.getCodigodeficha(), taskCompletionSource);
     }
+   @Override
+    public Task<Void> updateImgLinkForFinish(String uid, String link) {
+       TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
 
-    private String getAccessTokenFromLocalFile() {
-        tokenService.validateAndRefreshToken();
+        JSONObject jsonBody = new JSONObject();
         try {
-            String jsonContent = readFile(FILE_NAME);
-            Log.d(TAG, "Conteúdo do arquivo JSON: " + jsonContent);
-
-            JSONObject jsonObject = new JSONObject(jsonContent);
-
-            if (jsonObject.has("accessToken")) {
-                return jsonObject.getString("accessToken");
-            } else {
-                Log.e(TAG, "Campo 'accessToken' não encontrado no arquivo JSON");
-                return null;
-            }
-
-        } catch (IOException e) {
-            Log.e(TAG, "Erro ao ler o arquivo de token", e);
-            return null;
+            jsonBody.put("linkImg", link);
+            Log.e(TAG, jsonBody.toString());
         } catch (Exception e) {
-            Log.e(TAG, "Erro ao processar o conteúdo do arquivo", e);
-            return null;
+            Log.e(TAG, "Erro ao criar o corpo da requisição", e);
+            taskCompletionSource.setException(e);
+            return taskCompletionSource.getTask();
         }
+
+        return putPackingList(jsonBody, uid, taskCompletionSource);
     }
 
-    private String getIdDriveFromLocalFile() {
-
-        try {
-            String jsonContent = readFile(FILE_NAME);
-            Log.d(TAG, "Conteúdo do arquivo JSON: " + jsonContent);
-
-            JSONObject jsonObject = new JSONObject(jsonContent);
-
-            JSONObject data = jsonObject.getJSONObject("data");
-            JSONObject info = data.getJSONObject("info");
-
-            if (info.has("id")) {
-                return info.getString("id");
-            } else {
-                Log.e(TAG, "Campo 'id' não encontrado no arquivo JSON");
-                return null;
-            }
-
-        } catch (IOException e) {
-            Log.e(TAG, "Erro ao ler o arquivo de token", e);
-            return null;
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao processar o conteúdo do arquivo", e);
-            return null;
-        }
-    }
-
-    private Task<PackingList> getPackingListToApi(String id, String sts, String accessToken) {
-        TaskCompletionSource<PackingList> taskCompletionSource = new TaskCompletionSource<>();
-        Request request = new Request.Builder()
-                .url(URL_API + "api/romaneios/findBySearch/" + id)
-                .get()
-                .addHeader("Authorization", "Bearer " + accessToken)
-                .build();
-
-        new Thread(() -> {
-            try (Response response = new OkHttpClient().newCall(request).execute()) {
-                if (response.isSuccessful()) {
-                    String responseBody = response.body().string();
-                    Log.d(TAG, "Requisição GET bem-sucedida: " + responseBody);
-
-                    JSONObject jsonObject = new JSONObject(responseBody);
-
-                    PackingList packingList = new PackingList();
-                    if (jsonObject.optString("sts", "").equals(sts)) {
-
-                        packingList.setFuncionario(jsonObject.optJSONObject("funcionario").optString("nome", ""));
-                        packingList.setEntregador(jsonObject.optJSONObject("entregador").optString("nome", ""));
-                        packingList.setTelefone(jsonObject.optJSONObject("entregador").optString("telefone", ""));
-                        packingList.setCodigodeficha(jsonObject.optString("codigoUid", ""));
-                        packingList.setHoraedia(jsonObject.optString("data", ""));
-                        packingList.setQuantidade(String.valueOf(jsonObject.optInt("quantidade", 0)));
-                        packingList.setStatus(jsonObject.optString("sts", ""));
-                        packingList.setMotorista(jsonObject.optString("motorista", ""));
-                        packingList.setDownloadlink(jsonObject.optString("linkDownload", ""));
-                        packingList.setEmpresa(jsonObject.optJSONObject("empresa").optString("nome", ""));
-                        packingList.setEndereco(jsonObject.optJSONObject("entregador").optString("endereco", ""));
-
-                        JSONArray localArray = jsonObject.optJSONArray("cidade");
-
-                        JSONArray locallist = jsonObject.optJSONArray("cidade");
-
-                        String local = ""; // Inicializar uma string vazia
-
-                        if (locallist != null) {
-                            // Iterar sobre cada objeto no array de cidades
-                            for (int o = 0; o < locallist.length(); o++) {
-                                JSONObject cidadeObject = locallist.optJSONObject(o);
-                                if (cidadeObject != null) {
-                                    String cidadeNome = cidadeObject.optString("nome", "");
-                                    if (!cidadeNome.isEmpty()) {
-                                        // Adicionar o nome da cidade e uma vírgula
-                                        if (!local.isEmpty()) {
-                                            local += ", ";
-                                        }
-                                        local += cidadeNome;
-                                    }
-                                }
-                            }
-                        }
-
-                        JSONArray codigosArray = jsonObject.optJSONArray("codigos");
-                        List<String> codigosInseridos = new ArrayList<>();
-                        if (codigosArray != null) {
-                            for (int i = 0; i < codigosArray.length(); i++) {
-                                codigosInseridos.add(codigosArray.getJSONObject(i).optString("codigo", ""));
-                            }
-                        }
-
-                        packingList.setLocal(local);
-                        packingList.setCodigosinseridos(codigosInseridos);
-
-                        taskCompletionSource.setResult(packingList);
-                    } else {
-                        taskCompletionSource.setException(
-                                new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
-                    }
-                } else {
-                    Log.e(TAG, "Erro na requisição GET: " + response.code() + " " + response.message());
-                    taskCompletionSource.setException(
-                            new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao fazer a requisição GET", e);
-                taskCompletionSource.setException(e);
-            }
-        }).start();
-
-        return taskCompletionSource.getTask();
-    }
-
-    public Task<List<PackingList>> getPackingListToApiList(String sts, String accessToken) {
+    private Task<List<PackingList>> getPackingListToApiList(String sts, String accessToken) {
 
         TaskCompletionSource<List<PackingList>> taskCompletionSource = new TaskCompletionSource<>();
 
@@ -368,7 +226,167 @@ public class PackingListRepository implements IPackingListRepository {
 
         return taskCompletionSource.getTask(); // Retorna a Task criada
     }
+    private String getAccessTokenFromLocalFile() {
+        tokenService.validateAndRefreshToken();
+        try {
+            String jsonContent = readFile(FILE_NAME);
+            Log.d(TAG, "Conteúdo do arquivo JSON: " + jsonContent);
 
+            JSONObject jsonObject = new JSONObject(jsonContent);
+
+            if (jsonObject.has("accessToken")) {
+                return jsonObject.getString("accessToken");
+            } else {
+                Log.e(TAG, "Campo 'accessToken' não encontrado no arquivo JSON");
+                return null;
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "Erro ao ler o arquivo de token", e);
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao processar o conteúdo do arquivo", e);
+            return null;
+        }
+    }
+    private Task<Void> putPackingList(JSONObject jsonBody, String uid, TaskCompletionSource<Void> taskCompletionSource) {
+        tokenService.validateAndRefreshToken();
+
+
+        String accessToken = getAccessTokenFromLocalFile();
+        RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json; charset=utf-8"));
+
+        Request request = new Request.Builder()
+                .url(URL_API + "api/romaneios/update/codigo/" + uid)
+                .put(body)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+
+        new Thread(() -> {
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "Motorista atualizado com sucesso: " + response.body().string());
+                    taskCompletionSource.setResult(null);
+                } else {
+                    Log.e(TAG, "Erro na requisição PUT: " + response.code() + " " + response.message());
+                    taskCompletionSource.setException(
+                            new Exception("Erro na requisição PUT: " + response.code() + " " + response.message()));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao fazer a requisição PUT", e);
+                taskCompletionSource.setException(e);
+            }
+        }).start();
+
+        return taskCompletionSource.getTask();
+    }
+    private String getIdDriveFromLocalFile() {
+
+        try {
+            String jsonContent = readFile(FILE_NAME);
+            Log.d(TAG, "Conteúdo do arquivo JSON: " + jsonContent);
+
+            JSONObject jsonObject = new JSONObject(jsonContent);
+
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONObject info = data.getJSONObject("info");
+
+            if (info.has("id")) {
+                return info.getString("id");
+            } else {
+                Log.e(TAG, "Campo 'id' não encontrado no arquivo JSON");
+                return null;
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "Erro ao ler o arquivo de token", e);
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao processar o conteúdo do arquivo", e);
+            return null;
+        }
+    }
+    private Task<PackingList> getPackingListToApi(String id, String sts, String accessToken) {
+        TaskCompletionSource<PackingList> taskCompletionSource = new TaskCompletionSource<>();
+        Request request = new Request.Builder()
+                .url(URL_API + "api/romaneios/findBySearch/" + id)
+                .get()
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+
+        new Thread(() -> {
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    Log.d(TAG, "Requisição GET bem-sucedida: " + responseBody);
+
+                    JSONObject jsonObject = new JSONObject(responseBody);
+
+                    PackingList packingList = new PackingList();
+                    if (jsonObject.optString("sts", "").equals(sts)) {
+
+                        packingList.setFuncionario(jsonObject.optJSONObject("funcionario").optString("nome", ""));
+                        packingList.setEntregador(jsonObject.optJSONObject("entregador").optString("nome", ""));
+                        packingList.setTelefone(jsonObject.optJSONObject("entregador").optString("telefone", ""));
+                        packingList.setCodigodeficha(jsonObject.optString("codigoUid", ""));
+                        packingList.setHoraedia(jsonObject.optString("data", ""));
+                        packingList.setQuantidade(String.valueOf(jsonObject.optInt("quantidade", 0)));
+                        packingList.setStatus(jsonObject.optString("sts", ""));
+                        packingList.setMotorista(jsonObject.optString("motorista", ""));
+                        packingList.setDownloadlink(jsonObject.optString("linkDownload", ""));
+                        packingList.setEmpresa(jsonObject.optJSONObject("empresa").optString("nome", ""));
+                        packingList.setEndereco(jsonObject.optJSONObject("entregador").optString("endereco", ""));
+
+                        JSONArray locallist = jsonObject.optJSONArray("cidade");
+
+                        String local = ""; // Inicializar uma string vazia
+
+                        if (locallist != null) {
+                            // Iterar sobre cada objeto no array de cidades
+                            for (int o = 0; o < locallist.length(); o++) {
+                                JSONObject cidadeObject = locallist.optJSONObject(o);
+                                if (cidadeObject != null) {
+                                    String cidadeNome = cidadeObject.optString("nome", "");
+                                    if (!cidadeNome.isEmpty()) {
+                                        // Adicionar o nome da cidade e uma vírgula
+                                        if (!local.isEmpty()) {
+                                            local += ", ";
+                                        }
+                                        local += cidadeNome;
+                                    }
+                                }
+                            }
+                        }
+
+                        JSONArray codigosArray = jsonObject.optJSONArray("codigos");
+                        List<String> codigosInseridos = new ArrayList<>();
+                        if (codigosArray != null) {
+                            for (int i = 0; i < codigosArray.length(); i++) {
+                                codigosInseridos.add(codigosArray.getJSONObject(i).optString("codigo", ""));
+                            }
+                        }
+
+                        packingList.setLocal(local);
+                        packingList.setCodigosinseridos(codigosInseridos);
+
+                        taskCompletionSource.setResult(packingList);
+                    } else {
+                        taskCompletionSource.setException(
+                                new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
+                    }
+                } else {
+                    Log.e(TAG, "Erro na requisição GET: " + response.code() + " " + response.message());
+                    taskCompletionSource.setException(
+                            new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao fazer a requisição GET", e);
+                taskCompletionSource.setException(e);
+            }
+        }).start();
+
+        return taskCompletionSource.getTask();
+    }
     private void updateRomaneiosNome(PackingList packingList) {
         JSONObject jsonBody = new JSONObject();
         try {
@@ -401,7 +419,6 @@ public class PackingListRepository implements IPackingListRepository {
             }
         }).start();
     }
-
     private String readFile(String fileName) throws IOException {
         try (FileInputStream fis = context.openFileInput(fileName)) {
             byte[] buffer = new byte[fis.available()];

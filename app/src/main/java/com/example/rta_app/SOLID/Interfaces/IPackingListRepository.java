@@ -36,4 +36,6 @@ public interface IPackingListRepository {
 
     Task<Void> movePackingListForDelivery(PackingList packingList);
 
+    Task<Void> updateImgLinkForFinish(String uid, String link);
+
 }
