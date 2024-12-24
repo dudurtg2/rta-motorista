@@ -111,6 +111,7 @@ public class RTADetailsActivity extends AppCompatActivity {
 
     private void openCamera(String uid) {
         imageUploader = new ImageDriverService(this, uid);
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;

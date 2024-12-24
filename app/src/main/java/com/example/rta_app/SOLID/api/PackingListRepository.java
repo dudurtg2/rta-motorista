@@ -1,5 +1,7 @@
 package com.example.rta_app.SOLID.api;
 
+import android.graphics.Bitmap;
+import android.util.Base64;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
@@ -12,8 +14,10 @@ import com.google.android.gms.tasks.Tasks;
 import android.content.Context;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -111,20 +115,10 @@ public class PackingListRepository implements IPackingListRepository {
         return putPackingList(jsonBody, packingList.getCodigodeficha(), taskCompletionSource);
     }
    @Override
-    public Task<Void> updateImgLinkForFinish(String uid, String link) {
+    public Task<Void> updateImgLinkForFinish(Bitmap bitmap, String uid) {
        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
 
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("linkImg", link);
-            Log.e(TAG, jsonBody.toString());
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao criar o corpo da requisição", e);
-            taskCompletionSource.setException(e);
-            return taskCompletionSource.getTask();
-        }
-
-        return putPackingList(jsonBody, uid, taskCompletionSource);
+        return postImagenList(bitmap, uid, taskCompletionSource);
     }
 
     private Task<List<PackingList>> getPackingListToApiList(String sts, String accessToken) {
@@ -280,6 +274,61 @@ public class PackingListRepository implements IPackingListRepository {
 
         return taskCompletionSource.getTask();
     }
+
+    private Task<Void> postImagenList(Bitmap bitmap, String uid, TaskCompletionSource<Void> taskCompletionSource) {
+
+        tokenService.validateAndRefreshToken();
+
+        String base64Bitmap = bitmapToBase64(bitmap);
+
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("base64Image", base64Bitmap);
+        } catch (JSONException e) {
+            taskCompletionSource.setException(e);
+            return taskCompletionSource.getTask();
+        }
+
+        String accessToken = getAccessTokenFromLocalFile();
+        RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json; charset=utf-8"));
+
+        Request request = new Request.Builder()
+                .url(URL_API + "api/romaneios/imageUpload/" + uid)
+                .post(body)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+
+        new Thread(() -> {
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                String responseBody = response.body().string();  // Obtendo o corpo da resposta como String
+
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "Motorista atualizado com sucesso: " + responseBody);
+                    taskCompletionSource.setResult(null);
+                } else {
+                    Log.e(TAG, "Erro na requisição PUT: " + responseBody);  // Aqui usamos o conteúdo da resposta
+                    taskCompletionSource.setException(
+                            new Exception("Erro na requisição PUT: " + responseBody));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao fazer a requisição PUT", e);
+                taskCompletionSource.setException(e);
+            }
+        }).start();
+
+        return taskCompletionSource.getTask();
+    }
+
+
+
+    private String bitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 75, outputStream);
+        byte[] byteArray = outputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP);
+    }
+
+
     private String getIdDriveFromLocalFile() {
 
         try {

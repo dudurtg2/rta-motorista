@@ -1,5 +1,7 @@
 package com.example.rta_app.SOLID.Interfaces;
 
+import android.graphics.Bitmap;
+
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
@@ -36,6 +38,6 @@ public interface IPackingListRepository {
 
     Task<Void> movePackingListForDelivery(PackingList packingList);
 
-    Task<Void> updateImgLinkForFinish(String uid, String link);
+    Task<Void> updateImgLinkForFinish(Bitmap bitmap, String uid);
 
 }
