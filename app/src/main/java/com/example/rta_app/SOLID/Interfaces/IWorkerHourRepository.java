@@ -10,7 +10,7 @@ public interface IWorkerHourRepository {
     Task<WorkerHous> getWorkerHous();
 
     Task<Void> saveWorkerHous(WorkerHous workerHous);
-
+    Task<Void> saveHors(WorkerHous workerHous);
     void writeToFile(String data) throws IOException;
     String readFromFile() throws IOException;
 }

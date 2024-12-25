@@ -78,7 +78,7 @@ public class WorkHourActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Alerta")
                 .setMessage("Seus pontos estão sendo \nregistrados")
-                .setNeutralButton("ok", (dialog, which) -> closeOptionsMenu()).show();
+                .setNeutralButton("ok", (dialog, which) -> updateToSheets()).show();
         });
        binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
        binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsFinish("Almoço"));
@@ -295,6 +295,7 @@ public class WorkHourActivity extends AppCompatActivity {
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
             return diffInMinutes >= 20;
+            
         } catch (ParseException e) {
             e.printStackTrace();
             return false;

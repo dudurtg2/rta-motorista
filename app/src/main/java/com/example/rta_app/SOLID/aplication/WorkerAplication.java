@@ -25,7 +25,7 @@ public class WorkerAplication {
         if (!isNetworkConnected(context)) {
             return null;
         }
-        return UpdateWorkHours(nome).onSuccessTask(task -> {
+        return workerHourRepository.saveHors(workerHourRepository.getWorkerHous().getResult()).onSuccessTask(task -> {
             WorkerHous workerHours = new WorkerHous("", "", "", "", "", "");
             return new WorkerHourRepository(context).saveWorkerHous(workerHours);
         }).addOnFailureListener(v-> {
@@ -42,8 +42,4 @@ public class WorkerAplication {
         });
     }
 
-    private Task<Void> UpdateWorkHours(String registroDePonto) {
-        WorkerHous workerHours = workerHourRepository.getWorkerHous().getResult();
-        return new GoogleSheetsService(context).getGoogleSheetTask(registroDePonto, workerHours);
-    }
 }

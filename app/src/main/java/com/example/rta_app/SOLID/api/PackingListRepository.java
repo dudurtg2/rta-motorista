@@ -327,8 +327,6 @@ public class PackingListRepository implements IPackingListRepository {
         byte[] byteArray = outputStream.toByteArray();
         return Base64.encodeToString(byteArray, Base64.NO_WRAP);
     }
-
-
     private String getIdDriveFromLocalFile() {
 
         try {
