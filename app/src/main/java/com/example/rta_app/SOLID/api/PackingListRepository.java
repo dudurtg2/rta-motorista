@@ -37,7 +37,7 @@ import okhttp3.Response;
 public class PackingListRepository implements IPackingListRepository {
 
     private static final String TAG = "RTAAPITEST";
-    private static final String URL_API = "https://api.avalonstudios-rta.site/";
+    private static final String URL_API = "http://147.93.10.27:8080/";
     private static final String FILE_NAME = "user_data.json";
     private Context context;
     private TokenService tokenService;
@@ -126,7 +126,7 @@ public class PackingListRepository implements IPackingListRepository {
         TaskCompletionSource<List<PackingList>> taskCompletionSource = new TaskCompletionSource<>();
 
         String driverId = getIdDriveFromLocalFile();
-        String url = "http://carlo4664.c44.integrator.host:10500/api/romaneios/count/driver/" + driverId + "/" + sts;
+        String url = URL_API + "api/romaneios/count/driver/" + driverId + "/" + sts;
         Log.d(TAG, "URL: " + url);
         // Criando a requisição GET
         Request request = new Request.Builder()

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">carlo4664.c44.integrator.host</domain>
+        <domain includeSubdomains="true">147.93.10.27</domain>
     </domain-config>
 </network-security-config>
