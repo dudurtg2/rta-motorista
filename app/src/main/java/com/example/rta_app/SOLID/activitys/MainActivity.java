@@ -25,6 +25,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         packingListRepository.getListPackingListToDirect().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<PackingList> packingList = task.getResult();
+                Toast.makeText(this, packingList.toString(), Toast.LENGTH_SHORT).show();
                 if(packingList.isEmpty()){
                     packingList.add(new PackingList(
                             "LC HUB-01",
@@ -106,15 +108,36 @@ public class MainActivity extends AppCompatActivity {
                             "indisponível",
                             null,
                             "indisponível",
-                            "indisponível"));
+                            "indisponível"
+                    ));
                 }
                 binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
                 binding.listRTAview.setAdapter(new AdapterViewRTA(0, this, packingList));
             } else {
-                Log.d("Firestore", "Erro ao obter packing list: " + task.getException().getMessage());
+                List<PackingList> packingList = new ArrayList<>();
+
+                    packingList.add(new PackingList(
+                            "LC HUB-01",
+                            "indisponível",
+                            "indisponível",
+                            "indisponível",
+                            "Favor esperar para novos remessas",
+                            "Sacas em espera",
+                            "",
+                            "a",
+                            "Status indisponível",
+                            "indisponível",
+                            null,
+                            "indisponível",
+                            "indisponível"
+                    ));
+
+                binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                binding.listRTAview.setAdapter(new AdapterViewRTA(0, this, packingList));
             }
         });
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

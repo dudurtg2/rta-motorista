@@ -120,90 +120,39 @@ public class PackingListRepository implements IPackingListRepository {
 
         return postImagenList(bitmap, uid, taskCompletionSource);
     }
-
     private Task<List<PackingList>> getPackingListToApiList(String sts, String accessToken) {
-
         TaskCompletionSource<List<PackingList>> taskCompletionSource = new TaskCompletionSource<>();
 
         String driverId = getIdDriveFromLocalFile();
-        String url = URL_API + "api/romaneios/count/driver/" + driverId + "/" + sts;
+        String url = "http://carlo4664.c44.integrator.host:10500/api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts;
         Log.d(TAG, "URL: " + url);
-        // Criando a requisição GET
+
         Request request = new Request.Builder()
                 .url(url)
                 .get()
-                .addHeader("Authorization", "Bearer " + accessToken) // Adicionando o token de autorização
+                .addHeader("Authorization", "Bearer " + accessToken)
                 .build();
-
-        // Executando a requisição em uma Thread separada
         new Thread(() -> {
             try (Response response = new OkHttpClient().newCall(request).execute()) {
                 if (response.isSuccessful()) {
-                    String responseBody = response.body().string(); // Pegando o corpo da resposta
+                    String responseBody = response.body().string();
                     Log.d(TAG, "Requisição GET bem-sucedida: " + responseBody);
-
-                    // Criando um objeto JSONArray para processar os dados manualmente
                     JSONArray jsonArray = new JSONArray(responseBody);
                     List<PackingList> packingLists = new ArrayList<>();
-
-                    // Iterando sobre cada item do array
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                        // Criando e preenchendo manualmente o objeto PackingList
                         PackingList packingList = new PackingList();
-                        if (jsonObject.optString("sts", "").equals(sts)) {
-
-                            // Mapeando os campos necessários
-                            packingList.setFuncionario(jsonObject.optJSONObject("funcionario").optString("nome", ""));
-                            packingList.setEntregador(jsonObject.optJSONObject("entregador").optString("nome", ""));
-                            packingList.setTelefone(jsonObject.optJSONObject("entregador").optString("telefone", ""));
-
+                        if (jsonObject.optString("status", "").equals(sts)) {
                             packingList.setCodigodeficha(jsonObject.optString("codigoUid", ""));
-                            packingList.setHoraedia(jsonObject.optString("data", ""));
-                            packingList.setQuantidade(String.valueOf(jsonObject.optInt("quantidade", 0)));
-                            packingList.setStatus(jsonObject.optString("sts", ""));
                             packingList.setMotorista(jsonObject.optString("motorista", ""));
-                            packingList.setDownloadlink(jsonObject.optString("linkDownload", ""));
-                            packingList.setEmpresa(jsonObject.optJSONObject("empresa").optString("nome", ""));
-                            packingList.setEndereco(jsonObject.optJSONObject("entregador").optString("endereco", ""));
+                            packingList.setEntregador(jsonObject.optString("entregador", ""));
+                            packingList.setStatus(jsonObject.optString("status", ""));
+                            packingList.setHoraedia(jsonObject.optString("data", ""));
+                            packingList.setEmpresa(jsonObject.optString("empresa", ""));
+                            packingList.setLocal(jsonObject.optString("cidade", ""));
 
-                            // Preenchendo manualmente os códigos inseridos
-                            JSONArray codigosArray = jsonObject.optJSONArray("codigos");
-                            List<String> codigosInseridos = new ArrayList<>();
-                            if (codigosArray != null) {
-                                for (int j = 0; j < codigosArray.length(); j++) {
-                                    codigosInseridos.add(codigosArray.getJSONObject(j).optString("codigo", ""));
-                                }
-                            }
-
-
-                            JSONArray locallist = jsonObject.optJSONArray("cidade");
-
-                            String local = ""; // Inicializar uma string vazia
-
-                            if (locallist != null) {
-                                // Iterar sobre cada objeto no array de cidades
-                                for (int o = 0; o < locallist.length(); o++) {
-                                    JSONObject cidadeObject = locallist.optJSONObject(o);
-                                    if (cidadeObject != null) {
-                                        String cidadeNome = cidadeObject.optString("nome", "");
-                                        if (!cidadeNome.isEmpty()) {
-                                            // Adicionar o nome da cidade e uma vírgula
-                                            if (!local.isEmpty()) {
-                                                local += ", ";
-                                            }
-                                            local += cidadeNome;
-                                        }
-                                    }
-                                }
-                            }
-
-                            packingList.setLocal(local);
-                            packingList.setCodigosinseridos(codigosInseridos);
-
-                            // Adicionando o PackingList à lista
                             packingLists.add(packingList);
+                            Log.d(TAG, "Aqui o resultado " + packingList);
                         }
                     }
                     taskCompletionSource.setResult(packingLists);
@@ -214,11 +163,11 @@ public class PackingListRepository implements IPackingListRepository {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao fazer a requisição GET", e);
-                taskCompletionSource.setException(e); // Completa a Task com erro
+                taskCompletionSource.setException(e);
             }
         }).start();
 
-        return taskCompletionSource.getTask(); // Retorna a Task criada
+        return taskCompletionSource.getTask();
     }
     private String getAccessTokenFromLocalFile() {
         tokenService.validateAndRefreshToken();
