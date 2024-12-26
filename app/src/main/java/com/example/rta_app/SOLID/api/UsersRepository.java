@@ -27,7 +27,7 @@ import okhttp3.Response;
 public class UsersRepository implements IUsersRepository {
 
     private static final String TAG = "API";
-    private static final String URL_API = "http://carlo4664.c44.integrator.host:10500/";
+    private static final String URL_API = "https://api.avalonstudios-rta.site/";
     private static final String FILE_NAME = "user_data.json";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private TokenService tokenService;

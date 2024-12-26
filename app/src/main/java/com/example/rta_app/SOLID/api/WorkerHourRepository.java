@@ -32,7 +32,7 @@ public class WorkerHourRepository implements IWorkerHourRepository {
     private static final String TAG = "WorkerHourRepository";
     private static final String FILE_NAME = "worker_hours.json";
     private static final String FILE_NAME_USER = "user_data.json";
-    private static final String URL_API = "http://carlo4664.c44.integrator.host:10500/";
+    private static final String URL_API = "https://api.avalonstudios-rta.site/";
     private TokenService tokenService;
 
     public WorkerHourRepository(Context context) {

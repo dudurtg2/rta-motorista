@@ -37,7 +37,7 @@ import okhttp3.Response;
 public class PackingListRepository implements IPackingListRepository {
 
     private static final String TAG = "RTAAPITEST";
-    private static final String URL_API = "http://carlo4664.c44.integrator.host:10500/";
+    private static final String URL_API = "https://api.avalonstudios-rta.site/";
     private static final String FILE_NAME = "user_data.json";
     private Context context;
     private TokenService tokenService;
