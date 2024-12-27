@@ -284,8 +284,8 @@ public class PackingListRepository implements IPackingListRepository {
 
             JSONObject jsonObject = new JSONObject(jsonContent);
 
-            JSONObject data = jsonObject.getJSONObject("data");
-            JSONObject info = data.getJSONObject("info");
+            JSONObject info = jsonObject.getJSONObject("data");
+
 
             if (info.has("id")) {
                 return info.getString("id");

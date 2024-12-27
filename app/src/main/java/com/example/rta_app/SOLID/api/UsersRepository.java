@@ -26,7 +26,7 @@ import okhttp3.Response;
 
 public class UsersRepository implements IUsersRepository {
 
-    private static final String TAG = "API";
+    private static final String TAG = "RTAAPITEST";
     private static final String URL_API = "http://147.93.10.27:8082/";
     private static final String FILE_NAME = "user_data.json";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -46,8 +46,8 @@ public class UsersRepository implements IUsersRepository {
 
             JSONObject jsonObject = new JSONObject(jsonContent);
 
-            JSONObject data = jsonObject.getJSONObject("data");
-            JSONObject info = data.getJSONObject("info");
+            JSONObject info = jsonObject.getJSONObject("data");
+
 
             String id = info.getString("id");
             String nome = info.getString("nome");
@@ -94,7 +94,7 @@ public class UsersRepository implements IUsersRepository {
                     Log.d(TAG, "Resposta do servidor: " + responseBody);
                     JSONObject jsonObject = new JSONObject(responseBody);
 
-                    if (!jsonObject.optJSONObject("data").optString("cargo").equals("MOTORISTA")) throw new RuntimeException("Usuário não é motorista");
+                    if (!jsonObject.optJSONObject("data").optString("role").equals("MOTORISTA")) throw new RuntimeException("Usuário não é motorista");
 
                     saveApiResponse(responseBody);
 
@@ -120,10 +120,9 @@ public class UsersRepository implements IUsersRepository {
 
             if (jsonObject.has("data")) {
                 JSONObject data = jsonObject.getJSONObject("data");
-                if (data.has("info")) {
-                    JSONObject info = data.getJSONObject("info");
-                    info.put("nome", newName);
-                }
+
+                data.put("nome", newName);
+
             }
             writeFile(FILE_NAME, jsonObject.toString());
             Log.d(TAG, "Campo 'nome' atualizado no arquivo JSON com sucesso.");
