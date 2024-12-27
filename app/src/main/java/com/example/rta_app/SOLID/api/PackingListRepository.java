@@ -124,7 +124,7 @@ public class PackingListRepository implements IPackingListRepository {
         TaskCompletionSource<List<PackingList>> taskCompletionSource = new TaskCompletionSource<>();
 
         String driverId = getIdDriveFromLocalFile();
-        String url = "http://carlo4664.c44.integrator.host:10500/api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts;
+        String url = URL_API + "api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts;
         Log.d(TAG, "URL: " + url);
 
         Request request = new Request.Builder()
