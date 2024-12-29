@@ -19,18 +19,12 @@ import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.services.ImageDriverService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityRtadetailsBinding;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+
 
 public class RTADetailsActivity extends AppCompatActivity {
 

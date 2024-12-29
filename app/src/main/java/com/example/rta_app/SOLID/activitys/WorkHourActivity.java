@@ -17,12 +17,9 @@ import com.example.rta_app.SOLID.aplication.WorkerAplication;
 import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.api.WorkerHourRepository;
-import com.example.rta_app.SOLID.services.GoogleSheetsService;
-import com.example.rta_app.SOLID.services.NetworkService;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
 import com.google.android.gms.tasks.Task;
 
-import org.checkerframework.checker.units.qual.N;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -110,7 +107,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_after().equals("") && !isAfter20Minutes(workerHous.getDate(), workerHous.getHour_after())) {
             new AlertDialog.Builder(this)
                     .setTitle("Alerta")
-                    .setMessage("Você não pode registrar mais de \n20 minutos após o horário anterior")
+                    .setMessage("Você não pode registrar mais de \n15 minutos após o horário anterior")
                     .setNeutralButton("Ok", (dialog, which) -> dialog.dismiss()).show();
         } else if (!isValidate) {
             alert();
@@ -294,7 +291,8 @@ public class WorkHourActivity extends AppCompatActivity {
 
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
-            return diffInMinutes >= 20;
+            return diffInMinutes >= 15;
+
             
         } catch (ParseException e) {
             e.printStackTrace();

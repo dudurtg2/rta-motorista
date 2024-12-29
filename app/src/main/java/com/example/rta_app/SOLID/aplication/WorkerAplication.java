@@ -6,9 +6,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 
 import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
-import com.example.rta_app.SOLID.entities.WorkerHous;  // Corrected class name
+import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.api.WorkerHourRepository;
-import com.example.rta_app.SOLID.services.GoogleSheetsService;
 import com.google.android.gms.tasks.Task;
 
 public class WorkerAplication {

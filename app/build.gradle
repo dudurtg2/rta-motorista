@@ -51,13 +51,8 @@ dependencies {
     implementation libs.activity
     implementation libs.constraintlayout
 
-    // Dependências do Firebase
-    implementation libs.firebase.auth
-    implementation libs.firebase.storage
-    implementation libs.firebase.firestore
 
-    // Dependências do Google Drive API
-    implementation 'com.google.apis:google-api-services-drive:v3-rev197-1.25.0'
+
     implementation 'com.google.api-client:google-api-client:1.33.0'
     implementation 'com.google.http-client:google-http-client-gson:1.40.1'
     implementation 'com.google.code.gson:gson:2.10.1'

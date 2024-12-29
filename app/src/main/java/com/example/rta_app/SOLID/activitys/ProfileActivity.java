@@ -1,6 +1,5 @@
 package com.example.rta_app.SOLID.activitys;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -16,25 +15,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.entities.Users;
 import com.example.rta_app.SOLID.api.UsersRepository;
-import com.example.rta_app.SOLID.services.ImageUploaderService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityProfileBinding;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class ProfileActivity extends AppCompatActivity {
 
     public ActivityProfileBinding binding;
-    private ImageUploaderService imageUploader;
+
     public static final int PICK_IMAGE_REQUEST = 1;
     private IUsersRepository usersRepository;
     private static final String FILE_NAME = "user_data.json";
 
     public ProfileActivity() {
-
-       // imageUploader = new ImageUploaderService(this);
         usersRepository = new UsersRepository(this);
     }
 
@@ -77,10 +71,8 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        //imageUploader.loadImagem();
         getUser();
 
-      //  binding.UserImagenView.setOnClickListener(v -> imageUploader.openFileChooser(this));
         binding.profileUserInsert.setOnClickListener(v -> updateUser());
     }
 
@@ -105,7 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imageUploader.handleImageResult(requestCode, resultCode, data, this);
+
     }
 
     private void getUser() {

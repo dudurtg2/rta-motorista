@@ -26,21 +26,27 @@
         <activity
             android:name=".SOLID.activitys.RTADetailsActivity"
             android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SOLID.activitys.InTravelActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SOLID.activitys.WorkHourActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SOLID.activitys.ProfileActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SOLID.activitys.MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SOLID.activitys.LoginActivity"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -61,6 +67,7 @@
 
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
+
             android:theme="@style/zxing_CaptureTheme" />
     </application>
 

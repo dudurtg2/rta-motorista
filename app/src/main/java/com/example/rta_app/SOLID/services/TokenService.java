@@ -1,8 +1,11 @@
 package com.example.rta_app.SOLID.services;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Base64;
 import android.util.Log;
+
+import com.example.rta_app.SOLID.activitys.LoginActivity;
 
 import org.json.JSONObject;
 
@@ -20,7 +23,7 @@ import okhttp3.Response;
 public class TokenService {
     private static final String TAG = "API";
     private static final String FILE_NAME = "user_data.json";
-    private static final String URL_REFRESH_TOKEN = "http://carlo4664.c44.integrator.host:10500/auth/refresh-token";
+    private static final String URL_REFRESH_TOKEN = "http://147.93.10.27:8082/auth/refresh-token";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private final Context context;
@@ -61,37 +64,15 @@ public class TokenService {
             if (System.currentTimeMillis() >= expiration) {
                 Log.i(TAG, "Token expirado, tentando renová-lo");
 
+                context.deleteFile(FILE_NAME);
+                Log.d(TAG, "Arquivo de tokens excluído");
 
-                JSONObject requestBody = new JSONObject();
-                requestBody.put("refreshToken", refreshToken);
+                Intent loginIntent = new Intent(context, LoginActivity.class);
+                loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                context.startActivity(loginIntent);
 
-                RequestBody body = RequestBody.create(requestBody.toString(), JSON);
-                Request request = new Request.Builder()
-                        .url(URL_REFRESH_TOKEN)
-                        .post(body)
-                        .build();
-
-                new Thread(() -> {
-                    try (Response response = httpClient.newCall(request).execute()) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            String responseBody = response.body().string();
-                            Log.d(TAG, "Resposta da API: " + responseBody);
-
-                            JSONObject jsonResponse = new JSONObject(responseBody);
-                            String newAccessToken = jsonResponse.getString("accessToken");
-
-                            saveTokens(newAccessToken, refreshToken);
-
-                            future.complete(jsonResponse);
-                        } else {
-                            Log.e(TAG, "Erro ao renovar o token de acesso: " + response.code());
-                            future.completeExceptionally(new Exception("Erro ao renovar o token de acesso"));
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Erro ao chamar a API de renovação do token", e);
-                        future.completeExceptionally(e);
-                    }
-                }).start();
+                future.completeExceptionally(new Exception("Token expirado, redirecionado para login"));
+                return future;
             } else {
                 Log.i(TAG, "Token ainda válido");
                 JSONObject validTokenResponse = new JSONObject();
@@ -105,6 +86,7 @@ public class TokenService {
 
         return future;
     }
+
 
     private void saveTokens(String accessToken, String refreshToken) {
         try {

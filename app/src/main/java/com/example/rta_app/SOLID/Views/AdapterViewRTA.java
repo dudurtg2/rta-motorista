@@ -16,9 +16,6 @@ import com.example.rta_app.R;
 import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.api.PackingListRepository;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -28,14 +25,12 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
     private final Context context;
     private final int pipoca;
     private PackingListRepository packingListRepository;
-    private FirebaseAuth mAuth;
 
     public AdapterViewRTA(int item, Context context, List<PackingList> packingList) {
         this.packingListRepository = new PackingListRepository(context);
         this.context = context;
         this.packingList = packingList;
         this.pipoca = item;
-        mAuth = FirebaseAuth.getInstance();
     }
 
     @NonNull
@@ -133,15 +128,9 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
         packingListRepository.getPackingListToDirect(uid).addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot != null) {
                 String codigoDeFicha = documentSnapshot.getCodigodeficha();
-                String motorista = documentSnapshot.getMotorista();
-                String status = documentSnapshot.getStatus();
-
                 if (codigoDeFicha != null && !codigoDeFicha.isEmpty()) {
-
-
                         packingListRepository.movePackingListForDelivery(documentSnapshot)
                                 .addOnSuccessListener(vo -> notifyItemRemoved(position));
-
                 } else {
                     Toast.makeText(context, "Carga indisponível", Toast.LENGTH_SHORT).show();
                 }

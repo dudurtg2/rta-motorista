@@ -175,7 +175,6 @@ public class WorkerHourRepository implements IWorkerHourRepository {
 
         Log.i(TAG, workerHous.toString());
 
-        // Criação do JSON
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("date", workerHous.getDate());
@@ -203,10 +202,9 @@ public class WorkerHourRepository implements IWorkerHourRepository {
         Request request = new Request.Builder()
                 .url(URL_API + "api/pontos/save/" + getIdDriveFromLocalFile())
                 .post(body)
-                .addHeader("Authorization", "Bearer " + accessToken) // Adiciona o token de autenticação
+                .addHeader("Authorization", "Bearer " + accessToken)
                 .build();
 
-        // Execução da requisição em uma nova thread
         new Thread(() -> {
             try (Response response = new OkHttpClient().newCall(request).execute()) {
                 String responseBody = response.body() != null ? response.body().string() : null;
