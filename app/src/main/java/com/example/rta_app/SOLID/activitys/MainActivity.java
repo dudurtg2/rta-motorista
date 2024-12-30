@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 if (event == null || !event.isShiftPressed()) {
                     packingListRepository.getPackingListToBase(binding.RTAprocura.getText().toString().toUpperCase()).addOnSuccessListener(packingList -> {
-                        Toast.makeText(this, packingList.getCodigodeficha(), Toast.LENGTH_SHORT).show();
+
                         packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(va -> queryItems());
 
                     }).addOnFailureListener(va  -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
         packingListRepository.getListPackingListToDirect().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<PackingList> packingList = task.getResult();
-                Toast.makeText(this, packingList.toString(), Toast.LENGTH_SHORT).show();
                 if(packingList.isEmpty()){
                     packingList.add(new PackingList(
                             "LC HUB-01",

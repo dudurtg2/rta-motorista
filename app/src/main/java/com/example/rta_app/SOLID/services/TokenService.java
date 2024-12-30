@@ -23,7 +23,7 @@ import okhttp3.Response;
 public class TokenService {
     private static final String TAG = "API";
     private static final String FILE_NAME = "user_data.json";
-    private static final String URL_REFRESH_TOKEN = "http://147.93.10.27:8082/auth/refresh-token";
+    private static final String URL_REFRESH_TOKEN = "http://147.79.86.117:10102/auth/refresh-token";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private final Context context;
