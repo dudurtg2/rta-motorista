@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -104,7 +105,7 @@ public class PackingListRepository implements IPackingListRepository {
                 jsonBody.put("ocorrencia", ocorrencia);
             }
             jsonBody.put("status", status);
-            jsonBody.put("dataFinal", new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date()));
+            jsonBody.put("dataFinal", LocalDateTime.now());
             Log.e(TAG, jsonBody.toString());
         } catch (Exception e) {
             Log.e(TAG, "Erro ao criar o corpo da requisição", e);
