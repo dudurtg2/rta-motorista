@@ -156,7 +156,7 @@
             <ScrollView
                 android:id="@+id/scrollView2"
                 android:layout_width="0dp"
-                android:layout_height="300dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
@@ -172,10 +172,11 @@
                     android:id="@+id/textAllCodes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_stroke_squad"
+                    android:background="@drawable/button_stroke_squad_white_block"
                     android:text="TextView"
                     android:textColor="@color/black" />
             </ScrollView>
+
 
             <EditText
                 android:id="@+id/multiAutoCompleteTextView"
