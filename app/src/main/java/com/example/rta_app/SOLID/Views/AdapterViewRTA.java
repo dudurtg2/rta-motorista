@@ -49,7 +49,7 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
 
             holder.nameRTAText.setText(item.getCodigodeficha() != null ? item.getCodigodeficha() : "Código indisponível");
             holder.stsRTAtext.setText(item.getStatus() != null ? item.getStatus() : "Status indisponível");
-            holder.dateRTAtext.setText(item.getHoraedia() != null ? item.getHoraedia() : "Data indisponível");
+            holder.dateRTAtext.setText(item.getHoraedia() != null ? item.getHoraedia().replace("T", " ").split(" ")[0] : "Data indisponível");
             holder.cityRTAtext.setText(item.getLocal() != null ? item.getLocal() : "Cidade indisponível");
             holder.Empresa.setText(item.getEmpresa() != null ? item.getEmpresa() : "Empresa indisponível");
 
