@@ -104,13 +104,14 @@ public class ProfileActivity extends AppCompatActivity {
         usersRepository.getUser()
                 .addOnSuccessListener(users -> {
                     binding.editNameUser.setHint(users.getName());
+                    binding.editTelefoneUser.setHint(users.getTelefone());
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }
 
     private void updateUser() {
 
-        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid())).addOnSuccessListener(aVoid1 -> {
+        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid(), usersRepository.getUser().getResult().getTelefone())).addOnSuccessListener(aVoid1 -> {
             Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
             binding.profileUserInsert.setVisibility(View.GONE);
             binding.editNameUser.setText("");

@@ -51,8 +51,9 @@ public class UsersRepository implements IUsersRepository {
 
             String id = info.getString("id");
             String nome = info.getString("nome");
+            String telefone = info.getString("telefone");
 
-            return Tasks.forResult(new Users(nome, id));
+            return Tasks.forResult(new Users(nome, id, telefone));
         } catch (IOException e) {
             Log.e(TAG, "Erro ao ler o arquivo de usuário", e);
             return Tasks.forException(e);
@@ -66,8 +67,8 @@ public class UsersRepository implements IUsersRepository {
     public Task<Void> saveUser(Users user) {
         tokenService.validateAndRefreshToken();
         try {
-            updateUserNameInLocalFile(user.getName());
-            updateMotoristaNome(user.getUid(), user.getName());
+            updateUserNameInLocalFile(user.getName() , user.getTelefone());
+            updateMotoristaNome(user.getUid(), user.getName(), user.getTelefone());
 
             return Tasks.forResult(null);
         } catch (Exception e) {
@@ -112,7 +113,7 @@ public class UsersRepository implements IUsersRepository {
         return Tasks.call(future::join);
     }
 
-    private void updateUserNameInLocalFile(String newName) {
+    private void updateUserNameInLocalFile(String newName, String newTelefone) {
         try {
 
             String jsonContent = readFile(FILE_NAME);
@@ -122,6 +123,7 @@ public class UsersRepository implements IUsersRepository {
                 JSONObject data = jsonObject.getJSONObject("data");
 
                 data.put("nome", newName);
+                data.put("telefone", newTelefone);
 
             }
             writeFile(FILE_NAME, jsonObject.toString());
@@ -132,10 +134,13 @@ public class UsersRepository implements IUsersRepository {
             Log.e(TAG, "Erro ao atualizar o campo 'nome' no JSON", e);
         }
     }
-    private void updateMotoristaNome(String id, String nome) {
+    private void updateMotoristaNome(String id, String nome, String telefone) {
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("nome", nome);
+            jsonBody.put("telefone", telefone.replace(
+                    "(", "").replace(")", "").replace("-", "").replace(" ", ""
+            ));
             Log.e(TAG, jsonBody.toString());
         } catch (Exception e) {
             Log.e(TAG, "Erro ao criar o corpo da requisição", e);
@@ -146,7 +151,7 @@ public class UsersRepository implements IUsersRepository {
         RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json; charset=utf-8"));
 
         Request request = new Request.Builder()
-                .url(URL_API + "api/motoristas/update/" + id)
+                .url(URL_API + "api/motoristas/updateSite/" + id)
                 .put(body)
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .build();
