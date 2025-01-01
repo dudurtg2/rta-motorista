@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                         if (codigodeficha != null && !codigodeficha.isEmpty()) {
                             new AlertDialog.Builder(this)
                                     .setTitle("Confirmação")
-                                    .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: "+ packingList.getLocal() + "\nData: "+ packingList.getHoraedia())
+                                    .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: "+ packingList.getLocal() + "\nData: "+ packingList.getHoraedia().replace("T", " ").split("\\.")[0])
                                     .setPositiveButton("Coletar", (dialog, which) ->  packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
                                         queryItems();
                                         Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();

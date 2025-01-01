@@ -179,10 +179,10 @@ public class RTADetailsActivity extends AppCompatActivity {
 
         if (!documentSnapshot.getCodigodeficha().equals("")) {
             binding.textRTA.setText(documentSnapshot.getCodigodeficha() + " \uD83D\uDCBE");
-            binding.TextCidade.setText("Cidade: " + documentSnapshot.getLocal());
-            binding.textDate.setText("Data: " + documentSnapshot.getHoraedia());
+            binding.TextCidade.setText("Local: " + documentSnapshot.getLocal());
+            binding.textDate.setText("Data: " + documentSnapshot.getHoraedia().replace("T", " ").split("\\.")[0]);
             binding.textCount.setText("Quantidade: " + documentSnapshot.getQuantidade());
-            binding.textTelefone.setText("Entregador: " + documentSnapshot.getTelefone());
+            binding.textTelefone.setText("Telefone: " + documentSnapshot.getTelefone());
             binding.textEntregador.setText("Entregador: " + documentSnapshot.getEntregador());
             binding.Empresa.setText("Empresa: " + documentSnapshot.getEmpresa());
             binding.textEndereco.setText("Endereço: " + documentSnapshot.getEndereco());
