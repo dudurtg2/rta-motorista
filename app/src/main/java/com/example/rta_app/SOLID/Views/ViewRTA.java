@@ -1,6 +1,7 @@
 package com.example.rta_app.SOLID.Views;
 
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ public class ViewRTA extends RecyclerView.ViewHolder {
     protected TextView dateRTAtext;
     protected TextView cityRTAtext;
     protected TextView Empresa;
+    protected ImageView image;
 
     public ViewRTA(@NonNull View itemView) {
         super(itemView);
@@ -23,5 +25,7 @@ public class ViewRTA extends RecyclerView.ViewHolder {
         dateRTAtext = itemView.findViewById(R.id.dateRTAtext);
         cityRTAtext = itemView.findViewById(R.id.cityRTAtext);
         Empresa = itemView.findViewById(R.id.EmpresaRTAtext);
+        image = itemView.findViewById(R.id.image);
+        image.setImageResource(R.drawable.a);
     }
 }

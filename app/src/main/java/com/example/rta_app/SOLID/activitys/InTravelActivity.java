@@ -53,13 +53,7 @@ public class InTravelActivity extends AppCompatActivity {
         setupBinding();
         queryItems(filter);
         queryFilter();
-        getUser();
-    }
 
-    private void getUser() {
-        usersRepository.getUser()
-                .addOnSuccessListener(users -> binding.UserNameDisplay.setText(users.getName()))
-                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void setupBinding() {
@@ -161,7 +155,7 @@ public class InTravelActivity extends AppCompatActivity {
                     }
                 }
                 int itemCount = filteredList.size();
-                binding.QtdRTA.setText("QTD: " + itemCount);
+                binding.QtdRTA.setText(""+itemCount);
 
                 binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
                 binding.listRTATravelview.setAdapter(new AdapterViewRTA(1, getApplicationContext(), filteredList));

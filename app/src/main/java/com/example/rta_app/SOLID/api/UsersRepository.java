@@ -10,6 +10,7 @@ import com.example.rta_app.SOLID.services.TokenService;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
@@ -52,8 +53,10 @@ public class UsersRepository implements IUsersRepository {
             String id = info.getString("id");
             String nome = info.getString("nome");
             String telefone = info.getString("telefone");
+            JSONArray basesArray = info.getJSONArray("bases");
+            String baseNome = basesArray.getJSONObject(0).getString("nome");
 
-            return Tasks.forResult(new Users(nome, id, telefone));
+            return Tasks.forResult(new Users(nome, id, telefone, baseNome));
         } catch (IOException e) {
             Log.e(TAG, "Erro ao ler o arquivo de usuário", e);
             return Tasks.forException(e);

@@ -111,7 +111,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateUser() {
 
-        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid(), usersRepository.getUser().getResult().getTelefone())).addOnSuccessListener(aVoid1 -> {
+        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid(), usersRepository.getUser().getResult().getTelefone(), usersRepository.getUser().getResult().getBase())).addOnSuccessListener(aVoid1 -> {
             Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
             binding.profileUserInsert.setVisibility(View.GONE);
             binding.editNameUser.setText("");

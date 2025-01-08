@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
         usersRepository.getUser()
                 .addOnSuccessListener(users -> {
                     binding.UserNameDisplay.setText(users.getName());
+                    binding.telefone.setText(users.getTelefone().replaceAll("(\\d{2})(\\d{5})(\\d{4})", "($1) $2-$3"));
+                    binding.base.setText(users.getBase());
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Erro ao obter usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
-        binding.UserNameDisplay.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        binding.Perfil.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
         binding.inTravelbutton.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
 
@@ -99,11 +101,11 @@ public class MainActivity extends AppCompatActivity {
                             "indisponível",
                             "indisponível",
                             "indisponível",
-                            "Favor esperar para novos remessas",
+                            "Verifique a sua rota",
                             "Sacas em espera",
                             "",
                             "a",
-                            "Status indisponível",
+                            "Sem sacas alocadas",
                             "indisponível",
                             null,
                             "indisponível",
@@ -120,11 +122,11 @@ public class MainActivity extends AppCompatActivity {
                             "indisponível",
                             "indisponível",
                             "indisponível",
-                            "Favor esperar para novos remessas",
+                            "Verifique a sua rota",
                             "Sacas em espera",
                             "",
                             "a",
-                            "Status indisponível",
+                            "Sem sacas alocadas",
                             "indisponível",
                             null,
                             "indisponível",

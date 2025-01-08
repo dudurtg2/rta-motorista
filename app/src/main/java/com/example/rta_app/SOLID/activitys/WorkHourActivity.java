@@ -227,6 +227,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_first().isEmpty()) {
             binding.buttonFistHour.setText(workerHous.getHour_first());
             binding.imageFistHour.setImageResource(R.drawable.confirm_hour);
+            binding.imageFistHour.setBackgroundResource(R.drawable.button_stroke_squad);
 
             binding.imageDinnerStarHour.setVisibility(View.VISIBLE);
             binding.buttonDinnerStarHour.setVisibility(View.VISIBLE);
@@ -238,6 +239,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_dinner().isEmpty()) {
             binding.buttonDinnerStarHour.setText(workerHous.getHour_dinner());
             binding.imageDinnerStarHour.setImageResource(R.drawable.confirm_hour);
+            binding.imageDinnerStarHour.setBackgroundResource(R.drawable.button_stroke_squad);
 
             binding.imageDinnerFinishHour.setVisibility(View.VISIBLE);
             binding.buttonDinnerFinishHour.setVisibility(View.VISIBLE);
@@ -249,6 +251,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_finish().isEmpty()) {
             binding.buttonDinnerFinishHour.setText(workerHous.getHour_finish());
             binding.imageDinnerFinishHour.setImageResource(R.drawable.confirm_hour);
+            binding.imageDinnerFinishHour.setBackgroundResource(R.drawable.button_stroke_squad);
 
             binding.imageStop.setVisibility(View.VISIBLE);
             binding.buttonStop.setVisibility(View.VISIBLE);

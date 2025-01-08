@@ -193,7 +193,7 @@ public class RTADetailsActivity extends AppCompatActivity {
                 }
             }
         } else {
-            binding.textRTA.setText("Document does not exist");
+            binding.textRTA.setText("Documento não encontrado");
             binding.TextCidade.setText("");
             binding.textDate.setText("");
             binding.textCount.setText("");

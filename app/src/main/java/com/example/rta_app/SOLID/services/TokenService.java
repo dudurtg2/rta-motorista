@@ -64,14 +64,22 @@ public class TokenService {
             if (System.currentTimeMillis() >= expiration) {
                 Log.i(TAG, "Token expirado, tentando renová-lo");
 
-                context.deleteFile(FILE_NAME);
-                Log.d(TAG, "Arquivo de tokens excluído");
+                try {
+                    JSONObject newTokens = refreshAccessToken(refreshToken);
+                    saveTokens(newTokens.getString("accessToken"), refreshToken);
+                    future.complete(newTokens);
+                } catch (Exception refreshException) {
+                    Log.e(TAG, "Erro ao renovar o token", refreshException);
 
-                Intent loginIntent = new Intent(context, LoginActivity.class);
-                loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                context.startActivity(loginIntent);
+                    context.deleteFile(FILE_NAME);
+                    Log.d(TAG, "Arquivo de tokens excluído");
 
-                future.completeExceptionally(new Exception("Token expirado, redirecionado para login"));
+                    Intent loginIntent = new Intent(context, LoginActivity.class);
+                    loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    context.startActivity(loginIntent);
+
+                    future.completeExceptionally(new Exception("Token expirado e falha ao renovar, redirecionado para login"));
+                }
                 return future;
             } else {
                 Log.i(TAG, "Token ainda válido");
@@ -85,6 +93,26 @@ public class TokenService {
         }
 
         return future;
+    }
+
+    private JSONObject refreshAccessToken(String refreshToken) throws Exception {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("refreshToken", refreshToken);
+
+        RequestBody body = RequestBody.create(requestBody.toString(), JSON);
+        Request request = new Request.Builder()
+                .url(URL_REFRESH_TOKEN)
+                .post(body)
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new Exception("Erro ao renovar o token: " + response.code());
+            }
+
+            String responseBody = response.body().string();
+            return new JSONObject(responseBody);
+        }
     }
 
 
