@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/item_background"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="12dp"
+    android:layout_marginRight="12dp"
+    android:layout_marginTop="12dp"
+    android:padding="16dp"
+    >
+
+    <ImageView
+        android:id="@+id/imagePacket"
+        android:layout_width="92dp"
+        android:layout_height="77dp"
+        android:alpha="0.6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/a"
+        tools:layout_editor_absoluteY="2dp"
+        tools:ignore="MissingConstraints" />
+    <TextView
+        android:id="@+id/namePackectText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/entregadorNome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="TextView"
+        android:textColor="#002AFF"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/namePackectText"
+        app:layout_constraintTop_toBottomOf="@+id/namePackectText" />
+
+    <TextView
+        android:id="@+id/dataPacket"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/namePackectText"
+        app:layout_constraintTop_toBottomOf="@+id/namePackectText" />
+
+    <TextView
+        android:id="@+id/motoristaNome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        android:textColor="#002AFF"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/entregadorNome"
+        app:layout_constraintTop_toBottomOf="@+id/entregadorNome" />
+</androidx.constraintlayout.widget.ConstraintLayout>

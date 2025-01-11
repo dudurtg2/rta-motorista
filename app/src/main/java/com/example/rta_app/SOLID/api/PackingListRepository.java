@@ -39,6 +39,7 @@ public class PackingListRepository implements IPackingListRepository {
 
     private static final String TAG = "RTAAPITEST";
     private static final String URL_API = "http://147.79.86.117:10102/";
+    private static final String URL_API_GET = "http://147.79.86.117:10106/";
     private static final String FILE_NAME = "user_data.json";
     private Context context;
     private TokenService tokenService;
@@ -125,7 +126,7 @@ public class PackingListRepository implements IPackingListRepository {
         TaskCompletionSource<List<PackingList>> taskCompletionSource = new TaskCompletionSource<>();
 
         String driverId = getIdDriveFromLocalFile();
-        String url = URL_API + "api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts;
+        String url = URL_API_GET + "api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts;
         Log.d(TAG, "URL: " + url);
 
         Request request = new Request.Builder()
@@ -306,7 +307,7 @@ public class PackingListRepository implements IPackingListRepository {
     private Task<PackingList> getPackingListToApi(String id, String sts, String accessToken) {
         TaskCompletionSource<PackingList> taskCompletionSource = new TaskCompletionSource<>();
         Request request = new Request.Builder()
-                .url(URL_API + "api/romaneios/findBySearch/" + id)
+                .url(URL_API_GET + "api/romaneios/findBySearch/" + id)
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .build();

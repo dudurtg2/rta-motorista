@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
-import com.example.rta_app.SOLID.Views.AdapterViewRTA;
+import com.example.rta_app.SOLID.Views.RTAlista.AdapterViewRTA;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.api.UsersRepository;

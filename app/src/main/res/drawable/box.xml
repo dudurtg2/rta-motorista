@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Barra superior -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M480,32H32C14.327,32,0,46.328,0,64v64h512V64C512,46.328,497.673,32,480,32z" />
+
+    <!-- Retângulo inferior com botão -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M32,448.008C32,465.672,46.325,480,63.995,480h384.011c17.67,0,31.994-14.328,31.994-31.992V160H32V448.008z
+            M208,224h96c17.673,0,32,14.328,32,32s-14.327,32-32,32h-96c-17.673,0-32-14.328-32-32S190.327,224,208,224z" />
+</vector>

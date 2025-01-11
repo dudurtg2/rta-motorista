@@ -12,48 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"> <!-- Changed to wrap_content -->
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour"
-            tools:context=".SOLID.activitys.InTravelActivity">
 
-            <EditText
-                android:id="@+id/RTAprocura"
-                android:layout_width="294dp"
-                android:layout_height="33dp"
-                android:layout_marginStart="8dp"
-                android:background="@android:color/transparent"
-                android:ems="10"
-                android:hint="Adcione uma lista..."
-                android:inputType="text"
-                android:paddingLeft="15dp"
-                android:textColor="@color/black"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/buttonList"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-
-            <ImageView
-                android:id="@+id/buttonList"
-                android:layout_width="64dp"
-                android:layout_height="48dp"
-                android:layout_margin="0dp"
-                android:src="@drawable/camera"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageView
             android:id="@+id/imageView2"
@@ -77,32 +36,19 @@
             app:layout_constraintVertical_bias="1.0"
             app:srcCompat="@drawable/rta" />
 
-        <ImageView
-            android:id="@+id/buttonWorkHour"
-            android:layout_width="0dp"
-            android:layout_height="128dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/button_ripple"
-            android:src="@drawable/archive_clock"
-            app:layout_constraintEnd_toStartOf="@+id/inTravelbutton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
-
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listRTAview"
             android:layout_width="0dp"
             android:layout_height="450dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toTopOf="@+id/atualizar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+            app:layout_constraintTop_toBottomOf="@+id/PackectList">
 
         </androidx.recyclerview.widget.RecyclerView>
 
@@ -142,6 +88,46 @@
             app:layout_constraintStart_toEndOf="@+id/buttonWorkHour"
             app:layout_constraintTop_toTopOf="@+id/buttonWorkHour"
             app:layout_constraintVertical_bias="0.0" />
+
+        <ImageView
+            android:id="@+id/buttonWorkHour"
+            android:layout_width="0dp"
+            android:layout_height="128dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/button_ripple"
+            android:src="@drawable/archive_clock"
+            app:layout_constraintEnd_toStartOf="@+id/inTravelbutton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+        <ImageView
+            android:id="@+id/buttonList"
+            android:layout_width="0dp"
+            android:layout_height="128dp"
+
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_ripple"
+            android:src="@drawable/camera"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/inTravelbutton"
+            app:layout_constraintStart_toStartOf="@+id/inTravelbutton"
+            app:layout_constraintTop_toBottomOf="@+id/inTravelbutton" />
+
+        <ImageView
+            android:id="@+id/PackectList"
+            android:layout_width="0dp"
+            android:layout_height="128dp"
+            android:layout_marginTop="8dp"
+
+            android:background="@drawable/button_ripple"
+            android:src="@drawable/box"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/buttonWorkHour"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/buttonWorkHour"
+            app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour" />
 
         <TextView
             android:id="@+id/textView"
@@ -227,6 +213,8 @@
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
