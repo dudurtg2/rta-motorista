@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#474747">
+    android:background="#474747"
+    tools:context=".SOLID.activitys.PacketList">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
@@ -13,26 +14,12 @@
         tools:context=".SOLID.activitys.InTravelActivity">
 
 
-
-        <Spinner
-            android:id="@+id/DishesCategorySpinner"
-            android:layout_width="0dp"
-            android:layout_height="28dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toStartOf="@+id/QtdRTA"
-            app:layout_constraintStart_toStartOf="@+id/constraintLayout"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
-
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listRTATravelview"
+            android:id="@+id/listPacketTravel"
             android:layout_width="0dp"
             android:layout_height="450dp"
-
             android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -40,7 +27,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-            app:layout_constraintVertical_bias="0.394" />
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/atualizar"
@@ -52,18 +39,18 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="32dp"
             android:background="@drawable/button_ripple"
-            android:padding="8dp"
+            android:clickable="true"
+            android:elevation="2dp"
+            android:focusable="true"
             android:gravity="center"
+            android:padding="8dp"
             android:text="↻"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:elevation="2dp"
-            android:clickable="true"
-            android:focusable="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/listRTATravelview"
-            app:layout_constraintTop_toBottomOf="@+id/listRTATravelview"
+            app:layout_constraintStart_toStartOf="@+id/listPacketTravel"
+            app:layout_constraintTop_toBottomOf="@+id/listPacketTravel"
             app:layout_constraintVertical_bias="0.0" />
 
 
@@ -87,7 +74,7 @@
                 android:layout_marginStart="8dp"
                 android:background="@android:color/transparent"
                 android:ems="10"
-                android:hint="Pesquisar por lista..."
+                android:hint="Adcionar devolução..."
                 android:inputType="text"
                 android:paddingLeft="15dp"
                 android:textColor="@color/black"
@@ -110,58 +97,46 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/QtdRTA"
-            android:layout_width="wrap_content"
-            android:layout_height="28dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="0"
-            android:textColor="@color/black"
 
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
-            app:layout_constraintStart_toEndOf="@+id/DishesCategorySpinner"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/Perfil"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/button_stroke_squad_white"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView2"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/textView3"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/Perfil"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:fontFamily="@font/adlam_display"
-            android:text="ROTA"
-            android:textAlignment="center"
-            android:textSize="84dp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="0dp"
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="64dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/button_stroke_squad_white"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:fontFamily="@font/adlam_display"
+                android:text="DEVOLUÇÃO"
+                android:textAlignment="center"
+                android:textSize="36dp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <ImageView
             android:id="@+id/imageView2"
             android:layout_width="120dp"
-            android:layout_height="200dp"
+            android:layout_height="160dp"
             android:layout_marginTop="-20dp"
             android:background="@drawable/button_stroke_squad"
             app:layout_constraintStart_toStartOf="parent"

@@ -22,7 +22,7 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
     @NonNull
     @Override
     public ViewRTA onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.rta_list, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.packet_list, parent, false);
         return new ViewRTA(view);
     }
 
@@ -34,9 +34,9 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
         if (item != null) {
 
             holder.namePackectText.setText(item.getCodigo() != null ? item.getCodigo() : "Código indisponível");
-            holder.entregadorNome.setText(item.getEntregador() != null ? item.getEntregador() : "Status indisponível");
-            holder.dataPacket.setText(item.getData(jsonObject.optString("data", "")) != null ? item.getData(jsonObject.optString("data", "")).replace("T", " ").split(" ")[0] : "Data indisponível");
-            holder.motoristaNome.setText(item.getMotorista() != null ? item.getMotorista() : "Cidade indisponível");
+            holder.entregadorNome.setText(item.getEntregador() != null ? item.getEntregador() : "Entregador indisponível");
+            holder.dataPacket.setText(item.getData() != null ? item.getData().replace("T", " ").split(" ")[0] : "Data indisponível");
+            holder.motoristaNome.setText(item.getRta() != null ? item.getRta() : "Motorista indisponível");
 
         } else {
 

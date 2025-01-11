@@ -70,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
             integrator.setOrientationLocked(false);
             integrator.initiateScan();
         });
+        binding.textView5.setOnClickListener(v -> {
+            IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
+            integrator.setCaptureActivity(CaptureActivity.class);
+            integrator.setOrientationLocked(false);
+            integrator.initiateScan();
+        });
         binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 if (event == null || !event.isShiftPressed()) {
@@ -77,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
 
                         packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(va -> queryItems());
 
+
                     }).addOnFailureListener(va  -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
+                    binding.RTAprocura.setText("");
                     return true;
                 }
             }
@@ -85,8 +93,11 @@ public class MainActivity extends AppCompatActivity {
         });
         binding.Perfil.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
+        binding.textView.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
         binding.inTravelbutton.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
-
+        binding.textView2.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
+        binding.PackectList.setOnClickListener(v -> startActivity(new Intent(this, PacketList.class)));
+        binding.textView4.setOnClickListener(v -> startActivity(new Intent(this, PacketList.class)));
         binding.atualizar.setOnClickListener(v -> queryItems());
     }
 

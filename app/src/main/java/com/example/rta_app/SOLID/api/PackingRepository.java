@@ -1,27 +1,21 @@
 package com.example.rta_app.SOLID.api;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.util.Base64;
 import android.util.Log;
 
-import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.entities.Packet;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.services.TokenService;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +25,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class PackingRepository{
+public class PackingRepository {
 
     private static final String TAG = "RTAAPITEST";
     private static final String URL_API = "http://147.79.86.117:10102/";
@@ -39,26 +33,27 @@ public class PackingRepository{
     private static final String FILE_NAME = "user_data.json";
     private Context context;
     private TokenService tokenService;
+
     public PackingRepository(Context context) {
         this.context = context;
         this.tokenService = new TokenService(context);
     }
 
-   
+
     public Task<Void> finishPackingList() {
         return null;
     }
 
-    public Task<Void> postPacked( String codigo){
+    public Task<Void> postPacked(String codigo) {
         tokenService.validateAndRefreshToken();
         TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
         return postCodigoList(codigo, taskCompletionSource);
     }
-   
 
-    public Task<Packet> getPackingListToRota() {
+
+    public Task<List<Packet>> getListPacking() {
         String accessToken = getAccessTokenFromLocalFile();
-        return getPackingListToApi(accessToken);
+        return getPackingListToApiList(accessToken);
     }
 
     private String getAccessTokenFromLocalFile() {
@@ -85,7 +80,7 @@ public class PackingRepository{
         }
     }
 
-    private Task<Void> postCodigoList(String codigo ,TaskCompletionSource<Void> taskCompletionSource) {
+    private Task<Void> postCodigoList(String codigo, TaskCompletionSource<Void> taskCompletionSource) {
 
         tokenService.validateAndRefreshToken();
 
@@ -154,31 +149,40 @@ public class PackingRepository{
             return null;
         }
     }
-    private Task<Packet> getPackingListToApi(String accessToken) {
-        TaskCompletionSource<Packet> taskCompletionSource = new TaskCompletionSource<>();
+
+
+
+    private Task<List<Packet>> getPackingListToApiList(String accessToken) {
+        TaskCompletionSource<List<Packet>> taskCompletionSource = new TaskCompletionSource<>();
+
         Request request = new Request.Builder()
                 .url(URL_API_GET + "api/devolucao/findByMotorista/" + getIdDriveFromLocalFile())
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
-                .build();
-
+                .build();;
         new Thread(() -> {
             try (Response response = new OkHttpClient().newCall(request).execute()) {
                 if (response.isSuccessful()) {
                     String responseBody = response.body().string();
                     Log.d(TAG, "Requisição GET bem-sucedida: " + responseBody);
+                    JSONArray jsonArray = new JSONArray(responseBody);
+                    List<Packet> packingLists = new ArrayList<>();
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                    JSONObject jsonObject = new JSONObject(responseBody);
 
-                    Packet packingList = new Packet();
+                        Packet packingList = new Packet();
 
                         packingList.setEntregador(jsonObject.optJSONObject("entregador").optString("nome", ""));
-                        packingList.setCodigo(jsonObject.optString("codigo", ""));
-                        packingList.getData(jsonObject.optString("data", ""));
+                        packingList.setCodigo(jsonObject.optJSONObject("codigo").optString("codigo", ""));
+                        packingList.setData(jsonObject.optString("dataDevolvido", "").replace("T", " ").split("\\.")[0]);
+                        packingList.setRta(jsonObject.optJSONObject("codigo").optJSONObject("romaneio").optString("codigo", ""));
 
+                        packingLists.add(packingList);
+                        Log.d(TAG, "Aqui o resultado " + packingList);
 
-                        taskCompletionSource.setResult(packingList);
-
+                    }
+                    taskCompletionSource.setResult(packingLists);
                 } else {
                     Log.e(TAG, "Erro na requisição GET: " + response.code() + " " + response.message());
                     taskCompletionSource.setException(

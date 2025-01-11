@@ -25,6 +25,6 @@ public class ViewRTA extends RecyclerView.ViewHolder {
         motoristaNome = itemView.findViewById(R.id.motoristaNome);
         dataPacket = itemView.findViewById(R.id.dataPacket);
         imagePacket = itemView.findViewById(R.id.imagePacket);
-        imagePacket.setImageResource(R.drawable.a);
+
     }
 }

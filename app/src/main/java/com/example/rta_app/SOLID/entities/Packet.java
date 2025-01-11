@@ -4,14 +4,24 @@ public class Packet {
     private String codigo;
     private String entregador;
     private String data;
+    private String rta;
 
     public Packet() {
     }
 
-    public Packet(String codigo, String entregador,  String data) {
+    public Packet(String codigo, String entregador,  String data, String rta) {
         this.codigo = codigo;
         this.entregador = entregador;
         this.data = data;
+        this.rta = rta;
+    }
+
+    public String getRta() {
+        return rta;
+    }
+
+    public void setRta(String rta) {
+        this.rta = rta;
     }
 
     public String getCodigo() {
@@ -30,9 +40,7 @@ public class Packet {
         this.entregador = entregador;
     }
 
-
-
-    public String getData(String data) {
+    public String getData() {
         return this.data;
     }
 

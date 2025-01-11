@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RTA Motorista</string>
+    <string name="title_activity_packet_list">PacketList</string>
 </resources>
