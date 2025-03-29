@@ -87,7 +87,7 @@ public class InTravelActivity extends AppCompatActivity {
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             this.startActivity(intent);
                         } else {
-                            Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Romaneio não encontrado", Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(va ->
                             Toast.makeText(this, searchText + " não encontrado", Toast.LENGTH_SHORT).show()

@@ -55,23 +55,25 @@ public class AdapterViewRTA extends RecyclerView.Adapter<ViewRTA> {
 
             int color;
             switch (item.getStatus() != null ? item.getStatus() : "") {
-                case "Finalizado":
+                case "finalizado":
                     color = context.getResources().getColor(R.color.green);
                     break;
-                case "Ocorrencia":
+                case "ocorrencia":
                     color = context.getResources().getColor(R.color.yellow);
                     break;
-                case "Retirado":
+                case "retirado":
                     color = context.getResources().getColor(R.color.blue);
                     break;
-                case "Recusado":
+                case "recusado":
                     color = context.getResources().getColor(R.color.red);
                     break;
                 default:
                     color = Color.BLACK;
                     break;
             }
-            holder.stsRTAtext.setTextColor(color);
+            holder.stsRTAtext.setTextColor(Color.BLACK);
+            holder.nameRTAText.setTextColor(color);
+            holder.Empresa.setTextColor(Color.BLACK);
 
             if (pipoca == 1) {
                 holder.itemView.setOnClickListener(v -> {

@@ -99,6 +99,7 @@ public class RTADetailsActivity extends AppCompatActivity {
             if (imageUploader != null) {
                 imageUploader.handleCameraResult(photoURI, this);
                 statusUpdate(uid2, QA);
+                finish();
             }
         }
     }
@@ -106,7 +107,8 @@ public class RTADetailsActivity extends AppCompatActivity {
     private void openCamera(String uid) {
         imageUploader = new ImageDriverService(this, uid);
 
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE_SECURE);
+
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
             try {
@@ -165,8 +167,8 @@ public class RTADetailsActivity extends AppCompatActivity {
             packingListRepository.updateStatusPackingList(documentSnapshot, occurrence, status)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "Status atualizado para " + status, Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, InTravelActivity.class));
                         finish();
+                        
                     })
                     .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status", Toast.LENGTH_SHORT).show());
 

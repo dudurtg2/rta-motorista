@@ -76,21 +76,44 @@ public class MainActivity extends AppCompatActivity {
             integrator.setOrientationLocked(false);
             integrator.initiateScan();
         });
+
         binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 if (event == null || !event.isShiftPressed()) {
                     packingListRepository.getPackingListToBase(binding.RTAprocura.getText().toString().toUpperCase()).addOnSuccessListener(packingList -> {
+                        if (packingList != null) {
+                            String codigodeficha = packingList.getCodigodeficha();
+                            if (codigodeficha != null && !codigodeficha.isEmpty()) {
+                                new AlertDialog.Builder(this)
+                                        .setTitle("Confirmação")
+                                        .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: "+ packingList.getLocal() + "\nData: "+ packingList.getHoraedia().replace("T", " ").split("\\.")[0])
+                                        .setPositiveButton("Coletar", (dialog, which) ->  packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
+                                            queryItems();
+                                            Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();
+                                        }))
+                                        .setNegativeButton("Não coletar", null)
+                                        .show();
 
-                        packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(va -> queryItems());
+                            } else {
+                                Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
+                        }
 
 
-                    }).addOnFailureListener(va  -> Toast.makeText(this, binding.RTAprocura.getText().toString().toUpperCase() + " não encontrado", Toast.LENGTH_SHORT).show());
-                    binding.RTAprocura.setText("");
+                        binding.RTAprocura.setText("");
+
+                    }).addOnFailureListener(va  -> {
+                            
+                            binding.RTAprocura.setText("");
+                    });
                     return true;
                 }
             }
             return false;
         });
+
         binding.Perfil.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
         binding.textView.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
@@ -102,51 +125,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void queryItems() {
-        packingListRepository.getListPackingListToDirect().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                List<PackingList> packingList = task.getResult();
-                if(packingList.isEmpty()){
-                    packingList.add(new PackingList(
-                            "LC HUB-01",
-                            "indisponível",
-                            "indisponível",
-                            "indisponível",
-                            "Verifique a sua rota",
-                            "Sacas em espera",
-                            "",
-                            "a",
-                            "Sem sacas alocadas",
-                            "indisponível",
-                            null,
-                            "indisponível",
-                            "indisponível"
-                    ));
-                }
-                binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-                binding.listRTAview.setAdapter(new AdapterViewRTA(0, this, packingList));
-            } else {
-                List<PackingList> packingList = new ArrayList<>();
 
-                    packingList.add(new PackingList(
-                            "LC HUB-01",
-                            "indisponível",
-                            "indisponível",
-                            "indisponível",
-                            "Verifique a sua rota",
-                            "Sacas em espera",
-                            "",
-                            "a",
-                            "Sem sacas alocadas",
-                            "indisponível",
-                            null,
-                            "indisponível",
-                            "indisponível"
-                    ));
-
-                binding.listRTAview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-                binding.listRTAview.setAdapter(new AdapterViewRTA(0, this, packingList));
-            }
-        });
     }
 
 
