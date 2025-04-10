@@ -3,6 +3,7 @@ package com.example.rta_app.SOLID.api;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.rta_app.SOLID.entities.Coletas;
 import com.example.rta_app.SOLID.entities.Packet;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.services.TokenService;
@@ -28,8 +29,8 @@ import okhttp3.Response;
 public class PackingRepository {
 
     private static final String TAG = "RTAAPITEST";
-    private static final String URL_API = "http://147.79.86.117:10102/";
-    private static final String URL_API_GET = "http://147.79.86.117:10106/";
+    private static final String URL_API = "http://147.79.86.117:10200/";
+    private static final String URL_API_GET = "http://147.79.86.117:10200/";
     private static final String FILE_NAME = "user_data.json";
     private Context context;
     private TokenService tokenService;
@@ -40,8 +41,9 @@ public class PackingRepository {
     }
 
 
-    public Task<Void> finishPackingList() {
-        return null;
+    public Task<List<Coletas>> colectPack() {
+        String accessToken = getAccessTokenFromLocalFile();
+        return getPackingListToApiListNotColet(accessToken);
     }
 
     public Task<Void> postPacked(String codigo) {
@@ -87,6 +89,8 @@ public class PackingRepository {
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("codigo", codigo);
+            jsonBody.put("coletado", true);
+
         } catch (JSONException e) {
             taskCompletionSource.setException(e);
             return taskCompletionSource.getTask();
@@ -150,7 +154,51 @@ public class PackingRepository {
         }
     }
 
+    private Task<List<Coletas>> getPackingListToApiListNotColet(String accessToken) {
+        TaskCompletionSource<List<Coletas>> taskCompletionSource = new TaskCompletionSource<>();
 
+        Request request = new Request.Builder()
+                .url(URL_API_GET + "api/devolucao/findByMotoristaNotColect/" + getIdDriveFromLocalFile())
+                .get()
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+        ;
+        new Thread(() -> {
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    Log.d(TAG, "Requisição GET bem-sucedida: " + responseBody);
+                    JSONArray jsonArray = new JSONArray(responseBody);
+                    List<Coletas> packingLists = new ArrayList<>();
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+
+                        Coletas packingList = new Coletas();
+
+                        packingList.setEntregador(jsonObject.optJSONObject("entregador").optString("nome", ""));
+                        packingList.setCodigos(jsonObject.optString("codigos", ""));
+                        packingList.setQtd(jsonObject.optString("quantidade", ""));
+
+
+                        packingLists.add(packingList);
+                        Log.d(TAG, "Aqui o resultado " + packingList);
+
+                    }
+                    taskCompletionSource.setResult(packingLists);
+                } else {
+                    Log.e(TAG, "Erro na requisição GET: " + response.code() + " " + response.message());
+                    taskCompletionSource.setException(
+                            new Exception("Erro na requisição GET: " + response.code() + " " + response.message()));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao fazer a requisição GET", e);
+                taskCompletionSource.setException(e);
+            }
+        }).start();
+
+        return taskCompletionSource.getTask();
+    }
 
     private Task<List<Packet>> getPackingListToApiList(String accessToken) {
         TaskCompletionSource<List<Packet>> taskCompletionSource = new TaskCompletionSource<>();
@@ -159,7 +207,8 @@ public class PackingRepository {
                 .url(URL_API_GET + "api/devolucao/findByMotorista/" + getIdDriveFromLocalFile())
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
-                .build();;
+                .build();
+        ;
         new Thread(() -> {
             try (Response response = new OkHttpClient().newCall(request).execute()) {
                 if (response.isSuccessful()) {

@@ -56,8 +56,10 @@
                 android:layout_height="43dp"
                 android:background="@android:color/transparent"
                 android:ems="10"
-                android:hint="Adicione seu romaneio aqui ...."
+                android:hint="Digite o código de ficha aqui"
                 android:inputType="text"
+                android:textSize="18dp"
+                android:textAlignment="center"
                 android:paddingLeft="20dp"
                 android:textColor="@color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -72,11 +74,12 @@
         <TextView
             android:id="@+id/atualizar"
 
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="47dp"
+            android:layout_height="51dp"
 
             android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
             android:background="@drawable/button_ripple"
             android:clickable="true"
             android:elevation="2dp"
@@ -87,8 +90,9 @@
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/listPacketTravelDevo" />
 
         <ImageView
             android:id="@+id/inTravelbutton"
@@ -151,12 +155,12 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="32dp"
             android:text="v04a32v"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/listPacketTravelDevo" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/Perfil"
@@ -295,6 +299,44 @@
             app:layout_constraintStart_toStartOf="@+id/inTravelbutton"
             app:layout_constraintTop_toBottomOf="@+id/inTravelbutton" />
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listPacketTravelDevo"
+            android:layout_width="0dp"
+            android:layout_height="450dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textColeta"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <View
+            android:id="@+id/coletaLine"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="#000000"
+            app:layout_constraintBottom_toTopOf="@+id/textColeta"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" /> <!-- ou qualquer cor -->
+
+        <TextView
+            android:id="@+id/textColeta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_stroke_squad_white_block"
+            android:text="▼ DEVOLUÇÃO PARA COLETAR ▼"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
+            app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+            app:layout_constraintTop_toBottomOf="@+id/coletaLine" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

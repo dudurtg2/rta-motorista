@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -28,71 +30,74 @@ public class TokenService {
 
     private final Context context;
     private final OkHttpClient httpClient;
+    private final ExecutorService executor;
+    private final Object fileLock = new Object();
 
     public TokenService(Context context) {
         this.context = context;
         this.httpClient = new OkHttpClient();
+        this.executor = Executors.newSingleThreadExecutor(); // Executor para operações de I/O e rede
     }
 
     public CompletableFuture<JSONObject> validateAndRefreshToken() {
-        CompletableFuture<JSONObject> future = new CompletableFuture<>();
-
-        try {
-            String tokensJson = readFile(FILE_NAME);
-            JSONObject tokens = new JSONObject(tokensJson);
-
-            String accessToken = tokens.optString("accessToken", null);
-            String refreshToken = tokens.optString("refreshToken", null);
-
-            if (accessToken == null || refreshToken == null) {
-                Log.e(TAG, "Access token ou refresh token não encontrados");
-                future.completeExceptionally(new Exception("Access token ou refresh token não encontrados"));
-                return future;
-            }
-
-            String[] tokenParts = accessToken.split("\\.");
-            if (tokenParts.length < 2) {
-                Log.e(TAG, "Token inválido");
-                future.completeExceptionally(new Exception("Token inválido"));
-                return future;
-            }
-
-            String decodedPayload = new String(Base64.decode(tokenParts[1], Base64.DEFAULT), StandardCharsets.UTF_8);
-            JSONObject payload = new JSONObject(decodedPayload);
-            long expiration = payload.getLong("exp") * 1000;
-
-            if (System.currentTimeMillis() >= expiration) {
-                Log.i(TAG, "Token expirado, tentando renová-lo");
-
-                try {
-                    JSONObject newTokens = refreshAccessToken(refreshToken);
-                    saveTokens(newTokens.getString("accessToken"), refreshToken);
-                    future.complete(newTokens);
-                } catch (Exception refreshException) {
-                    Log.e(TAG, "Erro ao renovar o token", refreshException);
-
-                    context.deleteFile(FILE_NAME);
-                    Log.d(TAG, "Arquivo de tokens excluído");
-
-                    Intent loginIntent = new Intent(context, LoginActivity.class);
-                    loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    context.startActivity(loginIntent);
-
-                    future.completeExceptionally(new Exception("Token expirado e falha ao renovar, redirecionado para login"));
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String tokensJson = readFile(FILE_NAME);
+                if (tokensJson == null || tokensJson.isEmpty()) {
+                    throw new Exception("Arquivo de tokens vazio ou não encontrado");
                 }
-                return future;
-            } else {
-                Log.i(TAG, "Token ainda válido");
-                JSONObject validTokenResponse = new JSONObject();
-                validTokenResponse.put("accessToken", accessToken);
-                future.complete(validTokenResponse);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao validar ou renovar o token de acesso", e);
-            future.completeExceptionally(e);
-        }
+                JSONObject tokens = new JSONObject(tokensJson);
 
-        return future;
+                String accessToken = tokens.optString("accessToken", null);
+                String refreshToken = tokens.optString("refreshToken", null);
+
+                if (accessToken == null || refreshToken == null) {
+                    Log.e(TAG, "Access token ou refresh token não encontrados");
+                    throw new Exception("Access token ou refresh token não encontrados");
+                }
+
+                String[] tokenParts = accessToken.split("\\.");
+                if (tokenParts.length < 2) {
+                    Log.e(TAG, "Token inválido");
+                    throw new Exception("Token inválido");
+                }
+
+                // Utiliza URL_SAFE para tokens JWT
+                String decodedPayload = new String(Base64.decode(tokenParts[1], Base64.URL_SAFE), StandardCharsets.UTF_8);
+                JSONObject payload = new JSONObject(decodedPayload);
+                long expiration = payload.getLong("exp") * 1000;
+
+                if (System.currentTimeMillis() >= expiration) {
+                    Log.i(TAG, "Token expirado, tentando renová-lo");
+
+                    try {
+                        JSONObject newTokens = refreshAccessToken(refreshToken);
+                        saveTokens(newTokens.getString("accessToken"), refreshToken);
+                        return newTokens;
+                    } catch (Exception refreshException) {
+                        Log.e(TAG, "Erro ao renovar o token", refreshException);
+                        // Remove o arquivo de tokens
+                        synchronized (fileLock) {
+                            context.deleteFile(FILE_NAME);
+                        }
+                        Log.d(TAG, "Arquivo de tokens excluído");
+                        // Redireciona para a tela de login
+                        Intent loginIntent = new Intent(context, LoginActivity.class);
+                        loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        context.startActivity(loginIntent);
+                        throw new Exception("Token expirado e falha ao renovar, redirecionado para login");
+                    }
+                } else {
+                    Log.i(TAG, "Token ainda válido");
+                    JSONObject validTokenResponse = new JSONObject();
+                    validTokenResponse.put("accessToken", accessToken);
+                    return validTokenResponse;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao validar ou renovar o token de acesso", e);
+                throw new RuntimeException(e);
+            }
+        }, executor);
     }
 
     private JSONObject refreshAccessToken(String refreshToken) throws Exception {
@@ -115,40 +120,50 @@ public class TokenService {
         }
     }
 
-
     private void saveTokens(String accessToken, String refreshToken) {
         try {
-            String jsonContent = readFile(FILE_NAME);
-            JSONObject jsonObject;
-
-            if (!jsonContent.isEmpty()) {
-                jsonObject = new JSONObject(jsonContent);
-            } else {
-                jsonObject = new JSONObject();
+            synchronized (fileLock) {
+                String jsonContent = readFile(FILE_NAME);
+                JSONObject jsonObject;
+                if (jsonContent != null && !jsonContent.isEmpty()) {
+                    jsonObject = new JSONObject(jsonContent);
+                } else {
+                    jsonObject = new JSONObject();
+                }
+                jsonObject.put("accessToken", accessToken);
+                jsonObject.put("refreshToken", refreshToken);
+                writeFile(FILE_NAME, jsonObject.toString());
             }
-
-            jsonObject.put("accessToken", accessToken);
-            jsonObject.put("refreshToken", refreshToken);
-
-            writeFile(FILE_NAME, jsonObject.toString());
             Log.d(TAG, "Tokens atualizados com sucesso no arquivo.");
         } catch (Exception e) {
             Log.e(TAG, "Erro ao atualizar os tokens no arquivo", e);
         }
     }
 
-
     private String readFile(String fileName) throws Exception {
-        try (FileInputStream fis = context.openFileInput(fileName)) {
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            return new String(buffer, StandardCharsets.UTF_8);
+        synchronized (fileLock) {
+            try (FileInputStream fis = context.openFileInput(fileName)) {
+                byte[] buffer = new byte[fis.available()];
+                int readBytes = fis.read(buffer);
+                if (readBytes <= 0) {
+                    return "";
+                }
+                return new String(buffer, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao ler o arquivo " + fileName, e);
+                throw e;
+            }
         }
     }
 
     private void writeFile(String fileName, String content) throws Exception {
-        try (FileOutputStream fos = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
-            fos.write(content.getBytes(StandardCharsets.UTF_8));
+        synchronized (fileLock) {
+            try (FileOutputStream fos = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
+                fos.write(content.getBytes(StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao escrever no arquivo " + fileName, e);
+                throw e;
+            }
         }
     }
 }

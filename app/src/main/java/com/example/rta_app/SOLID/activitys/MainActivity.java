@@ -14,10 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
+import com.example.rta_app.SOLID.Views.Coletalista.AdapterViewRTA;
+import com.example.rta_app.SOLID.api.PackingRepository;
+import com.example.rta_app.SOLID.entities.Coletas;
+import com.example.rta_app.SOLID.entities.Packet;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.api.UsersRepository;
-import com.example.rta_app.SOLID.Views.RTAlista.AdapterViewRTA;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityMainBinding;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -32,10 +35,12 @@ public class MainActivity extends AppCompatActivity {
     public ActivityMainBinding binding;
     private IUsersRepository usersRepository;
     private IPackingListRepository packingListRepository;
+    private PackingRepository packingRepository;
 
     public MainActivity() {
         this.packingListRepository = new PackingListRepository(this);
         this.usersRepository = new UsersRepository(this);
+        this.packingRepository = new PackingRepository(this);
     }
 
     @Override
@@ -121,11 +126,40 @@ public class MainActivity extends AppCompatActivity {
         binding.textView2.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
         binding.PackectList.setOnClickListener(v -> startActivity(new Intent(this, PacketList.class)));
         binding.textView4.setOnClickListener(v -> startActivity(new Intent(this, PacketList.class)));
-        binding.atualizar.setOnClickListener(v -> queryItems());
+        binding.atualizar.setOnClickListener(v ->
+
+                queryItems());
     }
 
     public void queryItems() {
+        packingRepository.colectPack().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<Coletas> coletas = task.getResult();
+                if (coletas.isEmpty()) {
+                    coletas.add(new Coletas(
+                            "Verifique com a base ou com o entregador",
+                            "Sem devolução",
+                            "0"
 
+                    ));
+                }
+                binding.listPacketTravelDevo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                binding.listPacketTravelDevo.setAdapter(new AdapterViewRTA(this, coletas));
+            } else {
+                List<Coletas> coletas = task.getResult();
+                if (coletas.isEmpty()) {
+                    coletas.add(new Coletas(
+                            "Verifique com a base ou com o entregador",
+                            "Sem devolução",
+                            "0"
+
+                    ));
+                }
+
+                binding.listPacketTravelDevo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                binding.listPacketTravelDevo.setAdapter(new AdapterViewRTA(this, coletas));
+            }
+        });
     }
 
 

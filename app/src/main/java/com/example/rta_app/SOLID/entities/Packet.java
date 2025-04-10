@@ -5,6 +5,7 @@ public class Packet {
     private String entregador;
     private String data;
     private String rta;
+    private String city;
 
     public Packet() {
     }

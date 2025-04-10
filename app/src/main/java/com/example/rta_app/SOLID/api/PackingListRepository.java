@@ -38,8 +38,8 @@ import okhttp3.Response;
 public class PackingListRepository implements IPackingListRepository {
 
     private static final String TAG = "RTAAPITEST";
-    private static final String URL_API = "http://147.79.86.117:10102/";
-    private static final String URL_API_GET = "http://147.79.86.117:10106/";
+    private static final String URL_API = "http://147.79.86.117:10200/";
+    private static final String URL_API_GET = "http://147.79.86.117:10200/";
     private static final String FILE_NAME = "user_data.json";
     private Context context;
     private TokenService tokenService;
@@ -368,7 +368,14 @@ public class PackingListRepository implements IPackingListRepository {
                     List<String> codigosInseridos = new ArrayList<>();
                     if (codigosArray != null) {
                         for (int i = 0; i < codigosArray.length(); i++) {
-                            codigosInseridos.add(codigosArray.getJSONObject(i).optString("codigo", ""));
+                            if (codigosArray.getJSONObject(i).optString("type", "").equals("PACOTES")){
+                                codigosInseridos.add("✉\uFE0F - " + codigosArray.getJSONObject(i).optString("codigo", ""));
+                            } else {
+
+                                codigosInseridos.add("\uD83D\uDCE6 - " + codigosArray.getJSONObject(i).optString("codigo", ""));
+                            };
+
+
                         }
                     }
 
@@ -432,16 +439,14 @@ public class PackingListRepository implements IPackingListRepository {
 
                         JSONArray locallist = jsonObject.optJSONArray("cidade");
 
-                        String local = ""; // Inicializar uma string vazia
+                        String local = "";
 
                         if (locallist != null) {
-                            // Iterar sobre cada objeto no array de cidades
                             for (int o = 0; o < locallist.length(); o++) {
                                 JSONObject cidadeObject = locallist.optJSONObject(o);
                                 if (cidadeObject != null) {
                                     String cidadeNome = cidadeObject.optString("nome", "");
                                     if (!cidadeNome.isEmpty()) {
-                                        // Adicionar o nome da cidade e uma vírgula
                                         if (!local.isEmpty()) {
                                             local += ", ";
                                         }
@@ -451,13 +456,20 @@ public class PackingListRepository implements IPackingListRepository {
                             }
                         }
 
-                        JSONArray codigosArray = jsonObject.optJSONArray("codigos");
-                        List<String> codigosInseridos = new ArrayList<>();
-                        if (codigosArray != null) {
-                            for (int i = 0; i < codigosArray.length(); i++) {
-                                codigosInseridos.add(codigosArray.getJSONObject(i).optString("codigo", ""));
-                            }
+                    JSONArray codigosArray = jsonObject.optJSONArray("codigos");
+                    List<String> codigosInseridos = new ArrayList<>();
+                    if (codigosArray != null) {
+                        for (int i = 0; i < codigosArray.length(); i++) {
+                            if (codigosArray.getJSONObject(i).optString("type", "").equals("PACOTES")){
+                                codigosInseridos.add("✉\uFE0F " + codigosArray.getJSONObject(i).optString("codigo", ""));
+                            } else {
+
+                                codigosInseridos.add("\uD83D\uDCE6 " + codigosArray.getJSONObject(i).optString("codigo", ""));
+                            };
+
+
                         }
+                    }
 
                         packingList.setLocal(local);
                         packingList.setCodigosinseridos(codigosInseridos);
