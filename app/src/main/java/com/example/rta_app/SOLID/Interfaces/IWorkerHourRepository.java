@@ -13,4 +13,6 @@ public interface IWorkerHourRepository {
     Task<Void> saveHors(WorkerHous workerHous);
     void writeToFile(String data) throws IOException;
     String readFromFile() throws IOException;
+
+   Task<Void> validadeCode(String code);
 }

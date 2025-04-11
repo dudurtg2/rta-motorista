@@ -32,14 +32,49 @@ public class WorkerHourRepository implements IWorkerHourRepository {
     private static final String TAG = "WorkerHourRepository";
     private static final String FILE_NAME = "worker_hours.json";
     private static final String FILE_NAME_USER = "user_data.json";
-    private static final String URL_API = "http://147.79.86.117:10200/";
+    private static final String URL_API = "http://147.79.86.117:10102/";
     private TokenService tokenService;
 
     public WorkerHourRepository(Context context) {
         this.context = context;
         this.tokenService = new TokenService(context);
     }
+    @Override
+    public Task<Void> validadeCode(String code) {
+        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+        tokenService.validateAndRefreshToken();
 
+        String accessToken = getAccessTokenFromLocalFile();
+        RequestBody emptyBody = RequestBody.create("", null);
+        Request request = new Request.Builder()
+                .url(URL_API + "api/unique/validade/" + code)
+                .put(emptyBody)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+
+        new Thread(() -> {
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                String responseBody = response.body() != null ? response.body().string() : null;
+
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "Requisição bem-sucedida: " + request);
+                    Log.d(TAG, "Requisição bem-sucedida: " + responseBody);
+                    taskCompletionSource.setResult(null);
+                } else {
+                    Log.e(TAG, "Erro na requisição: " + request);
+                    Log.e(TAG, "Erro na requisição: " + responseBody);
+                    taskCompletionSource.setException(
+                            new Exception("Erro na API: " + request + responseBody)
+                    );
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao enviar a requisição", e);
+                taskCompletionSource.setException(e);
+            }
+        }).start();
+
+        return taskCompletionSource.getTask();
+    }
     public Task<Void> saveWorkerHous(WorkerHous workerHous) {
         TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
 
@@ -120,6 +155,8 @@ public class WorkerHourRepository implements IWorkerHourRepository {
             return new String(buffer, StandardCharsets.UTF_8);
         }
     }
+
+
     private String getAccessTokenFromLocalFile() {
         try {
             String jsonContent = readFile(FILE_NAME_USER);

@@ -1,7 +1,10 @@
 package com.example.rta_app.SOLID.activitys;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -10,6 +13,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
@@ -23,6 +27,8 @@ import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityMainBinding;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.CaptureActivity;
@@ -54,7 +60,10 @@ public class MainActivity extends AppCompatActivity {
         getUser();
         SetupBinding();
         queryItems();
+
     }
+
+
 
     private void getUser() {
         usersRepository.getUser()

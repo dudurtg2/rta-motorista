@@ -28,7 +28,7 @@ import okhttp3.Response;
 public class UsersRepository implements IUsersRepository {
 
     private static final String TAG = "RTAAPITEST";
-    private static final String URL_API = "http://147.79.86.117:10200/";
+    private static final String URL_API = "http://147.79.86.117:10102/";
     private static final String FILE_NAME = "user_data.json";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private TokenService tokenService;
