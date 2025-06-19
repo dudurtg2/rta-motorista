@@ -77,6 +77,7 @@ public class WorkHourActivity extends AppCompatActivity {
                         if (isInLocation(lat, lng)) {
                             binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
                         } else {
+                            if( binding.imageDinnerFinishHour.getVisibility() == View.VISIBLE) return;
                             binding.imageFistHour.setOnClickListener(v -> {
                                 if(!binding.buttonFistHour.getText().toString().equals("Entrada")) return;
                                 EditText input = new EditText(this);
@@ -110,13 +111,22 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private boolean isInLocation(double lat, double lng) {
-        double destinoLat = -12.255348493385583; //, 
-        double destinoLng = -38.92503847319095;
+        double destinoLat;
+        double destinoLng;
+
+        switch (usersRepository.getUser().getResult().getBaseid()){
+            case 1:
+                destinoLat = -12.255348493385583;
+                destinoLng = -38.92503847319095;
+                break;
+            default:
+                return true;
+        }
         float[] resultado = new float[1];
 
         Location.distanceBetween(lat, lng, destinoLat, destinoLng, resultado);
 
-        return resultado[0] < 100;
+        return resultado[0] < 300;
     }
 
     private void getUser() {

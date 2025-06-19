@@ -7,13 +7,25 @@ public class Users {
     private String base;
     private String uid;
 
-    public Users(String name, String uid, String telefone, String base) {
+    private int baseid;
+
+    public Users(String name, String uid, String telefone, String base, int baseid) {
         this.name = name;
         this.uid = uid;
         this.telefone = telefone;
         this.base = base;
+        this.baseid = baseid;
 
 
+
+    }
+
+    public int getBaseid() {
+        return baseid;
+    }
+
+    public void setBaseid(int baseid) {
+        this.baseid = baseid;
     }
 
     public String getTelefone() {

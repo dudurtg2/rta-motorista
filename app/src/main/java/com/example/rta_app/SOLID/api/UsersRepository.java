@@ -1,6 +1,7 @@
 package com.example.rta_app.SOLID.api;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
@@ -8,6 +9,7 @@ import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.entities.Users;
 import com.example.rta_app.SOLID.services.TokenService;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 
 import org.json.JSONArray;
@@ -17,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.concurrent.CompletableFuture;
 
 import okhttp3.MediaType;
@@ -37,7 +41,12 @@ public class UsersRepository implements IUsersRepository {
 
     public UsersRepository(Context context) {
         this.context = context;
-        this.tokenService = new TokenService(context);
+        try {
+
+            this.tokenService = new TokenService(context);
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao inicializar o TokenService", e);
+        }
     }
 
     @Override
@@ -55,8 +64,9 @@ public class UsersRepository implements IUsersRepository {
             String telefone = info.getString("telefone");
             JSONArray basesArray = info.getJSONArray("bases");
             String baseNome = basesArray.getJSONObject(0).getString("nome");
+            int baseId = basesArray.getJSONObject(0).getInt("id");
 
-            return Tasks.forResult(new Users(nome, id, telefone, baseNome));
+            return Tasks.forResult(new Users(nome, id, telefone, baseNome, baseId));
         } catch (IOException e) {
             Log.e(TAG, "Erro ao ler o arquivo de usuário", e);
             return Tasks.forException(e);
@@ -70,7 +80,7 @@ public class UsersRepository implements IUsersRepository {
     public Task<Void> saveUser(Users user) {
         tokenService.validateAndRefreshToken();
         try {
-            updateUserNameInLocalFile(user.getName() , user.getTelefone());
+            updateUserNameInLocalFile(user.getName(), user.getTelefone());
             updateMotoristaNome(user.getUid(), user.getName(), user.getTelefone());
 
             return Tasks.forResult(null);
@@ -79,6 +89,7 @@ public class UsersRepository implements IUsersRepository {
             return Tasks.forException(e);
         }
     }
+
     @Override
     public Task<Void> loginUser(String nome, String senha) {
         String jsonBody = String.format("{\"login\": \"%s\", \"senha\": \"%s\"}", nome, senha);
@@ -89,32 +100,45 @@ public class UsersRepository implements IUsersRepository {
                 .post(body)
                 .build();
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
+        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
 
         new Thread(() -> {
             try (Response response = client.newCall(request).execute()) {
                 if (response.isSuccessful() && response.body() != null) {
                     String responseBody = response.body().string();
                     Log.d(TAG, "Resposta do servidor: " + responseBody);
+
                     JSONObject jsonObject = new JSONObject(responseBody);
+                    JSONObject data = jsonObject.optJSONObject("data");
+                    if (data == null || !data.optString("role").equals("MOTORISTA")) {
+                        throw new RuntimeException("Usuário não é motorista");
+                    }
 
-                    if (!jsonObject.optJSONObject("data").optString("role").equals("MOTORISTA")) throw new RuntimeException("Usuário não é motorista");
+                    // adiciona o tokenExpired no JSON em horário de Brasília
+                    jsonObject.put(
+                            "tokenExpired",
+                            LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
+                                    .plusHours(11)
+                                    .toString()
+                    );
 
-                    saveApiResponse(responseBody);
+                    // salva a resposta já modificada
+                    saveApiResponse(jsonObject.toString());
 
-                    future.complete(null);
+                    tcs.setResult(null);
                 } else {
                     Log.e(TAG, "Erro na requisição: " + response.code() + " - " + response.message());
-                    future.completeExceptionally(new IOException("Erro na requisição: " + response.code()));
+                    tcs.setException(new IOException("Erro na requisição: " + response.code()));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao realizar o login", e);
-                future.completeExceptionally(e);
+                tcs.setException(e);
             }
         }).start();
 
-        return Tasks.call(future::join);
+        return tcs.getTask();
     }
+
 
     private void updateUserNameInLocalFile(String newName, String newTelefone) {
         try {
@@ -137,6 +161,7 @@ public class UsersRepository implements IUsersRepository {
             Log.e(TAG, "Erro ao atualizar o campo 'nome' no JSON", e);
         }
     }
+
     private void updateMotoristaNome(String id, String nome, String telefone) {
         JSONObject jsonBody = new JSONObject();
         try {
@@ -171,6 +196,7 @@ public class UsersRepository implements IUsersRepository {
             }
         }).start();
     }
+
     private String getAccessTokenFromLocalFile() {
         try {
             String jsonContent = readFile(FILE_NAME);
@@ -193,6 +219,7 @@ public class UsersRepository implements IUsersRepository {
             return null;
         }
     }
+
     private void saveApiResponse(String responseBody) {
         try {
 
@@ -202,6 +229,7 @@ public class UsersRepository implements IUsersRepository {
             Log.e(TAG, "Erro ao salvar a resposta da API", e);
         }
     }
+
     private String readFile(String fileName) throws IOException {
         try (FileInputStream fis = context.openFileInput(fileName)) {
             byte[] buffer = new byte[fis.available()];
@@ -209,12 +237,12 @@ public class UsersRepository implements IUsersRepository {
             return new String(buffer, StandardCharsets.UTF_8);
         }
     }
+
     private void writeFile(String fileName, String content) throws IOException {
         try (FileOutputStream fos = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
             fos.write(content.getBytes(StandardCharsets.UTF_8));
         }
     }
-
 
 
 }
