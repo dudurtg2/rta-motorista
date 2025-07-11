@@ -27,9 +27,7 @@ public class PacketList extends AppCompatActivity {
     private ActivityPacketListBinding binding;
     private PackingRepository packingRepository;
 
-    public PacketList() {
-        this.packingRepository = new PackingRepository(this);
-    }
+
 
 
     @Override
@@ -39,6 +37,7 @@ public class PacketList extends AppCompatActivity {
         setContentView(R.layout.activity_packet_list);
         binding = ActivityPacketListBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        this.packingRepository = new PackingRepository(this);
         queryItems();
         setupBinding();
     }

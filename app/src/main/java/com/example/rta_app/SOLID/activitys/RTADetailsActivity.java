@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.services.ImageDriverService;
@@ -39,9 +38,7 @@ public class RTADetailsActivity extends AppCompatActivity {
     private String QA;
     private PackingListRepository packingListRepository;
 
-    public RTADetailsActivity() {
-        this.packingListRepository = new PackingListRepository(this);
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +47,7 @@ public class RTADetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rtadetails);
         binding = ActivityRtadetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        this.packingListRepository = new PackingListRepository(this);
         Intent intent = getIntent();
         if (intent != null) {
             uii = intent.getStringExtra("uid");
@@ -79,16 +76,13 @@ public class RTADetailsActivity extends AppCompatActivity {
 
         binding.buttonFinalizar.setOnClickListener(v -> {
             QA = "finalizado";
-            openCamera(uid.getCodigodeficha());
-        });
-        binding.buttonOcorrencia.setOnClickListener(v -> {
             if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
                 QA = "ocorrencia";
                 openCamera(uid.getCodigodeficha());
-            } else {
-                Toast.makeText(this, "Preencha o campo de ocorrencia", Toast.LENGTH_SHORT).show();
             }
+            openCamera(uid.getCodigodeficha());
         });
+
         binding.textRTA.setOnClickListener(v -> downloadRTA(uid));
     }
 

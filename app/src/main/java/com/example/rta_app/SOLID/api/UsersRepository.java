@@ -1,16 +1,13 @@
 package com.example.rta_app.SOLID.api;
 
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
-import com.example.rta_app.SOLID.entities.PackingList;
+import com.example.rta_app.SOLID.services.TokenStorage;
 import com.example.rta_app.SOLID.entities.Users;
 import com.example.rta_app.SOLID.services.TokenService;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,9 +16,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -29,221 +25,191 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class UsersRepository implements IUsersRepository {
-
-    private static final String TAG = "RTAAPITEST";
-    private static final String URL_API = "http://147.79.86.117:10102/";
+public class UsersRepository {
+    private static final String TAG = "UsersRepo";
+    private static final String URL_API = "https://android.lc-transportes.com/";
     private static final String FILE_NAME = "user_data.json";
-    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private TokenService tokenService;
-    private final OkHttpClient client = new OkHttpClient();
+    private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
+
+    private final TokenStorage storage;
     private final Context context;
+    private final TokenService tokenService;
+    private final OkHttpClient httpClient;
+    private final ExecutorService executor;
 
     public UsersRepository(Context context) {
-        this.context = context;
-        try {
+        this.context = context.getApplicationContext();
+        this.httpClient = new OkHttpClient();
+        this.executor = Executors.newSingleThreadExecutor();
+        this.tokenService = new TokenService(this.context);
+        this.storage = new TokenStorage(this.context);
 
-            this.tokenService = new TokenService(context);
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao inicializar o TokenService", e);
-        }
     }
 
-    @Override
+    /**
+     * Busca apenas o objeto Users dentro de user_data.json (campo "data").
+     */
     public Task<Users> getUser() {
-        try {
-            String jsonContent = readFile(FILE_NAME);
+        TaskCompletionSource<Users> tcs = new TaskCompletionSource<>();
+        executor.execute(() -> {
+            try {
+                String json = readFile(FILE_NAME);
+                JSONObject data = new JSONObject(json).getJSONObject("data");
 
-            JSONObject jsonObject = new JSONObject(jsonContent);
+                String id = data.optString("id");
+                String nome = data.optString("nome");
+                String telefone = data.optString("telefone");
+                Boolean frete = data.optBoolean("bateponto");
 
-            JSONObject info = jsonObject.getJSONObject("data");
-
-
-            String id = info.getString("id");
-            String nome = info.getString("nome");
-            String telefone = info.getString("telefone");
-            JSONArray basesArray = info.getJSONArray("bases");
-            String baseNome = basesArray.getJSONObject(0).getString("nome");
-            int baseId = basesArray.getJSONObject(0).getInt("id");
-
-            return Tasks.forResult(new Users(nome, id, telefone, baseNome, baseId));
-        } catch (IOException e) {
-            Log.e(TAG, "Erro ao ler o arquivo de usuário", e);
-            return Tasks.forException(e);
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao processar os dados do usuário", e);
-            return Tasks.forException(e);
-        }
-    }
-
-    @Override
-    public Task<Void> saveUser(Users user) {
-        tokenService.validateAndRefreshToken();
-        try {
-            updateUserNameInLocalFile(user.getName(), user.getTelefone());
-            updateMotoristaNome(user.getUid(), user.getName(), user.getTelefone());
-
-            return Tasks.forResult(null);
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao salvar o usuário", e);
-            return Tasks.forException(e);
-        }
-    }
-
-    @Override
-    public Task<Void> loginUser(String nome, String senha) {
-        String jsonBody = String.format("{\"login\": \"%s\", \"senha\": \"%s\"}", nome, senha);
-        RequestBody body = RequestBody.create(jsonBody, JSON);
-
-        Request request = new Request.Builder()
-                .url(URL_API + "auth/login")
-                .post(body)
-                .build();
-
-        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-
-        new Thread(() -> {
-            try (Response response = client.newCall(request).execute()) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String responseBody = response.body().string();
-                    Log.d(TAG, "Resposta do servidor: " + responseBody);
-
-                    JSONObject jsonObject = new JSONObject(responseBody);
-                    JSONObject data = jsonObject.optJSONObject("data");
-                    if (data == null || !data.optString("role").equals("MOTORISTA")) {
-                        throw new RuntimeException("Usuário não é motorista");
-                    }
-
-                    // adiciona o tokenExpired no JSON em horário de Brasília
-                    jsonObject.put(
-                            "tokenExpired",
-                            LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
-                                    .plusHours(11)
-                                    .toString()
-                    );
-
-                    // salva a resposta já modificada
-                    saveApiResponse(jsonObject.toString());
-
-                    tcs.setResult(null);
-                } else {
-                    Log.e(TAG, "Erro na requisição: " + response.code() + " - " + response.message());
-                    tcs.setException(new IOException("Erro na requisição: " + response.code()));
+                JSONArray bases = data.optJSONArray("bases");
+                String baseNome = "";
+                int baseId = -1;
+                if (bases != null && bases.length() > 0) {
+                    JSONObject b = bases.getJSONObject(0);
+                    baseNome = b.optString("nome");
+                    baseId = b.optInt("id");
                 }
+
+                tcs.setResult(new Users(nome, id, telefone, baseNome, baseId, frete));
             } catch (Exception e) {
-                Log.e(TAG, "Erro ao realizar o login", e);
+                Log.e(TAG, "Erro ao obter usuário", e);
                 tcs.setException(e);
             }
-        }).start();
-
+        });
         return tcs.getTask();
     }
 
+    /**
+     * Grava localmente só o nó "data" do usuário em user_data.json.
+     */
+    public Task<Void> saveUser(Users user) {
+        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
+        executor.execute(() -> {
+            try {
+                // 1) Atualiza no servidor
+                JSONObject body = new JSONObject()
+                        .put("nome", user.getName())
+                        .put("telefone", user.getTelefone().replaceAll("\\D+", ""));
+                executeRequest(
+                        "api/motoristas/updateSite/" + user.getUid(),
+                        "PUT",
+                        body,
+                        tcs
+                );
 
-    private void updateUserNameInLocalFile(String newName, String newTelefone) {
-        try {
+                // 2) Atualiza o cache local (campo data)
+                String raw = readFile(FILE_NAME);
+                JSONObject root = new JSONObject(raw);
+                JSONObject data = root.getJSONObject("data");
+                data.put("nome", user.getName());
+                data.put("telefone", user.getTelefone());
+                writeFile(FILE_NAME, root.toString());
 
-            String jsonContent = readFile(FILE_NAME);
-            JSONObject jsonObject = new JSONObject(jsonContent);
-
-            if (jsonObject.has("data")) {
-                JSONObject data = jsonObject.getJSONObject("data");
-
-                data.put("nome", newName);
-                data.put("telefone", newTelefone);
-
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao salvar usuário", e);
+                tcs.setException(e);
             }
-            writeFile(FILE_NAME, jsonObject.toString());
-            Log.d(TAG, "Campo 'nome' atualizado no arquivo JSON com sucesso.");
-        } catch (IOException e) {
-            Log.e(TAG, "Erro ao ler o arquivo JSON para atualizar o nome", e);
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao atualizar o campo 'nome' no JSON", e);
-        }
+        });
+        return tcs.getTask();
     }
 
-    private void updateMotoristaNome(String id, String nome, String telefone) {
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("nome", nome);
-            jsonBody.put("telefone", telefone.replace(
-                    "(", "").replace(")", "").replace("-", "").replace(" ", ""
-            ));
-            Log.e(TAG, jsonBody.toString());
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao criar o corpo da requisição", e);
-        }
+    /**
+     * Faz login, salva os tokens no EncryptedSharedPreferences e grava
+     * em user_data.json só o bloco "data".
+     */
+    public Task<Void> loginUser(String nome, String senha) {
+        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
+        executor.execute(() -> {
+            try {
+                // 1) chama API de login
+                JSONObject loginBody = new JSONObject()
+                        .put("login", nome)
+                        .put("senha", senha);
+                RequestBody body = RequestBody.create(loginBody.toString(), JSON_MEDIA);
 
-        String accessToken = getAccessTokenFromLocalFile();
+                Request req = new Request.Builder()
+                        .url(URL_API + "auth/login")
+                        .post(body)
+                        .build();
 
-        RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json; charset=utf-8"));
+                try (Response resp = httpClient.newCall(req).execute()) {
+                    if (!resp.isSuccessful() || resp.body() == null) {
+                        throw new IOException("Login failed: " + resp.code());
+                    }
 
-        Request request = new Request.Builder()
-                .url(URL_API + "api/motoristas/updateSite/" + id)
-                .put(body)
-                .addHeader("Authorization", "Bearer " + accessToken)
-                .build();
+                    JSONObject json = new JSONObject(resp.body().string());
+                    JSONObject data = json.optJSONObject("data");
+                    String role = data.optString("role");
+                    if (!"MOTORISTA".equals(role)) {
+                        throw new RuntimeException("Usuário não é motorista");
+                    }
 
-        new Thread(() -> {
-            try (Response response = new OkHttpClient().newCall(request).execute()) {
-                if (response.isSuccessful()) {
-                    Log.d(TAG, "Motorista atualizado com sucesso: " + response.body().string());
-                } else {
-                    Log.e(TAG, "Erro na requisição PUT: " + response.code() + " " + response.message());
+                    // 2) salva tokens encriptados
+                    String at = json.getString("accessToken");
+                    String rt = json.getString("refreshToken");
+                    storage.saveTokens(at, rt);
+
+                    // 3) grava só o data em user_data.json
+                    JSONObject root = new JSONObject().put("data", data);
+                    writeFile(FILE_NAME, root.toString());
+
+                    tcs.setResult(null);
+                }
+
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao realizar login", e);
+                storage.clear();  // limpa tokens caso falhe
+                tcs.setException(e);
+            }
+        });
+        return tcs.getTask();
+    }
+
+    // --- executa PUT ou POST protegidos por Bearer token ---
+    private void executeRequest(
+            String path,
+            String method,
+            JSONObject body,
+            TaskCompletionSource<Void> tcs
+    ) {
+        executor.execute(() -> {
+            try {
+                // garante token válido
+                tokenService.validateAndRefreshToken().getResult();
+
+                String access = storage.getAccessToken();
+                RequestBody rb = RequestBody.create(body.toString(), JSON_MEDIA);
+                Request.Builder b = new Request.Builder()
+                        .url(URL_API + path)
+                        .addHeader("Authorization", "Bearer " + access);
+
+                Request req = "PUT".equals(method) ? b.put(rb).build() : b.post(rb).build();
+                try (Response resp = httpClient.newCall(req).execute()) {
+                    if (resp.isSuccessful()) {
+                        tcs.setResult(null);
+                    } else {
+                        throw new IOException("API error: " + resp.code());
+                    }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Erro ao fazer a requisição PUT", e);
+                Log.e(TAG, "Erro em executeRequest", e);
+                tcs.setException(e);
             }
-        }).start();
+        });
     }
 
-    private String getAccessTokenFromLocalFile() {
-        try {
-            String jsonContent = readFile(FILE_NAME);
-            Log.d(TAG, "Conteúdo do arquivo JSON: " + jsonContent);
-
-            JSONObject jsonObject = new JSONObject(jsonContent);
-
-            if (jsonObject.has("accessToken")) {
-                return jsonObject.getString("accessToken");
-            } else {
-                Log.e(TAG, "Campo 'accessToken' não encontrado no arquivo JSON");
-                return null;
-            }
-
-        } catch (IOException e) {
-            Log.e(TAG, "Erro ao ler o arquivo de token", e);
-            return null;
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao processar o conteúdo do arquivo", e);
-            return null;
+    // --- Helpers de I/O do bloco data em user_data.json ---
+    private String readFile(String name) throws IOException {
+        try (FileInputStream fis = context.openFileInput(name)) {
+            byte[] buf = new byte[fis.available()];
+            fis.read(buf);
+            return new String(buf, StandardCharsets.UTF_8);
         }
     }
 
-    private void saveApiResponse(String responseBody) {
-        try {
-
-            writeFile(FILE_NAME, responseBody);
-            Log.d(TAG, "Resposta da API salva com sucesso.");
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao salvar a resposta da API", e);
-        }
-    }
-
-    private String readFile(String fileName) throws IOException {
-        try (FileInputStream fis = context.openFileInput(fileName)) {
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            return new String(buffer, StandardCharsets.UTF_8);
-        }
-    }
-
-    private void writeFile(String fileName, String content) throws IOException {
-        try (FileOutputStream fos = context.openFileOutput(fileName, Context.MODE_PRIVATE)) {
+    private void writeFile(String name, String content) throws IOException {
+        try (FileOutputStream fos = context.openFileOutput(name, Context.MODE_PRIVATE)) {
             fos.write(content.getBytes(StandardCharsets.UTF_8));
         }
     }
-
-
 }
-

@@ -8,7 +8,6 @@ import android.util.Log;
 import android.widget.Toast;
 import android.media.ExifInterface;
 
-import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.activitys.RTADetailsActivity;
 import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
@@ -19,7 +18,7 @@ public class ImageDriverService {
 
     private final Context context;
     private final String codigodeficha;
-    private IPackingListRepository packingListRepository;
+    private PackingListRepository packingListRepository;
 
 
     public ImageDriverService(Context context, String codigodeficha) {

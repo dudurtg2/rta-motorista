@@ -7,17 +7,28 @@ public class Users {
     private String base;
     private String uid;
 
+    private boolean frete;
     private int baseid;
 
-    public Users(String name, String uid, String telefone, String base, int baseid) {
+    public Users(String name, String uid, String telefone, String base, int baseid, boolean frete) {
         this.name = name;
         this.uid = uid;
         this.telefone = telefone;
         this.base = base;
         this.baseid = baseid;
+        this.frete = frete;
 
 
 
+
+    }
+
+    public boolean isFrete() {
+        return frete;
+    }
+
+    public void setFrete(boolean frete) {
+        this.frete = frete;
     }
 
     public int getBaseid() {

@@ -15,8 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.Views.RTAlista.AdapterViewRTA;
 import com.example.rta_app.SOLID.entities.PackingList;
 import com.example.rta_app.SOLID.api.PackingListRepository;
@@ -35,13 +33,9 @@ public class InTravelActivity extends AppCompatActivity {
 
     public ActivityInTravelBinding binding;
     private String filter = "Todas as cidades";
-    private IUsersRepository usersRepository;
-    private IPackingListRepository packingListRepository;
+    private UsersRepository usersRepository;
+    private PackingListRepository packingListRepository;
 
-    public InTravelActivity() {
-        this.packingListRepository = new PackingListRepository(this);
-        this.usersRepository = new UsersRepository(this);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +43,8 @@ public class InTravelActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityInTravelBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        this.packingListRepository = new PackingListRepository(this);
+        this.usersRepository = new UsersRepository(this);
         setupBinding();
         queryItems(filter);
         queryFilter();

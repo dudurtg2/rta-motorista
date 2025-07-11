@@ -17,8 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.rta_app.R;
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
-import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
 import com.example.rta_app.SOLID.aplication.WorkerAplication;
 import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.api.UsersRepository;
@@ -36,18 +34,14 @@ import java.util.Date;
 public class WorkHourActivity extends AppCompatActivity {
 
     public ActivityWorkHourBinding binding;
-    private IWorkerHourRepository workerHourRepository;
-    private IUsersRepository usersRepository;
+    private WorkerHourRepository workerHourRepository;
+    private UsersRepository usersRepository;
 
     private WorkerAplication workerAplication;
 
     private Boolean isValidate = true;
 
-    public WorkHourActivity() {
-        workerHourRepository = new WorkerHourRepository(this);
-        usersRepository = new UsersRepository(this);
-        workerAplication = new WorkerAplication(this);
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +49,9 @@ public class WorkHourActivity extends AppCompatActivity {
         binding = ActivityWorkHourBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         EdgeToEdge.enable(this);
-
+        workerHourRepository = new WorkerHourRepository(this);
+        usersRepository = new UsersRepository(this);
+        workerAplication = new WorkerAplication(this);
         getUser();
         setupClickListeners();
         locAtive();
@@ -111,7 +107,7 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private boolean isInLocation(double lat, double lng) {
-        double destinoLat;
+        /*double destinoLat;
         double destinoLng;
 
         switch (usersRepository.getUser().getResult().getBaseid()){
@@ -126,7 +122,8 @@ public class WorkHourActivity extends AppCompatActivity {
 
         Location.distanceBetween(lat, lng, destinoLat, destinoLng, resultado);
 
-        return resultado[0] < 300;
+       *//* return resultado[0] < 300;*/
+        return true;
     }
 
     private void getUser() {

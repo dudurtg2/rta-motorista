@@ -15,8 +15,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.Views.Coletalista.AdapterViewRTA;
 import com.example.rta_app.SOLID.api.PackingRepository;
 import com.example.rta_app.SOLID.entities.Coletas;
@@ -33,15 +31,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public ActivityMainBinding binding;
-    private IUsersRepository usersRepository;
-    private IPackingListRepository packingListRepository;
+    private UsersRepository usersRepository;
+    private PackingListRepository packingListRepository;
     private PackingRepository packingRepository;
 
-    public MainActivity() {
-        this.packingListRepository = new PackingListRepository(this);
-        this.usersRepository = new UsersRepository(this);
-        this.packingRepository = new PackingRepository(this);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +43,14 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        this.packingListRepository = new PackingListRepository(this);
+        this.usersRepository = new UsersRepository(this);
+        this.packingRepository = new PackingRepository(this);
         getUser();
         SetupBinding();
         queryItems();
 
     }
-
 
 
     private void getUser() {
@@ -65,6 +59,15 @@ public class MainActivity extends AppCompatActivity {
                     binding.UserNameDisplay.setText(users.getName());
                     binding.telefone.setText(users.getTelefone().replaceAll("(\\d{2})(\\d{5})(\\d{4})", "($1) $2-$3"));
                     binding.base.setText(users.getBase());
+
+
+                    if (users.isFrete()) {
+                        binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
+                        binding.textView.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
+                    } else {
+                        binding.buttonWorkHour.setOnClickListener(v -> Toast.makeText(this, "Essa opção não está disponível para você", Toast.LENGTH_SHORT));
+                        binding.textView.setOnClickListener(v -> Toast.makeText(this, "Essa opção não está disponível para você", Toast.LENGTH_SHORT));
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Erro ao obter usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -94,8 +97,8 @@ public class MainActivity extends AppCompatActivity {
                             if (codigodeficha != null && !codigodeficha.isEmpty()) {
                                 new AlertDialog.Builder(this)
                                         .setTitle("Confirmação")
-                                        .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: "+ packingList.getLocal() + "\nData: "+ packingList.getHoraedia().replace("T", " ").split("\\.")[0])
-                                        .setPositiveButton("Coletar", (dialog, which) ->  packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
+                                        .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: " + packingList.getLocal() + "\nData: " + packingList.getHoraedia().replace("T", " ").split("\\.")[0])
+                                        .setPositiveButton("Coletar", (dialog, which) -> packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
                                             queryItems();
                                             Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();
                                         }))
@@ -112,9 +115,9 @@ public class MainActivity extends AppCompatActivity {
 
                         binding.RTAprocura.setText("");
 
-                    }).addOnFailureListener(va  -> {
-                            
-                            binding.RTAprocura.setText("");
+                    }).addOnFailureListener(va -> {
+
+                        binding.RTAprocura.setText("");
                     });
                     return true;
                 }
@@ -123,8 +126,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.Perfil.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
-        binding.buttonWorkHour.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
-        binding.textView.setOnClickListener(v -> startActivity(new Intent(this, WorkHourActivity.class)));
+
         binding.inTravelbutton.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
         binding.textView2.setOnClickListener(v -> startActivity(new Intent(this, InTravelActivity.class)));
         binding.PackectList.setOnClickListener(v -> startActivity(new Intent(this, PacketList.class)));
@@ -182,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
                         if (codigodeficha != null && !codigodeficha.isEmpty()) {
                             new AlertDialog.Builder(this)
                                     .setTitle("Confirmação")
-                                    .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: "+ packingList.getLocal() + "\nData: "+ packingList.getHoraedia().replace("T", " ").split("\\.")[0])
-                                    .setPositiveButton("Coletar", (dialog, which) ->  packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
+                                    .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: " + packingList.getLocal() + "\nData: " + packingList.getHoraedia().replace("T", " ").split("\\.")[0])
+                                    .setPositiveButton("Coletar", (dialog, which) -> packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
                                         queryItems();
                                         Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();
                                     }))
@@ -196,31 +198,31 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
                     }
-                }).addOnFailureListener(va -> { packingListRepository.getPackingListToDirect(scannedCode).addOnSuccessListener(packingList -> {
-                    if (packingList != null) {
-                        String codigodeficha = packingList.getCodigodeficha();
-                        if (codigodeficha != null && !codigodeficha.isEmpty()) {
-                            Toast.makeText(this, codigodeficha + "\n recebido e adicionado a rota", Toast.LENGTH_SHORT).show();
-                            packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vad -> queryItems());
+                }).addOnFailureListener(va -> {
+                    packingListRepository.getPackingListToDirect(scannedCode).addOnSuccessListener(packingList -> {
+                        if (packingList != null) {
+                            String codigodeficha = packingList.getCodigodeficha();
+                            if (codigodeficha != null && !codigodeficha.isEmpty()) {
+                                Toast.makeText(this, codigodeficha + "\n recebido e adicionado a rota", Toast.LENGTH_SHORT).show();
+                                packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vad -> queryItems());
 
+                            } else {
+                                Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Saca não encontrada", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(this, "Saca não encontrada", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(vaa -> {
-                    String message = scannedCode + " não encontrado";
-                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                    }).addOnFailureListener(vaa -> {
+                        String message = scannedCode + " não encontrado";
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                    });
                 });
-            });
             }
 
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-
 
 
 }

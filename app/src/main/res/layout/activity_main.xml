@@ -98,6 +98,7 @@
             android:id="@+id/inTravelbutton"
             android:layout_width="0dp"
             android:layout_height="128dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/button_ripple"
             android:src="@drawable/bus_marker"
@@ -106,14 +107,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toTopOf="@+id/buttonWorkHour"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
         <ImageView
             android:id="@+id/buttonWorkHour"
             android:layout_width="0dp"
             android:layout_height="128dp"
             android:layout_marginStart="16dp"
+
             android:layout_marginTop="20dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/button_ripple"

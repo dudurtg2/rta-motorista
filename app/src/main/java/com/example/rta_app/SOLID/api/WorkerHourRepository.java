@@ -1,9 +1,13 @@
+
 package com.example.rta_app.SOLID.api;
 
 import android.content.Context;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
+import com.example.rta_app.SOLID.entities.WorkerHous;
+import com.example.rta_app.SOLID.services.TokenService;
+import com.example.rta_app.SOLID.services.TokenStorage;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,12 +17,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
-import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.services.TokenService;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.TaskCompletionSource;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,242 +26,191 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class WorkerHourRepository implements IWorkerHourRepository {
+public class WorkerHourRepository{
 
-    private Context context;
     private static final String TAG = "WorkerHourRepository";
     private static final String FILE_NAME = "worker_hours.json";
-    private static final String FILE_NAME_USER = "user_data.json";
-    private static final String URL_API = "http://147.79.86.117:10102/";
-    private TokenService tokenService;
+    private static final String USER_FILE = "user_data.json";
+    private static final String BASE_URL = "https://android.lc-transportes.com/";
+    private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
+
+    private final Context context;
+    private final TokenService tokenService;
+    private final TokenStorage tokenStorage;
+    private final OkHttpClient httpClient;
+    private final ExecutorService executor;
 
     public WorkerHourRepository(Context context) {
-        this.context = context;
-        this.tokenService = new TokenService(context);
+        this.context = context.getApplicationContext();
+        this.tokenService = new TokenService(this.context);
+        this.httpClient = new OkHttpClient();
+        this.tokenStorage = new TokenStorage(this.context);
+        this.executor = Executors.newSingleThreadExecutor();
     }
-    @Override
+
+   
     public Task<Void> validadeCode(String code) {
-        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         tokenService.validateAndRefreshToken();
 
-        String accessToken = getAccessTokenFromLocalFile();
-        RequestBody emptyBody = RequestBody.create("", null);
+        String token = getAccessToken();
+        if (token == null) {
+            tcs.setException(new IllegalStateException("Access token missing"));
+            return tcs.getTask();
+        }
+
         Request request = new Request.Builder()
-                .url(URL_API + "api/unique/validade/" + code)
-                .put(emptyBody)
-                .addHeader("Authorization", "Bearer " + accessToken)
+                .url(BASE_URL + "api/unique/validade/" + code)
+                .put(RequestBody.create(new byte[0], null))
+                .addHeader("Authorization", "Bearer " + token)
                 .build();
 
-        new Thread(() -> {
-            try (Response response = new OkHttpClient().newCall(request).execute()) {
-                String responseBody = response.body() != null ? response.body().string() : null;
+        executeRequest(request, tcs);
+        return tcs.getTask();
+    }
 
-                if (response.isSuccessful()) {
-                    Log.d(TAG, "Requisição bem-sucedida: " + request);
-                    Log.d(TAG, "Requisição bem-sucedida: " + responseBody);
-                    taskCompletionSource.setResult(null);
+   
+    public Task<Void> saveHors(WorkerHous workerHous) {
+        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
+        tokenService.validateAndRefreshToken();
+
+        String token = getAccessToken();
+        String driveId = getUserId();
+        if (token == null || driveId == null) {
+            tcs.setException(new IllegalStateException("Token or user ID missing"));
+            return tcs.getTask();
+        }
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("date", workerHous.getDate());
+            json.put("hour_first", workerHous.getHour_first());
+            json.put("hour_dinner", workerHous.getHour_dinner());
+            json.put("hour_finish", workerHous.getHour_finish());
+            json.put("hour_stop", workerHous.getHour_stop());
+        } catch (JSONException e) {
+            tcs.setException(e);
+            return tcs.getTask();
+        }
+
+        RequestBody body = RequestBody.create(json.toString(), JSON_MEDIA);
+        Request request = new Request.Builder()
+                .url(BASE_URL + "api/pontos/save/" + driveId)
+                .post(body)
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+
+        executeRequest(request, tcs);
+        return tcs.getTask();
+    }
+
+   
+    public Task<Void> saveWorkerHous(WorkerHous workerHous) {
+        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
+        executor.execute(() -> {
+            try {
+                JSONObject json = new JSONObject();
+                json.put("date", workerHous.getDate());
+                json.put("hour_first", workerHous.getHour_first());
+                json.put("hour_dinner", workerHous.getHour_dinner());
+                json.put("hour_finish", workerHous.getHour_finish());
+                json.put("hour_stop", workerHous.getHour_stop());
+                json.put("hour_after", workerHous.getHour_after());
+                writeToFile(json.toString());
+                tcs.setResult(null);
+            } catch (Exception e) {
+                Log.e(TAG, "Error saving local data", e);
+                tcs.setException(e);
+            }
+        });
+        return tcs.getTask();
+    }
+
+   
+    public Task<WorkerHous> getWorkerHous() {
+        TaskCompletionSource<WorkerHous> tcs = new TaskCompletionSource<>();
+        executor.execute(() -> {
+            try {
+                String data = readFromFile();
+                if (data == null) {
+                    tcs.setResult(new WorkerHous("", "", "", "", "", ""));
                 } else {
-                    Log.e(TAG, "Erro na requisição: " + request);
-                    Log.e(TAG, "Erro na requisição: " + responseBody);
-                    taskCompletionSource.setException(
-                            new Exception("Erro na API: " + request + responseBody)
+                    JSONObject json = new JSONObject(data);
+                    WorkerHous wh = new WorkerHous(
+                            json.optString("date", ""),
+                            json.optString("hour_first", ""),
+                            json.optString("hour_dinner", ""),
+                            json.optString("hour_finish", ""),
+                            json.optString("hour_stop", ""),
+                            json.optString("hour_after", "")
                     );
+                    tcs.setResult(wh);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Erro ao enviar a requisição", e);
-                taskCompletionSource.setException(e);
+                Log.e(TAG, "Error reading local data", e);
+                tcs.setException(e);
             }
-        }).start();
-
-        return taskCompletionSource.getTask();
-    }
-    public Task<Void> saveWorkerHous(WorkerHous workerHous) {
-        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
-
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("date", workerHous.getDate());
-            jsonObject.put("hour_first", workerHous.getHour_first());
-            jsonObject.put("hour_dinner", workerHous.getHour_dinner());
-            jsonObject.put("hour_finish", workerHous.getHour_finish());
-            jsonObject.put("hour_stop", workerHous.getHour_stop());
-            jsonObject.put("hour_after", workerHous.getHour_after());
-
-            writeToFile(jsonObject.toString());
-            taskCompletionSource.setResult(null);
-
-        } catch (JSONException | IOException e) {
-            Log.e("WorkerHourRepository", "Erro ao salvar WorkerHous", e);
-            taskCompletionSource.setException(e);
-        }
-
-        return taskCompletionSource.getTask();
+        });
+        return tcs.getTask();
     }
 
-    public Task<WorkerHous> getWorkerHous() {
-        TaskCompletionSource<WorkerHous> taskCompletionSource = new TaskCompletionSource<>();
-
-        try {
-            String jsonData = readFromFile();
-
-            if (jsonData == null) {
-                taskCompletionSource.setResult(new WorkerHous("", "", "", "", "", ""));
-            } else {
-                JSONObject jsonObject = new JSONObject(jsonData);
-
-                String data = jsonObject.optString("date", "");
-                String entrada = jsonObject.optString("hour_first", "");
-                String almoco = jsonObject.optString("hour_dinner", "");
-                String saida = jsonObject.optString("hour_finish", "");
-                String fim = jsonObject.optString("hour_stop", "");
-                String anterior = jsonObject.optString("hour_after", "");
-
-                WorkerHous workerHous = new WorkerHous(data, entrada, almoco, saida, fim, anterior);
-                taskCompletionSource.setResult(workerHous);
+    private void executeRequest(Request request, TaskCompletionSource<Void> tcs) {
+        executor.execute(() -> {
+            try (Response resp = httpClient.newCall(request).execute()) {
+                String body = resp.body() != null ? resp.body().string() : "";
+                if (resp.isSuccessful()) {
+                    Log.d(TAG, "API Success: " + body);
+                    tcs.setResult(null);
+                } else {
+                    Log.e(TAG, "API Failure: " + body);
+                    tcs.setException(new IOException("API error: " + body));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Request error", e);
+                tcs.setException(e);
             }
-        } catch (JSONException | IOException e) {
-            Log.e("WorkerHourRepository", "Erro ao ler WorkerHous", e);
-            taskCompletionSource.setException(e);
-        }
-
-        return taskCompletionSource.getTask();
+        });
     }
 
+   
     public void writeToFile(String data) throws IOException {
         try (FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE)) {
-            fos.write(data.getBytes());
+            fos.write(data.getBytes(StandardCharsets.UTF_8));
         }
     }
 
+   
     public String readFromFile() throws IOException {
         File file = new File(context.getFilesDir(), FILE_NAME);
-        if (!file.exists()) {
-            return null;
-        }
-
+        if (!file.exists()) return null;
         try (FileInputStream fis = context.openFileInput(FILE_NAME)) {
-            StringBuilder stringBuilder = new StringBuilder();
-            int content;
-            while ((content = fis.read()) != -1) {
-                stringBuilder.append((char) content);
-            }
-            return stringBuilder.toString();
-        }
-    }
-    private String readFile(String fileName) throws IOException {
-        try (FileInputStream fis = context.openFileInput(fileName)) {
-            byte[] buffer = new byte[fis.available()];
-            fis.read(buffer);
-            return new String(buffer, StandardCharsets.UTF_8);
+            byte[] buf = new byte[fis.available()];
+            fis.read(buf);
+            return new String(buf, StandardCharsets.UTF_8);
         }
     }
 
-
-    private String getAccessTokenFromLocalFile() {
-        try {
-            String jsonContent = readFile(FILE_NAME_USER);
-            Log.d(TAG, "Conteúdo do arquivo JSON: " + jsonContent);
-
-            JSONObject jsonObject = new JSONObject(jsonContent);
-
-            if (jsonObject.has("accessToken")) {
-                return jsonObject.getString("accessToken");
-            } else {
-                Log.e(TAG, "Campo 'accessToken' não encontrado no arquivo JSON");
-                return null;
-            }
-
-        } catch (IOException e) {
-            Log.e(TAG, "Erro ao ler o arquivo de token", e);
-            return null;
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao processar o conteúdo do arquivo", e);
-            return null;
-        }
-    }
-    private String getIdDriveFromLocalFile() {
-
-        try {
-            String jsonContent = readFile(FILE_NAME_USER);
-            Log.d(TAG, "Conteúdo do arquivo JSON: " + jsonContent);
-
-            JSONObject jsonObject = new JSONObject(jsonContent);
-
-            JSONObject info = jsonObject.getJSONObject("data");
-
-            if (info.has("id")) {
-                return info.getString("id");
-            } else {
-                Log.e(TAG, "Campo 'id' não encontrado no arquivo JSON");
-                return null;
-            }
-
-        } catch (IOException e) {
-            Log.e(TAG, "Erro ao ler o arquivo de token", e);
-            return null;
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao processar o conteúdo do arquivo", e);
-            return null;
-        }
-    }
-    @Override
-
-    public Task<Void> saveHors(WorkerHous workerHous) {
-        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+    private String getAccessToken() {
         tokenService.validateAndRefreshToken();
-
-        Log.i(TAG, workerHous.toString());
-
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put("date", workerHous.getDate());
-            jsonBody.put("hour_first", workerHous.getHour_first());
-            jsonBody.put("hour_dinner", workerHous.getHour_dinner());
-            jsonBody.put("hour_finish", workerHous.getHour_finish());
-            jsonBody.put("hour_stop", workerHous.getHour_stop());
-        } catch (JSONException e) {
-            Log.e(TAG, "Erro ao criar JSON", e);
-            taskCompletionSource.setException(e);
-            return taskCompletionSource.getTask();
-        }
-
-        Log.i(TAG, "JSON enviado: " + jsonBody.toString());
-
-        // Criação do corpo da requisição
-        String accessToken = getAccessTokenFromLocalFile();
-        RequestBody body = RequestBody.create(
-                jsonBody.toString(), MediaType.get("application/json; charset=utf-8")
-        );
-
-        Log.i(TAG, "RequestBody criado: " + body.toString());
-
-        // Construção da requisição HTTP
-        Request request = new Request.Builder()
-                .url(URL_API + "api/pontos/save/" + getIdDriveFromLocalFile())
-                .post(body)
-                .addHeader("Authorization", "Bearer " + accessToken)
-                .build();
-
-        new Thread(() -> {
-            try (Response response = new OkHttpClient().newCall(request).execute()) {
-                String responseBody = response.body() != null ? response.body().string() : null;
-
-                if (response.isSuccessful()) {
-                    Log.d(TAG, "Requisição bem-sucedida: " + responseBody);
-                    taskCompletionSource.setResult(null);
-                } else {
-                    Log.e(TAG, "Erro na requisição: " + responseBody);
-                    taskCompletionSource.setException(
-                            new Exception("Erro na API: " + responseBody)
-                    );
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Erro ao enviar a requisição", e);
-                taskCompletionSource.setException(e);
-            }
-        }).start();
-
-        return taskCompletionSource.getTask();
+        return tokenStorage.getAccessToken();
     }
 
+    private String getUserId() {
+        try {
+            String json = readFile(USER_FILE);
+            JSONObject data = new JSONObject(json).getJSONObject("data");
+            return data.optString("id", null);
+        } catch (Exception e) {
+            Log.e(TAG, "User ID read error", e);
+            return null;
+        }
+    }
+
+    private String readFile(String name) throws IOException {
+        try (FileInputStream fis = context.openFileInput(name)) {
+            byte[] buf = new byte[fis.available()];
+            fis.read(buf);
+            return new String(buf, StandardCharsets.UTF_8);
+        }
+    }
 }

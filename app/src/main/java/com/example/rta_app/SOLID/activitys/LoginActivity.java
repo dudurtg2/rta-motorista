@@ -34,9 +34,6 @@ public class LoginActivity extends AppCompatActivity {
     private UsersRepository usersRepository;
     private static final String FILE_NAME = "user_data.json";
 
-    public LoginActivity(){
-        this.usersRepository = new UsersRepository(this);
-    }
     private final ActivityResultLauncher<String> requestCameraPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         if (isGranted) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
@@ -51,7 +48,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        this.usersRepository = new UsersRepository(this);
         asLogin();
+
         binding.loginButton.setOnClickListener(view -> validateData());
     }
 

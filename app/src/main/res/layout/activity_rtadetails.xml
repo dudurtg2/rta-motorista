@@ -81,11 +81,11 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="#FF000C"
-            android:text="RECUSAR"
+            android:text="RECUSAR ROMANEIO"
             android:textColor="@color/black"
             android:textSize="22sp"
             app:layout_constraintBottom_toTopOf="@+id/multiAutoCompleteTextView"
-            app:layout_constraintEnd_toStartOf="@+id/buttonOcorrencia"
+            app:layout_constraintEnd_toEndOf="@+id/buttonFinalizar"
             app:layout_constraintStart_toStartOf="@+id/buttonFinalizar"
             app:layout_constraintTop_toBottomOf="@+id/buttonFinalizar" />
 
@@ -97,26 +97,12 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:background="#32FFAD"
-        android:text="FINALIZAR SACA"
+        android:text="FINALIZAR ROMANEIO"
         android:textColor="@color/black"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
-
-        <Button
-            android:id="@+id/buttonOcorrencia"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:background="#FFD800"
-            android:text="OCORRÊNCIA"
-            android:textColor="@color/black"
-            android:textSize="22sp"
-            app:layout_constraintBottom_toBottomOf="@+id/buttonRecusar"
-            app:layout_constraintEnd_toEndOf="@+id/buttonFinalizar"
-            app:layout_constraintStart_toEndOf="@+id/buttonRecusar"
-            app:layout_constraintTop_toTopOf="@+id/buttonRecusar" />
 
         <TextView
             android:id="@+id/textRTA"
@@ -171,30 +157,27 @@
             app:layout_constraintStart_toStartOf="@+id/textEntregador"
             app:layout_constraintTop_toBottomOf="@+id/textEntregador" />
 
-            <ScrollView
-                android:id="@+id/scrollView2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="32dp"
-                app:layout_constraintBottom_toTopOf="@+id/buttonOcorrencia"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textEndereco"
-                app:layout_constraintVertical_bias="0.0">
+        <ScrollView
+            android:id="@+id/scrollView2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textEndereco">
 
-                <TextView
-                    android:id="@+id/textAllCodes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/button_stroke_squad_white_block"
-                    android:text="Carregando..."
-                    android:textIsSelectable="true"
-                    android:textColor="@color/black" />
-            </ScrollView>
+            <TextView
+                android:id="@+id/textAllCodes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_stroke_squad_white_block"
+                android:text="Carregando..."
+                android:textColor="@color/black"
+                android:textIsSelectable="true" />
+        </ScrollView>
 
 
         <EditText
@@ -205,17 +188,14 @@
             android:background="@drawable/squad_stroke"
             android:hint="Escreva aqui sua ocorrência"
             android:maxLength="253"
-            android:paddingLeft="10dp"
 
+            android:paddingLeft="10dp"
             android:textAlignment="gravity"
             android:textColor="@color/black"
             android:textColorHint="@color/black"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/buttonOcorrencia"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintEnd_toEndOf="@+id/buttonRecusar"
             app:layout_constraintStart_toStartOf="@+id/buttonRecusar"
-            app:layout_constraintTop_toBottomOf="@+id/buttonOcorrencia"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintTop_toBottomOf="@+id/buttonRecusar" />
 
         <TextView
             android:id="@+id/Empresa"

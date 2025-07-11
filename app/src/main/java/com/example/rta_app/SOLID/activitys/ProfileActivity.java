@@ -12,7 +12,6 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.entities.Users;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.R;
@@ -25,12 +24,10 @@ public class ProfileActivity extends AppCompatActivity {
     public ActivityProfileBinding binding;
 
     public static final int PICK_IMAGE_REQUEST = 1;
-    private IUsersRepository usersRepository;
+    private UsersRepository usersRepository;
     private static final String FILE_NAME = "user_data.json";
 
-    public ProfileActivity() {
-        usersRepository = new UsersRepository(this);
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +36,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         binding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        usersRepository = new UsersRepository(this);
         SetupClickListeners();
     }
 
@@ -111,7 +108,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateUser() {
 
-        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid(), usersRepository.getUser().getResult().getTelefone(), usersRepository.getUser().getResult().getBase(),usersRepository.getUser().getResult().getBaseid())).addOnSuccessListener(aVoid1 -> {
+        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid(), usersRepository.getUser().getResult().getTelefone(), usersRepository.getUser().getResult().getBase(),usersRepository.getUser().getResult().getBaseid(),usersRepository.getUser().getResult().isFrete() )).addOnSuccessListener(aVoid1 -> {
             Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
             binding.profileUserInsert.setVisibility(View.GONE);
             binding.editNameUser.setText("");

@@ -5,7 +5,6 @@ import static com.example.rta_app.SOLID.services.NetworkService.isNetworkConnect
 import android.app.AlertDialog;
 import android.content.Context;
 
-import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
 import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.google.android.gms.tasks.Task;
@@ -13,7 +12,7 @@ import com.google.android.gms.tasks.Task;
 public class WorkerAplication {
 
     private Context context;
-    private IWorkerHourRepository workerHourRepository;
+    private WorkerHourRepository workerHourRepository;
 
     public WorkerAplication(Context context) {
         this.context = context;

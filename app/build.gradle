@@ -71,7 +71,9 @@ dependencies {
     implementation 'com.google.api-client:google-api-client:1.33.0'
     implementation 'com.google.http-client:google-http-client-gson:1.40.1'
     implementation 'com.google.code.gson:gson:2.10.1'
-    // Outras dependências
+// https://mvnrepository.com/artifact/androidx.security/security-crypto
+    runtimeOnly 'androidx.security:security-crypto:1.1.0-beta01'
+
     implementation 'com.journeyapps:zxing-android-embedded:4.1.0'
     implementation 'com.google.mlkit:barcode-scanning:17.0.0'
     implementation 'com.squareup.picasso:picasso:2.8'

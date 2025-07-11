@@ -6,22 +6,15 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.example.rta_app.R;
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.services.NetworkService;
 import com.example.rta_app.SOLID.services.TokenService;
 import com.example.rta_app.databinding.ActivityFirstBinding;
-import com.example.rta_app.databinding.ActivityLoginBinding;
 
 public class FirstActivity extends AppCompatActivity {
     private TokenService tokenService;
     private Integer id;
-    private IUsersRepository usersRepository;
+    private UsersRepository usersRepository;
     private NetworkService networkService;
     private ActivityFirstBinding binding;
 
