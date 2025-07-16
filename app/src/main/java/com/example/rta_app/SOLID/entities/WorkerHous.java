@@ -64,4 +64,16 @@ public class WorkerHous {
     public void setHour_stop(String hour_stop) {
         this.hour_stop = hour_stop;
     }
+
+    @Override
+    public String toString() {
+        return "WorkerHous{" +
+                "date='" + date + '\'' +
+                ", hour_first='" + hour_first + '\'' +
+                ", hour_dinner='" + hour_dinner + '\'' +
+                ", hour_finish='" + hour_finish + '\'' +
+                ", hour_stop='" + hour_stop + '\'' +
+                ", hour_after='" + hour_after + '\'' +
+                '}';
+    }
 }

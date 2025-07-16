@@ -54,77 +54,11 @@ public class WorkHourActivity extends AppCompatActivity {
         workerAplication = new WorkerAplication(this);
         getUser();
         setupClickListeners();
-        locAtive();
-    }
-
-
-    private void locAtive() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, location -> {
-                    if (location != null) {
-                        double lat = location.getLatitude();
-                        double lng = location.getLongitude();
-
-                        if (isInLocation(lat, lng)) {
-                            binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
-                        } else {
-                            if( binding.imageDinnerFinishHour.getVisibility() == View.VISIBLE) return;
-                            binding.imageFistHour.setOnClickListener(v -> {
-                                if(!binding.buttonFistHour.getText().toString().equals("Entrada")) return;
-                                EditText input = new EditText(this);
-                                input.setHint("Código de liberação");
-                                LinearLayout container = new LinearLayout(this);
-                                container.setPadding(50, 0, 50, 0);
-                                container.addView(input);
-
-                                new AlertDialog.Builder(this)
-                                        .setTitle("Alerta")
-                                        .setMessage("Você não pode registrar o ponto\nfora do local da base.\n\nSolicite um código de liberação:")
-                                        .setView(container)
-                                        .setPositiveButton("Enviar", (dialog, which) -> {
-                                            workerHourRepository.validadeCode(input.getText().toString().toUpperCase())
-                                                    .addOnSuccessListener(d -> openPontsIsFinish("Entrada"))
-                                                    .addOnFailureListener(c ->
-                                                            new AlertDialog.Builder(this)
-                                                            .setTitle("Alerta")
-                                                            .setMessage("Código de validação inválido")
-                                                            .setNeutralButton("Ok", (dialog2, which2) -> finish()).show()
-                                            );
-                                        })
-                                        .setNeutralButton("Cancelar", (dialog, which) -> dialog.dismiss())
-                                        .show();
-                            });
-                        }
-                    }
-                });
-
 
     }
 
-    private boolean isInLocation(double lat, double lng) {
-        /*double destinoLat;
-        double destinoLng;
 
-        switch (usersRepository.getUser().getResult().getBaseid()){
-            case 1:
-                destinoLat = -12.255348493385583;
-                destinoLng = -38.92503847319095;
-                break;
-            default:
-                return true;
-        }
-        float[] resultado = new float[1];
 
-        Location.distanceBetween(lat, lng, destinoLat, destinoLng, resultado);
-
-       *//* return resultado[0] < 300;*/
-        return true;
-    }
 
     private void getUser() {
         usersRepository.getUser()
@@ -150,7 +84,7 @@ public class WorkHourActivity extends AppCompatActivity {
                     .setMessage("Seus pontos estão sendo \nregistrados")
                     .setNeutralButton("ok", (dialog, which) -> updateToSheets()).show();
         });
-
+        binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
         binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsFinish("Almoço"));
         binding.imageDinnerFinishHour.setOnClickListener(v -> openPontsIsFinish("Saída"));
         binding.imageStop.setOnClickListener(v -> openPontsIsFinish("Fim"));
@@ -247,6 +181,7 @@ public class WorkHourActivity extends AppCompatActivity {
         isValidate = false;
         try {
             if (isNetworkConnected(this)) {
+
                 workerAplication.Finish(binding.UserNameDisplay.getText().toString()).addOnSuccessListener(v -> {
                     binding.progressBar.setVisibility(View.GONE);
                     binding.buttonFistHour.setVisibility(View.VISIBLE);
@@ -370,6 +305,7 @@ public class WorkHourActivity extends AppCompatActivity {
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
             return diffInMinutes >= 15;
+
 
 
         } catch (ParseException e) {
