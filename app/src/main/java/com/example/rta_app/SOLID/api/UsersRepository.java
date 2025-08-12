@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.example.rta_app.SOLID.services.TokenStorage;
 import com.example.rta_app.SOLID.entities.Users;
-import com.example.rta_app.SOLID.services.TokenService;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 
@@ -33,7 +32,6 @@ public class UsersRepository {
 
     private final TokenStorage storage;
     private final Context context;
-    private final TokenService tokenService;
     private final OkHttpClient httpClient;
     private final ExecutorService executor;
 
@@ -41,7 +39,6 @@ public class UsersRepository {
         this.context = context.getApplicationContext();
         this.httpClient = new OkHttpClient();
         this.executor = Executors.newSingleThreadExecutor();
-        this.tokenService = new TokenService(this.context);
         this.storage = new TokenStorage(this.context);
 
     }
@@ -137,7 +134,9 @@ public class UsersRepository {
                         throw new IOException("Login failed: " + resp.code());
                     }
 
+
                     JSONObject json = new JSONObject(resp.body().string());
+
                     JSONObject data = json.optJSONObject("data");
                     String role = data.optString("role");
                     if (!"MOTORISTA".equals(role)) {
@@ -145,9 +144,8 @@ public class UsersRepository {
                     }
 
                     // 2) salva tokens encriptados
-                    String at = json.getString("accessToken");
-                    String rt = json.getString("refreshToken");
-                    storage.saveTokens(at, rt);
+                    String apiKey = json.getString("apiKey");
+                    storage.saveApiKey(apiKey);
 
                     // 3) grava só o data em user_data.json
                     JSONObject root = new JSONObject().put("data", data);
@@ -175,13 +173,12 @@ public class UsersRepository {
         executor.execute(() -> {
             try {
                 // garante token válido
-                tokenService.validateAndRefreshToken().getResult();
 
-                String access = storage.getAccessToken();
+                String access = storage.getApiKey();
                 RequestBody rb = RequestBody.create(body.toString(), JSON_MEDIA);
                 Request.Builder b = new Request.Builder()
                         .url(URL_API + path)
-                        .addHeader("Authorization", "Bearer " + access);
+                        .addHeader("X-API-Key", access);
 
                 Request req = "PUT".equals(method) ? b.put(rb).build() : b.post(rb).build();
                 try (Response resp = httpClient.newCall(req).execute()) {

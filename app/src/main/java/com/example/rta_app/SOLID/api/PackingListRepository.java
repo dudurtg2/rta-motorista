@@ -6,7 +6,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.services.TokenService;
 import com.example.rta_app.SOLID.services.TokenStorage;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
@@ -42,29 +41,18 @@ public class PackingListRepository {
     private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
 
     private final Context context;
-    private final TokenService tokenService;
     private final OkHttpClient httpClient;
     private final TokenStorage tokenStorage;
     private final ExecutorService executor;
 
     public PackingListRepository(Context context) {
         this.context = context.getApplicationContext();
-        this.tokenService = new TokenService(this.context);
         this.tokenStorage = new TokenStorage(this.context);
         this.httpClient = new OkHttpClient();
         this.executor = Executors.newSingleThreadExecutor();
     }
 
    
-    public Task<Void> finishPackingList() {
-        tokenService.validateAndRefreshToken();
-        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        executor.execute(() -> {
-            // TODO: implementar lógica de fechamento de packing list
-            tcs.setResult(null);
-        });
-        return tcs.getTask();
-    }
 
    
     public Task<PackingList> getPackingListToDirect(String id) {
@@ -98,7 +86,6 @@ public class PackingListRepository {
 
    
     public Task<Void> movePackingListForDelivery(PackingList packingList) {
-        tokenService.validateAndRefreshToken();
         try {
             updateRomaneiosNome(packingList);
             return Tasks.forResult(null);
@@ -110,7 +97,6 @@ public class PackingListRepository {
 
    
     public Task<Void> updateStatusPackingList(PackingList packingList, String ocorrencia, String status) {
-        tokenService.validateAndRefreshToken();
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
@@ -131,7 +117,6 @@ public class PackingListRepository {
 
    
     public Task<Void> updateImgLinkForFinish(Bitmap bitmap, String uid) {
-        tokenService.validateAndRefreshToken();
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
@@ -155,7 +140,7 @@ public class PackingListRepository {
             try {
                 Request request = new Request.Builder()
                         .url(URL_API_GET + "api/romaneios/findBySearch/" + id)
-                        .addHeader("Authorization", "Bearer " + token)
+                        .addHeader("X-API-Key", token)
                         .get()
                         .build();
                 try (Response resp = httpClient.newCall(request).execute()) {
@@ -183,7 +168,7 @@ public class PackingListRepository {
                 String driverId = getIdDrive();
                 Request request = new Request.Builder()
                         .url(URL_API_GET + "api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts)
-                        .addHeader("Authorization", "Bearer " + token)
+                        .addHeader("X-API-Key", token)
                         .get()
                         .build();
                 try (Response resp = httpClient.newCall(request).execute()) {
@@ -298,8 +283,8 @@ public class PackingListRepository {
     // --- File I/O and Token ---
 
     private String getAccessToken() {
-        tokenService.validateAndRefreshToken();
-        return tokenStorage.getAccessToken();
+
+        return tokenStorage.getApiKey();
     }
 
     private String getIdDrive() {

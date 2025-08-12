@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
@@ -45,6 +46,7 @@ public class PacketList extends AppCompatActivity {
         binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 if (event == null || !event.isShiftPressed()) {
+
                     packingRepository.postPacked(binding.RTAprocura.getText().toString()).addOnSuccessListener(packingList -> {
                         alertaSubmit(true, binding.RTAprocura.getText().toString());
                         binding.RTAprocura.setText("");
@@ -125,22 +127,24 @@ public class PacketList extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-
+        binding.progressBar2.setVisibility(View.VISIBLE);
         if (result != null) {
             if (result.getContents() == null) {
                 Toast.makeText(this, "Operação cancelada", Toast.LENGTH_LONG).show();
             } else {
                 String scannedCode = result.getContents();
                 packingRepository.postPacked(scannedCode).addOnSuccessListener(packingList -> {
-
+                    binding.progressBar2.setVisibility(View.GONE);
                     alertaSubmit(true, scannedCode);
-                }).addOnFailureListener(v ->
-                        alertaSubmit(false, scannedCode)
+                }).addOnFailureListener(v -> {
+                        binding.progressBar2.setVisibility(View.GONE);
+                        alertaSubmit(false, scannedCode);}
                 );
             }
 
 
         } else {
+            binding.progressBar2.setVisibility(View.GONE);
             super.onActivityResult(requestCode, resultCode, data);
         }
     }

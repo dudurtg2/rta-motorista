@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.example.rta_app.SOLID.entities.Coletas;
 import com.example.rta_app.SOLID.entities.Packet;
-import com.example.rta_app.SOLID.services.TokenService;
 import com.example.rta_app.SOLID.services.TokenStorage;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
@@ -36,14 +35,12 @@ public class PackingRepository {
     private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
 
     private final Context context;
-    private final TokenService tokenService;
     private final TokenStorage tokenStorage;
     private final OkHttpClient httpClient;
     private final ExecutorService executor;
 
     public PackingRepository(Context context) {
         this.context = context.getApplicationContext();
-        this.tokenService = new TokenService(this.context);
         this.httpClient = new OkHttpClient();
         this.executor = Executors.newSingleThreadExecutor();
         this.tokenStorage = new TokenStorage(this.context);
@@ -77,46 +74,82 @@ public class PackingRepository {
 
     private <T> Task<List<T>> fetchList(String path, Class<T> type) {
         TaskCompletionSource<List<T>> tcs = new TaskCompletionSource<>();
-        executor.execute(() -> {
-            try {
-                String token = getAccessToken();
-                String driverId = getIdDrive();
-                Request request = new Request.Builder()
-                        .url((type == Packet.class ? URL_API_GET : URL_API_GET) + path + driverId)
-                        .addHeader("Authorization", "Bearer " + token)
-                        .get()
-                        .build();
-                try (Response resp = httpClient.newCall(request).execute()) {
-                    if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
-                    String json = resp.body().string();
-                    JSONArray arr = new JSONArray(json);
-                    List<T> list = new ArrayList<>();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = arr.getJSONObject(i);
-                        if (type == Coletas.class) {
-                            Coletas c = new Coletas();
-                            c.setEntregador(obj.optJSONObject("entregador").optString("nome"));
-                            c.setCodigos(obj.optString("codigos"));
-                            c.setQtd(obj.optString("quantidade"));
-                            list.add(type.cast(c));
-                        } else if (type == Packet.class) {
-                            Packet p = new Packet();
-                            p.setEntregador(obj.optJSONObject("entregador").optString("nome"));
-                            p.setCodigo(obj.optJSONObject("codigo").optString("codigo"));
-                            p.setData(obj.optString("dataDevolvido").replace("T", " ").split("\\.")[0]);
-                            p.setRta(obj.optJSONObject("codigo").optJSONObject("romaneio").optString("codigo"));
-                            list.add(type.cast(p));
-                        }
+
+        // 1) Primeiro valide/refresh o token de forma assíncrona
+       
+                    String accessToken;
+                    try {
+                        accessToken = tokenStorage.getApiKey();
+                    } catch (Exception e) {
+                        tcs.setException(e);
+                        return null;
                     }
-                    tcs.setResult(list);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Erro fetch list", e);
-                tcs.setException(e);
-            }
-        });
+
+                    // 2) Só depois disso, faça o HTTP numa thread de background
+                    executor.execute(() -> {
+                        try {
+                            String driverId = getIdDrive();
+                            if (driverId == null || driverId.isEmpty()) {
+                                throw new IllegalStateException("Driver ID inválido");
+                            }
+
+                            Request req = new Request.Builder()
+                                    .url(URL_API + path + driverId)
+                                    .addHeader("X-API-Key", accessToken)
+                                    .addHeader("Accept", "application/json")
+                                    .get()
+                                    .build();
+
+                            try (Response resp = httpClient.newCall(req).execute()) {
+                                if (!resp.isSuccessful()) {
+                                    throw new IOException("HTTP " + resp.code());
+                                }
+
+                                String body = resp.body().string();
+                                JSONArray arr = new JSONArray(body);
+                                List<T> list = new ArrayList<>();
+                                for (int i = 0; i < arr.length(); i++) {
+                                    JSONObject obj = arr.getJSONObject(i);
+                                    if (type == Coletas.class) {
+                                        Coletas c = new Coletas();
+                                        c.setEntregador(obj.optJSONObject("entregador").optString("nome"));
+                                        c.setCodigos(obj.optString("codigos"));
+                                        c.setQtd(obj.optString("quantidade"));
+                                        list.add(type.cast(c));
+
+                                    } else { // Packet.class
+                                        Packet p = new Packet();
+                                        p.setEntregador(obj.optJSONObject("entregador").optString("nome"));
+                                        p.setCodigo(obj.optJSONObject("codigo").optString("codigo"));
+                                        p.setData(
+                                                obj.optString("dataDevolvido")
+                                                        .replace("T", " ")
+                                                        .split("\\.")[0]
+                                        );
+                                        p.setRta(
+                                                obj.optJSONObject("codigo")
+                                                        .optJSONObject("romaneio")
+                                                        .optString("codigo")
+                                        );
+                                        list.add(type.cast(p));
+                                    }
+                                }
+
+                                // 3) devolve o resultado
+                                tcs.setResult(list);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Erro fetch list", e);
+                            tcs.setException(e);
+                        }
+                    });
+
+               
+
         return tcs.getTask();
     }
+
+
 
     private Task<Void> sendRequest(String path, String method, JSONObject body) {
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
@@ -126,7 +159,7 @@ public class PackingRepository {
                 RequestBody rb = RequestBody.create(body.toString(), JSON_MEDIA);
                 Request.Builder builder = new Request.Builder()
                         .url(URL_API + path)
-                        .addHeader("Authorization", "Bearer " + token);
+                        .addHeader("X-API-Key", token);
                 Request req = method.equalsIgnoreCase("POST") ? builder.post(rb).build()
                         : builder.put(rb).build();
                 try (Response resp = httpClient.newCall(req).execute()) {
@@ -142,8 +175,7 @@ public class PackingRepository {
     }
 
     private String getAccessToken() {
-        tokenService.validateAndRefreshToken();
-        return tokenStorage.getAccessToken();
+        return tokenStorage.getApiKey();
 
     }
 

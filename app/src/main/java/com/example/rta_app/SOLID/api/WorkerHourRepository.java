@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.services.TokenService;
 import com.example.rta_app.SOLID.services.TokenStorage;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
@@ -35,7 +34,6 @@ public class WorkerHourRepository {
     private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
 
     private final Context context;
-    private final TokenService tokenService;
     private final TokenStorage tokenStorage;
     private final OkHttpClient httpClient;
     private final ExecutorService executor;
@@ -43,7 +41,6 @@ public class WorkerHourRepository {
     public WorkerHourRepository(Context context) {
         Log.d(TAG, "Constructor: initializing WorkerHourRepository");
         this.context = context.getApplicationContext();
-        this.tokenService = new TokenService(this.context);
         this.httpClient = new OkHttpClient();
         this.tokenStorage = new TokenStorage(this.context);
         this.executor = Executors.newSingleThreadExecutor();
@@ -52,7 +49,6 @@ public class WorkerHourRepository {
     public Task<Void> validadeCode(String code) {
         Log.d(TAG, "validadeCode(): code=" + code);
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        tokenService.validateAndRefreshToken();
 
         String token = getAccessToken();
         if (token == null) {
@@ -64,7 +60,7 @@ public class WorkerHourRepository {
         Request request = new Request.Builder()
                 .url(BASE_URL + "api/unique/validade/" + code)
                 .put(RequestBody.create(new byte[0], null))
-                .addHeader("Authorization", "Bearer " + token)
+                .addHeader("X-API-Key", token)
                 .build();
 
         executeRequest(request, tcs);
@@ -74,7 +70,6 @@ public class WorkerHourRepository {
     public Task<Void> saveHors(WorkerHous workerHous) {
         Log.d(TAG, "saveHors(): workerHous=" + workerHous);
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        tokenService.validateAndRefreshToken();
 
         String token = getAccessToken();
         String driveId = getUserId();
@@ -101,7 +96,7 @@ public class WorkerHourRepository {
         Request request = new Request.Builder()
                 .url(BASE_URL + "api/pontos/save/" + driveId)
                 .post(body)
-                .addHeader("Authorization", "Bearer " + token)
+                .addHeader("X-API-Key", token)
                 .build();
 
         executeRequest(request, tcs);
@@ -204,9 +199,8 @@ public class WorkerHourRepository {
     }
 
     private String getAccessToken() {
-        Log.d(TAG, "getAccessToken(): refreshing token");
-        tokenService.validateAndRefreshToken();
-        String token = tokenStorage.getAccessToken();
+      
+        String token = tokenStorage.getApiKey();
         Log.d(TAG, "getAccessToken(): token=" + (token != null ? "[REDACTED]" : "null"));
         return token;
     }
