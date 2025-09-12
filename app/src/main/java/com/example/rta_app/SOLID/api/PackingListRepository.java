@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -29,14 +30,15 @@ import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class PackingListRepository {
+
     private static final String TAG = "PackingListRepo";
     private static final String URL_API = "https://android.lc-transportes.com/";
-    private static final String URL_API_GET = "https://android.lc-transportes.com/";
     private static final String FILE_NAME = "user_data.json";
     private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
 
@@ -48,44 +50,33 @@ public class PackingListRepository {
     public PackingListRepository(Context context) {
         this.context = context.getApplicationContext();
         this.tokenStorage = new TokenStorage(this.context);
-        this.httpClient = new OkHttpClient();
+        this.httpClient = new OkHttpClient.Builder()
+                .protocols(Collections.singletonList(Protocol.HTTP_1_1))
+                .build();
         this.executor = Executors.newSingleThreadExecutor();
+        Log.d(TAG, "PackingListRepository initialized");
     }
 
-   
+    // ------------------ MÉTODOS PÚBLICOS ------------------ //
 
-   
     public Task<PackingList> getPackingListToDirect(String id) {
-        String token = getAccessToken();
-        return getPackingList(id, "alocado", token);
+        return getPackingList(id, "alocado", getAccessToken());
     }
 
-   
     public Task<PackingList> getPackingListToRota(String id) {
-        String token = getAccessToken();
-        return getPackingList(id, "retirado", token);
+        return getPackingList(id, "retirado", getAccessToken());
     }
 
-   
     public Task<PackingList> getPackingListToBase(String id) {
-        String token = getAccessToken();
-        return getPackingList(id, token);
+        return getPackingList(id, "aguardando", getAccessToken());
     }
 
-   
-    public Task<List<PackingList>> getListPackingListToDirect() {
-        String token = getAccessToken();
-        return getPackingListList("alocado", token);
-    }
-
-   
     public Task<List<PackingList>> getListPackingListBase() {
-        String token = getAccessToken();
-        return getPackingListList("retirado", token);
+        return getPackingListList("retirado", getAccessToken());
     }
 
-   
     public Task<Void> movePackingListForDelivery(PackingList packingList) {
+        Log.d(TAG, "movePackingListForDelivery: " + packingList.getCodigodeficha());
         try {
             updateRomaneiosNome(packingList);
             return Tasks.forResult(null);
@@ -95,17 +86,18 @@ public class PackingListRepository {
         }
     }
 
-   
     public Task<Void> updateStatusPackingList(PackingList packingList, String ocorrencia, String status) {
+        Log.d(TAG, "updateStatusPackingList: ficha=" + packingList.getCodigodeficha() + ", status=" + status);
+
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
                 JSONObject body = new JSONObject();
                 if (!ocorrencia.isEmpty()) body.put("ocorrencia", ocorrencia);
+
                 body.put("status", status);
-                String formattedDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                        .format(new Date());
-                body.put("dataFinal", formattedDate);
+                body.put("dataFinal", getCurrentDateTime());
+
                 executeRequest("api/romaneios/update/codigo/" + packingList.getCodigodeficha(), "PUT", body, tcs);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao atualizar status", e);
@@ -115,14 +107,14 @@ public class PackingListRepository {
         return tcs.getTask();
     }
 
-   
     public Task<Void> updateImgLinkForFinish(Bitmap bitmap, String uid) {
+        Log.d(TAG, "updateImgLinkForFinish UID: " + uid);
+
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
                 String base64 = bitmapToBase64(bitmap);
-                JSONObject body = new JSONObject();
-                body.put("base64Image", base64);
+                JSONObject body = new JSONObject().put("base64Image", base64);
                 executeRequest("api/romaneios/imageUpload/" + uid, "POST", body, tcs);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao enviar imagem", e);
@@ -132,20 +124,35 @@ public class PackingListRepository {
         return tcs.getTask();
     }
 
-    // --- Helpers ---
+    // ------------------ MÉTODOS PRIVADOS ------------------ //
 
     private Task<PackingList> getPackingList(String id, String sts, String token) {
+        Log.d(TAG, "getPackingList ID: " + id + ", filtro: " + sts);
+
         TaskCompletionSource<PackingList> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
                 Request request = new Request.Builder()
-                        .url(URL_API_GET + "api/romaneios/findBySearch/" + id)
+                        .url(URL_API + "api/romaneios/findBySearch/" + id)
                         .addHeader("X-API-Key", token)
                         .get()
                         .build();
+
                 try (Response resp = httpClient.newCall(request).execute()) {
                     if (!resp.isSuccessful()) throw new IOException(resp.message());
                     JSONObject json = new JSONObject(resp.body().string());
+
+
+                    String stsFilter = json.optString("sts");
+
+
+                    if (stsFilter.equals("finalizado") || stsFilter.equals("inativo")) {
+                        throw new IllegalStateException("Status filter inválido: " + stsFilter);
+                    }
+                    if (sts.equals("aguardando") || sts.equals("alocado")) {
+                        if (stsFilter.equals("retirado") || stsFilter.equals("recusado") ) throw new IllegalStateException("Status filter inválido: " + stsFilter);
+                    }
+
                     PackingList pl = parsePackingList(json, sts);
                     tcs.setResult(pl);
                 }
@@ -157,22 +164,23 @@ public class PackingListRepository {
         return tcs.getTask();
     }
 
-    private Task<PackingList> getPackingList(String id, String token) {
-        return getPackingList(id, null, token);
-    }
-
     private Task<List<PackingList>> getPackingListList(String sts, String token) {
+        Log.d(TAG, "getPackingListList status: " + sts);
+
         TaskCompletionSource<List<PackingList>> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
                 String driverId = getIdDrive();
+
                 Request request = new Request.Builder()
-                        .url(URL_API_GET + "api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts)
+                        .url(URL_API + "api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts)
                         .addHeader("X-API-Key", token)
                         .get()
                         .build();
+
                 try (Response resp = httpClient.newCall(request).execute()) {
                     if (!resp.isSuccessful()) throw new IOException(resp.message());
+
                     JSONArray arr = new JSONArray(resp.body().string());
                     List<PackingList> list = new ArrayList<>();
                     for (int i = 0; i < arr.length(); i++) {
@@ -192,28 +200,29 @@ public class PackingListRepository {
         executor.execute(() -> {
             try {
                 RequestBody rb = RequestBody.create(body.toString(), JSON_MEDIA);
-                Request.Builder rbuilder = new Request.Builder()
+
+                Request.Builder builder = new Request.Builder()
                         .url(URL_API + path)
-                        .addHeader("Authorization", "Bearer " + getAccessToken());
-                Request req = method.equals("PUT")
-                        ? rbuilder.put(rb).build()
-                        : rbuilder.post(rb).build();
+                        .addHeader("X-API-Key", getAccessToken());
+
+                Request req = "PUT".equals(method) ? builder.put(rb).build() : builder.post(rb).build();
+
                 try (Response resp = httpClient.newCall(req).execute()) {
-                    if (resp.isSuccessful()) tcs.setResult(null);
-                    else throw new IOException(resp.message());
+                    if (resp.isSuccessful()) {
+                        tcs.setResult(null);
+                    } else {
+                        throw new IOException("Erro HTTP: " + resp.code() + " - " + resp.message());
+                    }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Erro operação", e);
+                Log.e(TAG, "Erro operação " + method + " " + path, e);
                 tcs.setException(e);
             }
         });
     }
 
     private PackingList parsePackingList(JSONObject json, String stsFilter) throws JSONException {
-        String sts = json.optString("sts");
-        if (stsFilter != null && !sts.equals(stsFilter)) {
-            throw new JSONException("Status inválido: " + sts);
-        }
+
         PackingList pl = new PackingList();
         pl.setFuncionario(json.optJSONObject("funcionario").optString("nome"));
         pl.setEntregador(json.optJSONObject("entregador").optString("nome"));
@@ -221,37 +230,15 @@ public class PackingListRepository {
         pl.setCodigodeficha(json.optString("codigoUid"));
         pl.setHoraedia(json.optString("data"));
         pl.setQuantidade(String.valueOf(json.optInt("quantidade")));
-        pl.setStatus(sts);
+        pl.setStatus(stsFilter);
         pl.setMotorista(json.optString("motorista"));
         pl.setDownloadlink(json.optString("linkDownload"));
         pl.setEmpresa(json.optJSONObject("empresa").optString("nome"));
         pl.setEndereco(json.optJSONObject("entregador").optString("endereco"));
 
-        // Cidades
-        JSONArray cidades = json.optJSONArray("cidade");
-        StringBuilder loc = new StringBuilder();
-        if (cidades != null) {
-            for (int i = 0; i < cidades.length(); i++) {
-                String cn = cidades.getJSONObject(i).optString("nome");
-                if (!cn.isEmpty()) {
-                    if (loc.length() > 0) loc.append(", ");
-                    loc.append(cn);
-                }
-            }
-        }
-        pl.setLocal(loc.toString());
+        pl.setLocal(parseCidades(json.optJSONArray("cidade")));
+        pl.setCodigosinseridos(parseCodigos(json.optJSONArray("codigos")));
 
-        // Códigos
-        JSONArray cods = json.optJSONArray("codigos");
-        List<String> codes = new ArrayList<>();
-        if (cods != null) {
-            for (int i = 0; i < cods.length(); i++) {
-                JSONObject c = cods.getJSONObject(i);
-                String prefix = c.optString("type").equals("PACOTES") ? "✉️" : "📦";
-                codes.add(prefix + " - " + c.optString("codigo"));
-            }
-        }
-        pl.setCodigosinseridos(codes);
         return pl;
     }
 
@@ -270,9 +257,10 @@ public class PackingListRepository {
     private void updateRomaneiosNome(PackingList pl) {
         executor.execute(() -> {
             try {
-                JSONObject body = new JSONObject();
-                body.put("status", "retirado");
-                body.put("motorista", getIdDrive());
+                JSONObject body = new JSONObject()
+                        .put("status", "retirado")
+                        .put("motorista", getIdDrive());
+
                 executeRequest("api/romaneios/update/codigo/" + pl.getCodigodeficha(), "PUT", body, new TaskCompletionSource<>());
             } catch (Exception e) {
                 Log.e(TAG, "Erro updateRomaneio", e);
@@ -280,11 +268,12 @@ public class PackingListRepository {
         });
     }
 
-    // --- File I/O and Token ---
+    // ------------------ UTILS ------------------ //
 
     private String getAccessToken() {
-
-        return tokenStorage.getApiKey();
+        String token = tokenStorage.getApiKey();
+        Log.d(TAG, "Access token: " + (token != null ? "[OK]" : "[NULL]"));
+        return token;
     }
 
     private String getIdDrive() {
@@ -292,7 +281,7 @@ public class PackingListRepository {
             String json = readFile(FILE_NAME);
             return new JSONObject(json).getJSONObject("data").optString("id");
         } catch (Exception e) {
-            Log.e(TAG, "Drive ID read error", e);
+            Log.e(TAG, "Erro ao ler Driver ID", e);
             return null;
         }
     }
@@ -309,5 +298,35 @@ public class PackingListRepository {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.PNG, 75, os);
         return Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);
+    }
+
+    private String getCurrentDateTime() {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                .format(new Date());
+    }
+
+    private String parseCidades(JSONArray cidades) throws JSONException {
+        if (cidades == null) return "";
+        StringBuilder loc = new StringBuilder();
+        for (int i = 0; i < cidades.length(); i++) {
+            String cn = cidades.getJSONObject(i).optString("nome");
+            if (!cn.isEmpty()) {
+                if (loc.length() > 0) loc.append(", ");
+                loc.append(cn);
+            }
+        }
+        return loc.toString();
+    }
+
+    private List<String> parseCodigos(JSONArray cods) throws JSONException {
+        List<String> codes = new ArrayList<>();
+        if (cods == null) return codes;
+
+        for (int i = 0; i < cods.length(); i++) {
+            JSONObject c = cods.getJSONObject(i);
+            String prefix = "PACOTES".equals(c.optString("type")) ? "✉️" : "📦";
+            codes.add(prefix + " - " + c.optString("codigo"));
+        }
+        return codes;
     }
 }
