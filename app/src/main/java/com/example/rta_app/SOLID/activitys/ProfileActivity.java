@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -11,32 +12,22 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
 import com.example.rta_app.SOLID.entities.Users;
-import com.example.rta_app.SOLID.repository.UsersRepository;
-import com.example.rta_app.SOLID.services.ImageUploaderService;
+import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityProfileBinding;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.io.File;
 
 public class ProfileActivity extends AppCompatActivity {
 
     public ActivityProfileBinding binding;
-    private DocumentReference docRef;
-    private FirebaseFirestore firestore;
-    private FirebaseAuth mAuth;
-    private ImageUploaderService imageUploader;
-    public static final int PICK_IMAGE_REQUEST = 1;
-    private IUsersRepository usersRepository;
 
-    public ProfileActivity() {
-        firestore = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
-        imageUploader = new ImageUploaderService(this);
-        usersRepository = new UsersRepository();
-    }
+    public static final int PICK_IMAGE_REQUEST = 1;
+    private UsersRepository usersRepository;
+    private static final String FILE_NAME = "user_data.json";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,22 +36,15 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         binding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        usersRepository = new UsersRepository(this);
         SetupClickListeners();
     }
 
     private void SetupClickListeners() {
         binding.profileUserInsert.setVisibility(View.GONE);
 
-        if (mAuth.getCurrentUser() != null) {
-            docRef = firestore.collection("usuarios").document(mAuth.getCurrentUser().getUid());
-        } else {
-            Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
         binding.singOut.setOnClickListener(v -> {
-            mAuth.signOut();
+            eraseToFile();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         });
@@ -84,30 +68,47 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        imageUploader.loadImagem();
         getUser();
 
-        binding.UserImagenView.setOnClickListener(v -> imageUploader.openFileChooser(this));
         binding.profileUserInsert.setOnClickListener(v -> updateUser());
+    }
+
+    private void eraseToFile() {
+        try {
+            File file = getFileStreamPath(FILE_NAME);
+            if (file.exists()) {
+                boolean isDeleted = this.deleteFile(FILE_NAME);
+                if (isDeleted) {
+                    Log.d("Arquivo", "Arquivo deletado com sucesso: " + FILE_NAME);
+                } else {
+                    Log.e("Arquivo", "Erro ao deletar o arquivo.");
+                }
+            } else {
+                Log.d("Arquivo", "Arquivo não existe: " + FILE_NAME);
+            }
+        } catch (Exception e){
+            Log.e("Arquivo", "Erro ao deletar o arquivo.", e);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        imageUploader.handleImageResult(requestCode, resultCode, data, this);
+
     }
 
     private void getUser() {
         usersRepository.getUser()
                 .addOnSuccessListener(users -> {
                     binding.editNameUser.setHint(users.getName());
+                    binding.editTelefoneUser.setHint(users.getTelefone());
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter dados do usuário", Toast.LENGTH_SHORT).show());
     }
 
     private void updateUser() {
 
-        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(), mAuth.getCurrentUser().getUid())).addOnSuccessListener(aVoid1 -> {
+        usersRepository.saveUser(new Users(binding.editNameUser.getText().toString(),usersRepository.getUser().getResult().getUid(), usersRepository.getUser().getResult().getTelefone(), usersRepository.getUser().getResult().getBase(),usersRepository.getUser().getResult().getBaseid(),usersRepository.getUser().getResult().isFrete() )).addOnSuccessListener(aVoid1 -> {
             Toast.makeText(this, "Usuário atualizado com sucesso", Toast.LENGTH_SHORT).show();
             binding.profileUserInsert.setVisibility(View.GONE);
             binding.editNameUser.setText("");

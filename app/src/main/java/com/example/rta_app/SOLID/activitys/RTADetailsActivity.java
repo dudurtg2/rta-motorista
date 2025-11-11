@@ -13,24 +13,17 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.repository.PackingListRepository;
+import com.example.rta_app.SOLID.api.PackingListRepository;
 import com.example.rta_app.SOLID.services.ImageDriverService;
 import com.example.rta_app.R;
 import com.example.rta_app.databinding.ActivityRtadetailsBinding;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+
 
 public class RTADetailsActivity extends AppCompatActivity {
 
@@ -43,11 +36,9 @@ public class RTADetailsActivity extends AppCompatActivity {
     public static final int PICK_IMAGE_REQUEST = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     private String QA;
-    private IPackingListRepository packingListRepository;
+    private PackingListRepository packingListRepository;
 
-    public RTADetailsActivity() {
-        this.packingListRepository = new PackingListRepository();
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +47,7 @@ public class RTADetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rtadetails);
         binding = ActivityRtadetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        this.packingListRepository = new PackingListRepository(this);
         Intent intent = getIntent();
         if (intent != null) {
             uii = intent.getStringExtra("uid");
@@ -79,22 +70,19 @@ public class RTADetailsActivity extends AppCompatActivity {
         binding.buttonRecusar.setOnClickListener(v -> new AlertDialog.Builder(this)
                 .setTitle("Confirmação")
                 .setMessage("O entregador realmente não vai receber a saca de código " + uid.getCodigodeficha() + "?")
-                .setPositiveButton("Não vai receber", (dialog, which) -> statusUpdate(uid, "Recusado"))
+                .setPositiveButton("Não vai receber", (dialog, which) -> statusUpdate(uid, "recusado"))
                 .setNegativeButton("Vai receber", null)
                 .show());
 
         binding.buttonFinalizar.setOnClickListener(v -> {
-            QA = "Finalizado";
+            QA = "finalizado";
+            if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
+                QA = "ocorrencia";
+                openCamera(uid.getCodigodeficha());
+            }
             openCamera(uid.getCodigodeficha());
         });
-        binding.buttonOcorrencia.setOnClickListener(v -> {
-            if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
-                QA = "Ocorrencia";
-                openCamera(uid.getCodigodeficha());
-            } else {
-                Toast.makeText(this, "Preencha o campo de ocorrencia", Toast.LENGTH_SHORT).show();
-            }
-        });
+
         binding.textRTA.setOnClickListener(v -> downloadRTA(uid));
     }
 
@@ -103,15 +91,18 @@ public class RTADetailsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (imageUploader != null) {
-                statusUpdate(uid2, QA);
                 imageUploader.handleCameraResult(photoURI, this);
+                statusUpdate(uid2, QA);
+                finish();
             }
         }
     }
 
     private void openCamera(String uid) {
         imageUploader = new ImageDriverService(this, uid);
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE_SECURE);
+
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
             try {
@@ -158,7 +149,7 @@ public class RTADetailsActivity extends AppCompatActivity {
         if (!documentSnapshot.getCodigodeficha().equals("")) {
             String occurrence = "";
 
-            if (status.equals("Ocorrencia")) {
+            if (status.equals("ocorrencia")) {
                 if (!binding.multiAutoCompleteTextView.getText().toString().isEmpty()) {
                     occurrence = binding.multiAutoCompleteTextView.getText().toString();
                     Toast.makeText(this, "Ocorrência: " + occurrence, Toast.LENGTH_SHORT).show();
@@ -170,8 +161,8 @@ public class RTADetailsActivity extends AppCompatActivity {
             packingListRepository.updateStatusPackingList(documentSnapshot, occurrence, status)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "Status atualizado para " + status, Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, InTravelActivity.class));
                         finish();
+                        
                     })
                     .addOnFailureListener(e -> Toast.makeText(this, "Erro ao atualizar status", Toast.LENGTH_SHORT).show());
 
@@ -184,10 +175,10 @@ public class RTADetailsActivity extends AppCompatActivity {
 
         if (!documentSnapshot.getCodigodeficha().equals("")) {
             binding.textRTA.setText(documentSnapshot.getCodigodeficha() + " \uD83D\uDCBE");
-            binding.TextCidade.setText("Cidade: " + documentSnapshot.getLocal());
-            binding.textDate.setText("Data: " + documentSnapshot.getHoraedia());
+            binding.TextCidade.setText("Local: " + documentSnapshot.getLocal());
+            binding.textDate.setText("Data: " + documentSnapshot.getHoraedia().replace("T", " ").split("\\.")[0]);
             binding.textCount.setText("Quantidade: " + documentSnapshot.getQuantidade());
-            binding.textTelefone.setText("Entregador: " + documentSnapshot.getTelefone());
+            binding.textTelefone.setText("Telefone: " + documentSnapshot.getTelefone());
             binding.textEntregador.setText("Entregador: " + documentSnapshot.getEntregador());
             binding.Empresa.setText("Empresa: " + documentSnapshot.getEmpresa());
             binding.textEndereco.setText("Endereço: " + documentSnapshot.getEndereco());
@@ -198,7 +189,7 @@ public class RTADetailsActivity extends AppCompatActivity {
                 }
             }
         } else {
-            binding.textRTA.setText("Document does not exist");
+            binding.textRTA.setText("Documento não encontrado");
             binding.TextCidade.setText("");
             binding.textDate.setText("");
             binding.textCount.setText("");

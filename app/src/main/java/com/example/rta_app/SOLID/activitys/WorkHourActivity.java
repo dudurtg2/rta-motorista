@@ -2,27 +2,30 @@ package com.example.rta_app.SOLID.activitys;
 
 import static com.example.rta_app.SOLID.services.NetworkService.isNetworkConnected;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.example.rta_app.R;
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
-import com.example.rta_app.SOLID.Interfaces.IWorkerHourRepository;
 import com.example.rta_app.SOLID.aplication.WorkerAplication;
 import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.repository.UsersRepository;
-import com.example.rta_app.SOLID.repository.WorkerHourRepository;
-import com.example.rta_app.SOLID.services.GoogleSheetsService;
-import com.example.rta_app.SOLID.services.NetworkService;
+import com.example.rta_app.SOLID.api.UsersRepository;
+import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 
-import org.checkerframework.checker.units.qual.N;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,18 +34,14 @@ import java.util.Date;
 public class WorkHourActivity extends AppCompatActivity {
 
     public ActivityWorkHourBinding binding;
-    private IWorkerHourRepository workerHourRepository;
-    private IUsersRepository usersRepository;
+    private WorkerHourRepository workerHourRepository;
+    private UsersRepository usersRepository;
 
     private WorkerAplication workerAplication;
 
     private Boolean isValidate = true;
 
-    public WorkHourActivity() {
-        workerHourRepository = new WorkerHourRepository(this);
-        usersRepository = new UsersRepository();
-        workerAplication = new WorkerAplication(this);
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,11 +49,16 @@ public class WorkHourActivity extends AppCompatActivity {
         binding = ActivityWorkHourBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         EdgeToEdge.enable(this);
-
+        workerHourRepository = new WorkerHourRepository(this);
+        usersRepository = new UsersRepository(this);
+        workerAplication = new WorkerAplication(this);
         getUser();
         setupClickListeners();
 
     }
+
+
+
 
     private void getUser() {
         usersRepository.getUser()
@@ -75,24 +79,25 @@ public class WorkHourActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         binding.progressBar.setOnClickListener(v -> {
-        new AlertDialog.Builder(this)
-                .setTitle("Alerta")
-                .setMessage("Seus pontos estão sendo \nregistrados")
-                .setNeutralButton("ok", (dialog, which) -> closeOptionsMenu()).show();
+            new AlertDialog.Builder(this)
+                    .setTitle("Alerta")
+                    .setMessage("Seus pontos estão sendo \nregistrados")
+                    .setNeutralButton("ok", (dialog, which) -> updateToSheets()).show();
         });
-       binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
-       binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsFinish("Almoço"));
-       binding.imageDinnerFinishHour.setOnClickListener(v -> openPontsIsFinish("Saída"));
-       binding.imageStop.setOnClickListener(v -> openPontsIsFinish("Fim"));
+        binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
+        binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsFinish("Almoço"));
+        binding.imageDinnerFinishHour.setOnClickListener(v -> openPontsIsFinish("Saída"));
+        binding.imageStop.setOnClickListener(v -> openPontsIsFinish("Fim"));
     }
 
-    private void alert(){
+    private void alert() {
         new AlertDialog.Builder(this)
                 .setTitle("Alerta")
                 .setMessage("Você ja bateu os pontos\n\nDescanse e se prepare \npara o trabalho")
                 .setNeutralButton("Descansa", (dialog, which) -> finish()).show();
 
     }
+
     private void openPontsIsFinish(String valueForHourUpdate) {
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -110,7 +115,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_after().equals("") && !isAfter20Minutes(workerHous.getDate(), workerHous.getHour_after())) {
             new AlertDialog.Builder(this)
                     .setTitle("Alerta")
-                    .setMessage("Você não pode registrar mais de \n20 minutos após o horário anterior")
+                    .setMessage("Você não pode registrar mais de \n15 minutos após o horário anterior")
                     .setNeutralButton("Ok", (dialog, which) -> dialog.dismiss()).show();
         } else if (!isValidate) {
             alert();
@@ -132,7 +137,7 @@ public class WorkHourActivity extends AppCompatActivity {
                     }
                     break;
                 case "Fim":
-                    if(!isNetworkConnected(this)){
+                    if (!isNetworkConnected(this)) {
                         new AlertDialog.Builder(this)
                                 .setTitle("Alerta")
                                 .setMessage("Para registrar o ponto de saida,\nVocê precisa estar conectado\na internet")
@@ -146,16 +151,17 @@ public class WorkHourActivity extends AppCompatActivity {
 
     private void openPonts(String valueForHourUpdate) {
 
-        if(valueForHourUpdate == "Fim" && !isNetworkConnected(this)) {
+        if (valueForHourUpdate == "Fim" && !isNetworkConnected(this)) {
             return;
-        }  new AlertDialog.Builder(this)
-                    .setTitle("Confirmar registro de hora")
-                    .setMessage("Deseja registrar o horário de " + valueForHourUpdate + "?\nDia: "
-                            + new SimpleDateFormat("dd-MM-yyyy").format(new Date())
-                            + " às " + new SimpleDateFormat("HH:mm").format(new Date()))
-                    .setPositiveButton("Sim", (dialog, which) -> updateHours(valueForHourUpdate))
-                    .setNegativeButton("Não", (dialog, which) -> dialog.dismiss())
-                    .show();
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar registro de hora")
+                .setMessage("Deseja registrar o horário de " + valueForHourUpdate + "?\nDia: "
+                        + new SimpleDateFormat("dd-MM-yyyy").format(new Date())
+                        + " às " + new SimpleDateFormat("HH:mm").format(new Date()))
+                .setPositiveButton("Sim", (dialog, which) -> updateHours(valueForHourUpdate))
+                .setNegativeButton("Não", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private void updateHours(String valueForHourUpdate) {
@@ -174,7 +180,8 @@ public class WorkHourActivity extends AppCompatActivity {
     private void updateToSheets() {
         isValidate = false;
         try {
-            if(isNetworkConnected(this)){
+            if (isNetworkConnected(this)) {
+
                 workerAplication.Finish(binding.UserNameDisplay.getText().toString()).addOnSuccessListener(v -> {
                     binding.progressBar.setVisibility(View.GONE);
                     binding.buttonFistHour.setVisibility(View.VISIBLE);
@@ -183,8 +190,8 @@ public class WorkHourActivity extends AppCompatActivity {
                 }).addOnFailureListener(v -> Toast.makeText(this, "Registro de hora falhou!", Toast.LENGTH_SHORT).show());
             } else {
                 Toast.makeText(this, "Você não está conectado a internet", Toast.LENGTH_SHORT).show();
-           }
-        } catch (Exception e){
+            }
+        } catch (Exception e) {
 
         }
     }
@@ -230,6 +237,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_first().isEmpty()) {
             binding.buttonFistHour.setText(workerHous.getHour_first());
             binding.imageFistHour.setImageResource(R.drawable.confirm_hour);
+            binding.imageFistHour.setBackgroundResource(R.drawable.button_stroke_squad);
 
             binding.imageDinnerStarHour.setVisibility(View.VISIBLE);
             binding.buttonDinnerStarHour.setVisibility(View.VISIBLE);
@@ -241,6 +249,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_dinner().isEmpty()) {
             binding.buttonDinnerStarHour.setText(workerHous.getHour_dinner());
             binding.imageDinnerStarHour.setImageResource(R.drawable.confirm_hour);
+            binding.imageDinnerStarHour.setBackgroundResource(R.drawable.button_stroke_squad);
 
             binding.imageDinnerFinishHour.setVisibility(View.VISIBLE);
             binding.buttonDinnerFinishHour.setVisibility(View.VISIBLE);
@@ -252,6 +261,7 @@ public class WorkHourActivity extends AppCompatActivity {
         if (!workerHous.getHour_finish().isEmpty()) {
             binding.buttonDinnerFinishHour.setText(workerHous.getHour_finish());
             binding.imageDinnerFinishHour.setImageResource(R.drawable.confirm_hour);
+            binding.imageDinnerFinishHour.setBackgroundResource(R.drawable.button_stroke_squad);
 
             binding.imageStop.setVisibility(View.VISIBLE);
             binding.buttonStop.setVisibility(View.VISIBLE);
@@ -261,17 +271,17 @@ public class WorkHourActivity extends AppCompatActivity {
         }
 
         if (!workerHous.getHour_stop().isEmpty()) {
-             binding.buttonDinnerStarHour.setVisibility(View.GONE);
-             binding.buttonDinnerFinishHour.setVisibility(View.GONE);
-             binding.buttonStop.setVisibility(View.GONE);
-             binding.imageDinnerStarHour.setVisibility(View.GONE);
-             binding.imageDinnerFinishHour.setVisibility(View.GONE);
-             binding.imageStop.setVisibility(View.GONE);
-             binding.progressBar.setVisibility(View.VISIBLE);
-             binding.buttonFistHour.setText("Descansa");
-             binding.buttonFistHour.setVisibility(View.GONE);
-             binding.imageFistHour.setVisibility(View.GONE);
-        }else {
+            binding.buttonDinnerStarHour.setVisibility(View.GONE);
+            binding.buttonDinnerFinishHour.setVisibility(View.GONE);
+            binding.buttonStop.setVisibility(View.GONE);
+            binding.imageDinnerStarHour.setVisibility(View.GONE);
+            binding.imageDinnerFinishHour.setVisibility(View.GONE);
+            binding.imageStop.setVisibility(View.GONE);
+            binding.progressBar.setVisibility(View.VISIBLE);
+            binding.buttonFistHour.setText("Descansa");
+            binding.buttonFistHour.setVisibility(View.GONE);
+            binding.imageFistHour.setVisibility(View.GONE);
+        } else {
             binding.buttonStop.setText("Fim do Expediente");
         }
     }
@@ -294,7 +304,10 @@ public class WorkHourActivity extends AppCompatActivity {
 
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
-            return diffInMinutes >= 20;
+            return diffInMinutes >= 15;
+
+
+
         } catch (ParseException e) {
             e.printStackTrace();
             return false;

@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+app/src/main/assets/google-sheets.json
+app/src/main/assets/service_account.json
+app/src/main/res/raw/service_account_key.json
+.gitignore

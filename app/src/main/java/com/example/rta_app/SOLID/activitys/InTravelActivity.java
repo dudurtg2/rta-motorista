@@ -15,12 +15,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.rta_app.SOLID.Interfaces.IPackingListRepository;
-import com.example.rta_app.SOLID.Interfaces.IUsersRepository;
-import com.example.rta_app.SOLID.Views.AdapterViewRTA;
+import com.example.rta_app.SOLID.Views.RTAlista.AdapterViewRTA;
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.repository.PackingListRepository;
-import com.example.rta_app.SOLID.repository.UsersRepository;
+import com.example.rta_app.SOLID.api.PackingListRepository;
+import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.databinding.ActivityInTravelBinding;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -35,13 +33,9 @@ public class InTravelActivity extends AppCompatActivity {
 
     public ActivityInTravelBinding binding;
     private String filter = "Todas as cidades";
-    private IUsersRepository usersRepository;
-    private IPackingListRepository packingListRepository;
+    private UsersRepository usersRepository;
+    private PackingListRepository packingListRepository;
 
-    public InTravelActivity() {
-        this.packingListRepository = new PackingListRepository();
-        this.usersRepository = new UsersRepository();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,17 +43,12 @@ public class InTravelActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityInTravelBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        this.packingListRepository = new PackingListRepository(this);
+        this.usersRepository = new UsersRepository(this);
         setupBinding();
         queryItems(filter);
         queryFilter();
-        getUser();
-    }
 
-    private void getUser() {
-        usersRepository.getUser()
-                .addOnSuccessListener(users -> binding.UserNameDisplay.setText(users.getName()))
-                .addOnFailureListener(e -> Toast.makeText(this, "Erro ao obter usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void setupBinding() {
@@ -71,12 +60,6 @@ public class InTravelActivity extends AppCompatActivity {
         });
 
         binding.atualizar.setOnClickListener(v -> queryItems(filter));
-
-        binding.buttonFinaliza.setOnClickListener(v -> {
-            packingListRepository.finishPackingList().addOnSuccessListener(v1 -> {
-                queryItems(filter);
-            });
-        });
 
         binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
@@ -99,7 +82,7 @@ public class InTravelActivity extends AppCompatActivity {
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             this.startActivity(intent);
                         } else {
-                            Toast.makeText(this, "Packing list não encontrado", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Romaneio não encontrado", Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(va ->
                             Toast.makeText(this, searchText + " não encontrado", Toast.LENGTH_SHORT).show()
@@ -166,9 +149,8 @@ public class InTravelActivity extends AppCompatActivity {
                         }
                     }
                 }
-
                 int itemCount = filteredList.size();
-                binding.QtdRTA.setText("QTD: " + itemCount);
+                binding.QtdRTA.setText(""+itemCount);
 
                 binding.listRTATravelview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
                 binding.listRTATravelview.setAdapter(new AdapterViewRTA(1, getApplicationContext(), filteredList));
