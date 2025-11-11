@@ -125,7 +125,7 @@ public class UsersRepository {
                 RequestBody body = RequestBody.create(loginBody.toString(), JSON_MEDIA);
 
                 Request req = new Request.Builder()
-                        .url(URL_API + "auth/login")
+                        .url(URL_API + "auth/V12/login")
                         .post(body)
                         .build();
 

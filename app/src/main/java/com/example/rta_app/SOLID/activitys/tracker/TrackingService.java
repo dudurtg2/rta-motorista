@@ -30,6 +30,8 @@ public class TrackingService extends Service {
     private static final String CH_ID = "track_channel";
     private static final int NOTIF_ID = 42;
 
+    // >>> HABILITA TESTE 5s <<<
+    private static final boolean TEST_EVERY_5S = false;
     private FusedLocationProviderClient fused;
     private boolean moving = true;
 
@@ -60,18 +62,20 @@ public class TrackingService extends Service {
     }
 
     private void requestUpdates() {
-        long intervalMs = moving ? 15_000L : 60_000L;
-        float minDist   = moving ? 25f    : 150f;
+        long intervalMs = TEST_EVERY_5S ? 5_000L : (moving ? 15_000L : 60_000L);
+        float minDist   = TEST_EVERY_5S ? 0f     : (moving ? 25f    : 150f);
 
         LocationRequest req = new LocationRequest.Builder(
-                moving ? Priority.PRIORITY_HIGH_ACCURACY : Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                Priority.PRIORITY_HIGH_ACCURACY, // força precisão p/ garantir callback
                 intervalMs
-        ).setMinUpdateDistanceMeters(minDist)
-                .setWaitForAccurateLocation(true)
+        )
+                .setMinUpdateDistanceMeters(minDist)     // 0 m => entrega mesmo parado
+                .setWaitForAccurateLocation(!TEST_EVERY_5S) // em teste, não espera “muito preciso”
                 .build();
 
         fused.requestLocationUpdates(req, callback, Looper.getMainLooper());
     }
+
 
     private final LocationCallback callback = new LocationCallback() {
         @Override public void onLocationResult(LocationResult result) {

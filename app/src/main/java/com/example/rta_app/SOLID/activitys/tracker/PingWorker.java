@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,6 +14,8 @@ import androidx.work.WorkerParameters;
 
 import com.example.rta_app.SOLID.activitys.WorkHourActivity;
 import com.example.rta_app.SOLID.api.UsersRepository;
+import com.example.rta_app.SOLID.api.WorkerHourRepository;
+import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.services.TokenStorage;
 
 import okhttp3.MediaType;
@@ -25,39 +28,71 @@ import java.io.ByteArrayOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class PingWorker extends Worker {
+    private static final String TAG = "PingWorker"; // <<< TAG
+
     private static final boolean USE_GZIP_REQUEST = false; // mude para true se sua API suportar
     private UsersRepository usersRepository;
+    private WorkerHourRepository workerHourRepository;
+    private int motoristaId;
+    private boolean isValidate;
+
     public PingWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
+        Log.d(TAG, "constructor: init repositories");
         this.usersRepository = new UsersRepository(context);
+        this.workerHourRepository = new WorkerHourRepository(context);
+        getUser();
     }
+
     private void getUser() {
+        Log.d(TAG, "getUser(): iniciando fetch de usuário e worker hours");
+
         usersRepository.getUser()
                 .addOnSuccessListener(users -> {
-                   
+                    try {
+                        motoristaId = Integer.parseInt(users.getUid());
+                        Log.i(TAG, "getUser(): motoristaId definido = " + motoristaId);
+                    } catch (NumberFormatException nfe) {
+                        Log.e(TAG, "getUser(): UID não é int: " + users.getUid(), nfe);
+                        motoristaId = 0;
+                    }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Erro ao obter usuário: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "getUser(): falha ao obter usuário", e);
+                    motoristaId = 0;
                 });
+
+        workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                WorkerHous workerHous = task.getResult();
+                isValidate = (!workerHous.getHour_first().isEmpty());
+                Log.i(TAG, "getUser(): isValidate=" + isValidate + " (workerHous " + (workerHous.getHour_first() == null ? "null" : "ok") + ")" + workerHous.getHour_first());
+            } else {
+                isValidate = false;
+                Log.e(TAG, "getUser(): falha ao obter workerHous", task.getException());
+            }
+        });
     }
 
     @Override
     public Result doWork() {
+        Log.d(TAG, "doWork(): start");
+
         Context ctx = getApplicationContext();
 
         // Auth via header:
         TokenStorage ts = new TokenStorage(ctx);
         String deviceToken = ts.getApiKey();
+        Log.d(TAG, "doWork(): token presente? " + (deviceToken != null && !deviceToken.isEmpty()));
         if (deviceToken == null || deviceToken.isEmpty()) {
+            Log.w(TAG, "doWork(): sem deviceToken -> retry");
             return Result.retry();
         }
 
-
-        int motoristaId;
-
-
+        Log.d(TAG, "doWork(): motoristaId=" + motoristaId + " | isValidate=" + isValidate);
         if (motoristaId <= 0) {
-            return Result.retry(); // exige motorista definido antes de enviar
+            Log.w(TAG, "doWork(): motoristaId inválido -> retry");
+            return Result.retry();
         }
 
         Data d = getInputData();
@@ -68,6 +103,9 @@ public class PingWorker extends Worker {
         float brg  = d.getFloat("brg", 0f);
         long tsMs  = d.getLong("ts", 0L);
         int  bat   = batteryPct(ctx);
+
+        Log.d(TAG, String.format("doWork(): ponto lat=%.6f lon=%.6f acc=%.2f spd=%.2f brg=%.2f ts=%d bat=%d",
+                lat, lon, acc, spd, brg, tsMs, bat));
 
         // Corpo com motorista{id: <int>}
         String json = "{"
@@ -81,33 +119,50 @@ public class PingWorker extends Worker {
                 + "\"motorista\":{\"id\":" + motoristaId + "}"
                 + "}";
 
-        final boolean USE_GZIP_REQUEST = false; // deixe false se sua API não aceita gzip
-
         try {
-            OkHttpClient client = new OkHttpClient();
+            if (isValidate) {
+                OkHttpClient client = new OkHttpClient();
 
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json"),
-                    USE_GZIP_REQUEST ? gzip(json.getBytes()) : json.getBytes()
-            );
+                RequestBody body = RequestBody.create(
+                        MediaType.parse("application/json"),
+                        USE_GZIP_REQUEST ? gzip(json.getBytes()) : json.getBytes()
+                );
 
-            Request.Builder rb = new Request.Builder()
-                    .url(LocationTracker.BASE_URL + "/api/locations")
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader("X-API-Key", deviceToken); // AUTH via header
+                String url = LocationTracker.BASE_URL + "/api/locationPings/save";
+                Log.d(TAG, "doWork(): POST " + url + " | gzip=" + USE_GZIP_REQUEST);
 
-            if (USE_GZIP_REQUEST) rb.addHeader("Content-Encoding", "gzip");
+                Request.Builder rb = new Request.Builder()
+                        .url(url)
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("X-API-Key", deviceToken); // AUTH via header
 
-            Request req = rb.post(body).build();
-            Response r = client.newCall(req).execute();
-            boolean ok = r.isSuccessful();
-            r.close();
-            return ok ? Result.success() : Result.retry();
+                if (USE_GZIP_REQUEST) rb.addHeader("Content-Encoding", "gzip");
+
+                Request req = rb.post(body).build();
+                Response r = client.newCall(req).execute();
+                int code = r.code();
+                String msg = r.message();
+                Log.i(TAG, "doWork(): resposta HTTP code=" + code + " msg=" + msg);
+                boolean ok = r.isSuccessful();
+                r.close();
+
+                if (ok) {
+                    Log.d(TAG, "doWork(): sucesso");
+                    return Result.success();
+                } else {
+                    Log.w(TAG, "doWork(): falha HTTP -> retry");
+                    return Result.retry();
+                }
+            } else {
+                Log.w(TAG, "doWork(): isValidate=false (sem workerHous) -> retry");
+                return Result.retry();
+            }
+
         } catch (Exception e) {
+            Log.e(TAG, "doWork(): exceção ao enviar ping", e);
             return Result.retry();
         }
     }
-
 
     private static int batteryPct(Context ctx) {
         Intent i = ctx.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -115,7 +170,9 @@ public class PingWorker extends Worker {
         int level = i.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = i.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         if (level < 0 || scale <= 0) return -1;
-        return Math.round(100f * level / scale);
+        int pct = Math.round(100f * level / scale);
+        Log.d(TAG, "batteryPct(): " + pct + "%");
+        return pct;
     }
 
     private static byte[] gzip(byte[] bytes) throws Exception {
@@ -123,6 +180,8 @@ public class PingWorker extends Worker {
         GZIPOutputStream gos = new GZIPOutputStream(bos);
         gos.write(bytes);
         gos.close();
-        return bos.toByteArray();
+        byte[] out = bos.toByteArray();
+        Log.d(TAG, "gzip(): in=" + bytes.length + " bytes, out=" + out.length + " bytes");
+        return out;
     }
 }
