@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.rta_app.SOLID.Views.Coletalista.AdapterViewRTA;
+import com.example.rta_app.SOLID.activitys.tracker.LocationTracker;
 import com.example.rta_app.SOLID.api.PackingRepository;
 import com.example.rta_app.SOLID.entities.Coletas;
 import com.example.rta_app.SOLID.api.PackingListRepository;
@@ -47,11 +48,25 @@ public class MainActivity extends AppCompatActivity {
         this.usersRepository = new UsersRepository(this);
         this.packingRepository = new PackingRepository(this);
         getUser();
+        StartLocate();
         SetupBinding();
         queryItems();
-
     }
 
+    private void StartLocate() {
+
+        String[] perms = new String[]{
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                android.Manifest.permission.POST_NOTIFICATIONS,
+                android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        };
+        requestPermissions(perms, 10);
+
+
+        LocationTracker.start(this);
+
+    }
 
     private void getUser() {
         usersRepository.getUser()
