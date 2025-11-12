@@ -1,5 +1,6 @@
 package com.example.rta_app.SOLID.activitys;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -48,25 +49,12 @@ public class MainActivity extends AppCompatActivity {
         this.usersRepository = new UsersRepository(this);
         this.packingRepository = new PackingRepository(this);
         getUser();
-        StartLocate();
+
         SetupBinding();
         queryItems();
     }
 
-    private void StartLocate() {
 
-        String[] perms = new String[]{
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                android.Manifest.permission.POST_NOTIFICATIONS,
-                android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        };
-        requestPermissions(perms, 10);
-
-
-        LocationTracker.start(this);
-
-    }
 
     private void getUser() {
         usersRepository.getUser()
@@ -90,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void SetupBinding() {
+
         binding.buttonList.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setCaptureActivity(CaptureActivity.class);

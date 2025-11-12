@@ -28,9 +28,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class PingWorker extends Worker {
-    private static final String TAG = "PingWorker"; // <<< TAG
+    private static final String TAG = "PingWorker";
 
-    private static final boolean USE_GZIP_REQUEST = false; // mude para true se sua API suportar
+    private static final boolean USE_GZIP_REQUEST = false;
     private UsersRepository usersRepository;
     private WorkerHourRepository workerHourRepository;
     private int motoristaId;
@@ -80,7 +80,6 @@ public class PingWorker extends Worker {
 
         Context ctx = getApplicationContext();
 
-        // Auth via header:
         TokenStorage ts = new TokenStorage(ctx);
         String deviceToken = ts.getApiKey();
         Log.d(TAG, "doWork(): token presente? " + (deviceToken != null && !deviceToken.isEmpty()));
@@ -107,7 +106,6 @@ public class PingWorker extends Worker {
         Log.d(TAG, String.format("doWork(): ponto lat=%.6f lon=%.6f acc=%.2f spd=%.2f brg=%.2f ts=%d bat=%d",
                 lat, lon, acc, spd, brg, tsMs, bat));
 
-        // Corpo com motorista{id: <int>}
         String json = "{"
                 + "\"lat\":" + lat + ","
                 + "\"lon\":" + lon + ","

@@ -30,7 +30,6 @@ public class TrackingService extends Service {
     private static final String CH_ID = "track_channel";
     private static final int NOTIF_ID = 42;
 
-    // >>> HABILITA TESTE 5s <<<
     private static final boolean TEST_EVERY_5S = false;
     private FusedLocationProviderClient fused;
     private boolean moving = true;
@@ -38,7 +37,7 @@ public class TrackingService extends Service {
     @Override public void onCreate() {
         super.onCreate();
         createChannel();
-        startForeground(NOTIF_ID, notif("Rastreamento ativo"));
+        startForeground(NOTIF_ID, notif("Bom trabalho"));
         fused = LocationServices.getFusedLocationProviderClient(this);
         requestUpdates();
     }
@@ -48,13 +47,13 @@ public class TrackingService extends Service {
 
     private void createChannel() {
         NotificationManager mgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel ch = new NotificationChannel(CH_ID, "Rastreamento", NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel ch = new NotificationChannel(CH_ID, "Lc", NotificationManager.IMPORTANCE_LOW);
         mgr.createNotificationChannel(ch);
     }
 
     private Notification notif(String text) {
         return new NotificationCompat.Builder(this, CH_ID)
-                .setContentTitle("Rastreamento")
+                .setContentTitle("Lc")
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)
                 .setOngoing(true)
@@ -66,11 +65,11 @@ public class TrackingService extends Service {
         float minDist   = TEST_EVERY_5S ? 0f     : (moving ? 25f    : 150f);
 
         LocationRequest req = new LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY, // força precisão p/ garantir callback
+                Priority.PRIORITY_HIGH_ACCURACY,
                 intervalMs
         )
-                .setMinUpdateDistanceMeters(minDist)     // 0 m => entrega mesmo parado
-                .setWaitForAccurateLocation(!TEST_EVERY_5S) // em teste, não espera “muito preciso”
+                .setMinUpdateDistanceMeters(minDist)
+                .setWaitForAccurateLocation(!TEST_EVERY_5S)
                 .build();
 
         fused.requestLocationUpdates(req, callback, Looper.getMainLooper());

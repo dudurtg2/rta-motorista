@@ -50,7 +50,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/testeImagem"
         android:layout_width="309dp"
         android:layout_height="280dp"
         app:layout_constraintEnd_toEndOf="parent"

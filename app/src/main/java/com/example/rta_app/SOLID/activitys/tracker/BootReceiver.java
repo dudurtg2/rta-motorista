@@ -10,7 +10,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context ctx, Intent intent) {
         if (intent == null || intent.getAction() == null) return;
         TokenStorage ts = new TokenStorage(ctx);
-        if (ts.getApiKey().isEmpty()) return; // sem token, não inicia
+        if (ts.getApiKey().isEmpty()) return;
 
         String a = intent.getAction();
         if (Intent.ACTION_BOOT_COMPLETED.equals(a)
