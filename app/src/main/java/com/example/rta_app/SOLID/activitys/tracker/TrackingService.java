@@ -30,20 +30,29 @@ public class TrackingService extends Service {
     private static final String CH_ID = "track_channel";
     private static final int NOTIF_ID = 42;
 
-    private static final boolean TEST_EVERY_5S = false;
+    // >>> FIXO: 1 ping a cada 20s <<<
+    private static final long PING_INTERVAL_MS = 15_000L;
+    private static final float MIN_DIST_METERS = 0f; // envia mesmo sem mover
+
     private FusedLocationProviderClient fused;
-    private boolean moving = true;
 
     @Override public void onCreate() {
         super.onCreate();
         createChannel();
-        startForeground(NOTIF_ID, notif("Bom trabalho"));
+        startForeground(NOTIF_ID, notif("Rastreamento ativo"));
         fused = LocationServices.getFusedLocationProviderClient(this);
         requestUpdates();
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) { return START_STICKY; }
     @Nullable @Override public IBinder onBind(Intent intent) { return null; }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        if (fused != null) {
+            fused.removeLocationUpdates(callback);
+        }
+    }
 
     private void createChannel() {
         NotificationManager mgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -61,26 +70,21 @@ public class TrackingService extends Service {
     }
 
     private void requestUpdates() {
-        long intervalMs = TEST_EVERY_5S ? 5_000L : (moving ? 15_000L : 60_000L);
-        float minDist   = TEST_EVERY_5S ? 0f     : (moving ? 25f    : 150f);
-
         LocationRequest req = new LocationRequest.Builder(
                 Priority.PRIORITY_HIGH_ACCURACY,
-                intervalMs
+                PING_INTERVAL_MS
         )
-                .setMinUpdateDistanceMeters(minDist)
-                .setWaitForAccurateLocation(!TEST_EVERY_5S)
+                .setMinUpdateDistanceMeters(MIN_DIST_METERS) // 0m => sempre manda
+                .setWaitForAccurateLocation(false)           // não bloqueia esperando extra precisão
                 .build();
 
         fused.requestLocationUpdates(req, callback, Looper.getMainLooper());
     }
 
-
     private final LocationCallback callback = new LocationCallback() {
         @Override public void onLocationResult(LocationResult result) {
             Location loc = result.getLastLocation();
             if (loc == null) return;
-            moving = (loc.getSpeed() >= 1.0f);
             enqueuePing(loc);
         }
     };
@@ -99,6 +103,7 @@ public class TrackingService extends Service {
                 .setInputData(data)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
                 .build();
+
         WorkManager.getInstance(this).enqueue(req);
     }
 }

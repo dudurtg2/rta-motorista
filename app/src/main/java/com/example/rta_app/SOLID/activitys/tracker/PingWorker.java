@@ -5,14 +5,12 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.example.rta_app.SOLID.activitys.WorkHourActivity;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.example.rta_app.SOLID.entities.WorkerHous;
@@ -30,7 +28,9 @@ import java.util.zip.GZIPOutputStream;
 public class PingWorker extends Worker {
     private static final String TAG = "PingWorker";
 
-    private static final boolean USE_GZIP_REQUEST = false;
+    // Reuso de conexão (keep-alive)
+    private static final OkHttpClient CLIENT = new OkHttpClient();
+
     private UsersRepository usersRepository;
     private WorkerHourRepository workerHourRepository;
     private int motoristaId;
@@ -65,8 +65,8 @@ public class PingWorker extends Worker {
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 WorkerHous workerHous = task.getResult();
-                isValidate = (!workerHous.getHour_first().isEmpty());
-                Log.i(TAG, "getUser(): isValidate=" + isValidate + " (workerHous " + (workerHous.getHour_first() == null ? "null" : "ok") + ")" + workerHous.getHour_first());
+                isValidate = (workerHous != null && workerHous.getHour_first() != null && !workerHous.getHour_first().isEmpty());
+                Log.i(TAG, "getUser(): isValidate=" + isValidate);
             } else {
                 isValidate = false;
                 Log.e(TAG, "getUser(): falha ao obter workerHous", task.getException());
@@ -106,6 +106,7 @@ public class PingWorker extends Worker {
         Log.d(TAG, String.format("doWork(): ponto lat=%.6f lon=%.6f acc=%.2f spd=%.2f brg=%.2f ts=%d bat=%d",
                 lat, lon, acc, spd, brg, tsMs, bat));
 
+        // Corpo SEMPRE gzipado + motorista{id}
         String json = "{"
                 + "\"lat\":" + lat + ","
                 + "\"lon\":" + lon + ","
@@ -118,44 +119,39 @@ public class PingWorker extends Worker {
                 + "}";
 
         try {
-            if (isValidate) {
-                OkHttpClient client = new OkHttpClient();
-
-                RequestBody body = RequestBody.create(
-                        MediaType.parse("application/json"),
-                        USE_GZIP_REQUEST ? gzip(json.getBytes()) : json.getBytes()
-                );
-
-                String url = LocationTracker.BASE_URL + "/api/locationPings/save";
-                Log.d(TAG, "doWork(): POST " + url + " | gzip=" + USE_GZIP_REQUEST);
-
-                Request.Builder rb = new Request.Builder()
-                        .url(url)
-                        .addHeader("Content-Type", "application/json")
-                        .addHeader("X-API-Key", deviceToken); // AUTH via header
-
-                if (USE_GZIP_REQUEST) rb.addHeader("Content-Encoding", "gzip");
-
-                Request req = rb.post(body).build();
-                Response r = client.newCall(req).execute();
-                int code = r.code();
-                String msg = r.message();
-                Log.i(TAG, "doWork(): resposta HTTP code=" + code + " msg=" + msg);
-                boolean ok = r.isSuccessful();
-                r.close();
-
-                if (ok) {
-                    Log.d(TAG, "doWork(): sucesso");
-                    return Result.success();
-                } else {
-                    Log.w(TAG, "doWork(): falha HTTP -> retry");
-                    return Result.retry();
-                }
-            } else {
+            if (!isValidate) {
                 Log.w(TAG, "doWork(): isValidate=false (sem workerHous) -> retry");
                 return Result.retry();
             }
 
+            byte[] gzBody = gzip(json.getBytes());
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), gzBody);
+
+            String url = LocationTracker.BASE_URL + "/api/locationPings/save";
+            Log.d(TAG, "doWork(): POST " + url + " | gzip=true (body)");
+
+            Request req = new Request.Builder()
+                    .url(url)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Content-Encoding", "gzip")   // << sempre gzip
+                    .addHeader("X-API-Key", deviceToken)     // auth
+                    .post(body)
+                    .build();
+
+            Response r = CLIENT.newCall(req).execute();
+            int code = r.code();
+            String msg = r.message();
+            Log.i(TAG, "doWork(): resposta HTTP code=" + code + " msg=" + msg);
+            boolean ok = r.isSuccessful();
+            r.close();
+
+            if (ok) {
+                Log.d(TAG, "doWork(): sucesso");
+                return Result.success();
+            } else {
+                Log.w(TAG, "doWork(): falha HTTP -> retry");
+                return Result.retry();
+            }
         } catch (Exception e) {
             Log.e(TAG, "doWork(): exceção ao enviar ping", e);
             return Result.retry();

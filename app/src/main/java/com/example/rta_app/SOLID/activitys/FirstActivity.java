@@ -8,6 +8,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.rta_app.SOLID.activitys.tracker.LocationTracker;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.services.NetworkService;
 import com.example.rta_app.SOLID.services.TokenStorage;
@@ -69,6 +70,7 @@ public class FirstActivity extends AppCompatActivity {
     }
 
     private void startMain() {
+        LocationTracker.start(this);
         Log.i(TAG, "startMain(): abrindo MainActivity");
         startActivity(new Intent(this, MainActivity.class));
         finish();

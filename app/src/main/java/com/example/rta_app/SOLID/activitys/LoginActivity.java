@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.rta_app.SOLID.activitys.tracker.LocationTracker;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.databinding.ActivityLoginBinding;
 
@@ -191,6 +192,7 @@ public class LoginActivity extends AppCompatActivity {
     // ========= NAVEGAÇÃO =========
 
     private void openMain() {
+        LocationTracker.start(this);
         Log.i(TAG, "Abrindo MainActivity");
         startActivity(new Intent(LoginActivity.this, MainActivity.class));
         finish();
