@@ -65,7 +65,15 @@ public class PingWorker extends Worker {
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 WorkerHous workerHous = task.getResult();
-                isValidate = (workerHous != null && workerHous.getHour_first() != null && !workerHous.getHour_first().isEmpty());
+
+                if(!workerHous.getHour_first().isEmpty() && workerHous.getHour_dinner().isEmpty()){
+                    isValidate = true;
+                } else if (!workerHous.getHour_dinner().isEmpty() && !workerHous.getHour_finish().isEmpty()){
+                    isValidate = true;
+                } else {
+                    isValidate = false;
+                }
+
                 Log.i(TAG, "getUser(): isValidate=" + isValidate);
             } else {
                 isValidate = false;
@@ -106,7 +114,6 @@ public class PingWorker extends Worker {
         Log.d(TAG, String.format("doWork(): ponto lat=%.6f lon=%.6f acc=%.2f spd=%.2f brg=%.2f ts=%d bat=%d",
                 lat, lon, acc, spd, brg, tsMs, bat));
 
-        // Corpo SEMPRE gzipado + motorista{id}
         String json = "{"
                 + "\"lat\":" + lat + ","
                 + "\"lon\":" + lon + ","

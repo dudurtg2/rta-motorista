@@ -304,7 +304,7 @@ public class WorkHourActivity extends AppCompatActivity {
 
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
-            return diffInMinutes >= 15;
+            return true;
 
 
 
