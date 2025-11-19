@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
             integrator.setOrientationLocked(false);
             integrator.initiateScan();
         });
+        binding.testeImagem.setOnClickListener(v -> startActivity(new Intent(this, CarroRotasActivity.class)));
         binding.textView5.setOnClickListener(v -> {
             IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
             integrator.setCaptureActivity(CaptureActivity.class);
