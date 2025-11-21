@@ -46,26 +46,6 @@ public class WorkerHourRepository {
         this.executor = Executors.newSingleThreadExecutor();
     }
 
-    public Task<Void> validadeCode(String code) {
-        Log.d(TAG, "validadeCode(): code=" + code);
-        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-
-        String token = getAccessToken();
-        if (token == null) {
-            Log.e(TAG, "validadeCode(): access token missing");
-            tcs.setException(new IllegalStateException("Access token missing"));
-            return tcs.getTask();
-        }
-
-        Request request = new Request.Builder()
-                .url(BASE_URL + "api/unique/validade/" + code)
-                .put(RequestBody.create(new byte[0], null))
-                .addHeader("X-API-Key", token)
-                .build();
-
-        executeRequest(request, tcs);
-        return tcs.getTask();
-    }
 
     public Task<Void> saveHors(WorkerHous workerHous) {
         Log.d(TAG, "saveHors(): workerHous=" + workerHous);

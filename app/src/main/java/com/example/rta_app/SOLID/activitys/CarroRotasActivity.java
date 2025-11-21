@@ -22,7 +22,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.rta_app.databinding.ActivityCarroRotasBinding;
-
 public class CarroRotasActivity extends AppCompatActivity {
     private ActivityCarroRotasBinding binding;
     private static final int REQ_FOTO_COMBUSTIVEL = 1;
