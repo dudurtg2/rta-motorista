@@ -74,112 +74,432 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/lblMecanica">
 
-            <CheckBox
-                android:id="@+id/chk_agua"
+            <Spinner
+                android:id="@+id/dishesCategorySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Água do Radiador"
-                android:textColor="@android:color/white" />
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/button_stroke_squad_white_block" />
 
-            <CheckBox
-                android:id="@+id/chk_oleo_motor"
+            <!-- ÁGUA DO RADIADOR -->
+            <LinearLayout
+                android:id="@+id/row_agua"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Óleo do Motor"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp">
 
-            <CheckBox
-                android:id="@+id/chk_oleo_freio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Óleo de Freio"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Água do Radiador"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
 
-            <CheckBox
-                android:id="@+id/chk_oleo_direcao"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Óleo de Direção"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                <CheckBox
+                    android:id="@+id/chk_agua_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
 
-            <CheckBox
-                android:id="@+id/chk_farois"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Faróis"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                <CheckBox
+                    android:id="@+id/chk_agua_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
 
-            <CheckBox
-                android:id="@+id/chk_piscas"
+            <!-- ÓLEO DO MOTOR -->
+            <LinearLayout
+                android:id="@+id/row_oleo_motor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Piscas (Setas)"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
 
-            <CheckBox
-                android:id="@+id/chk_luz_freio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Luz de Freio"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Óleo do Motor"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
 
-            <CheckBox
-                android:id="@+id/chk_luz_re"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Luz de Ré"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                <CheckBox
+                    android:id="@+id/chk_oleo_motor_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
 
-            <CheckBox
-                android:id="@+id/chk_pneus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Calibragem Pneus"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                <CheckBox
+                    android:id="@+id/chk_oleo_motor_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
 
-            <CheckBox
-                android:id="@+id/chk_step"
+            <!-- ÓLEO DE FREIO -->
+            <LinearLayout
+                android:id="@+id/row_oleo_freio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Step (Reserva)"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
 
-            <CheckBox
-                android:id="@+id/chk_chave_rodas"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Chave de Rodas"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Óleo de Freio"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
 
-            <CheckBox
-                android:id="@+id/chk_macaco"
+                <CheckBox
+                    android:id="@+id/chk_oleo_freio_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_oleo_freio_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- ÓLEO DE DIREÇÃO -->
+            <LinearLayout
+                android:id="@+id/row_oleo_direcao"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:buttonTint="@android:color/white"
-                android:text="Macaco"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Óleo de Direção"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_oleo_direcao_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_oleo_direcao_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- FARÓIS -->
+            <LinearLayout
+                android:id="@+id/row_farois"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Faróis"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_farois_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_farois_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- PISCAS -->
+            <LinearLayout
+                android:id="@+id/row_piscas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Piscas (Setas)"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_piscas_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_piscas_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- LUZ DE FREIO -->
+            <LinearLayout
+                android:id="@+id/row_luz_freio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Luz de Freio"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_luz_freio_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_luz_freio_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- LUZ DE RÉ -->
+            <LinearLayout
+                android:id="@+id/row_luz_re"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Luz de Ré"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_luz_re_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_luz_re_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- PNEUS -->
+            <LinearLayout
+                android:id="@+id/row_pneus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Calibragem Pneus"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_pneus_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_pneus_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- STEP -->
+            <LinearLayout
+                android:id="@+id/row_step"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Step (Reserva)"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_step_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_step_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- CHAVE DE RODAS -->
+            <LinearLayout
+                android:id="@+id/row_chave_rodas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Chave de Rodas"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_chave_rodas_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_chave_rodas_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
+
+            <!-- MACACO -->
+            <LinearLayout
+                android:id="@+id/row_macaco"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Macaco"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/chk_macaco_ruim"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruim"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+
+                <CheckBox
+                    android:id="@+id/chk_macaco_bom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bom"
+                    android:textColor="@android:color/white"
+                    android:buttonTint="@android:color/white" />
+            </LinearLayout>
 
         </LinearLayout>
 

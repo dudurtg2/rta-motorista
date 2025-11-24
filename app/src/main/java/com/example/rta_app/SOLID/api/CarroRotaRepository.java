@@ -44,27 +44,35 @@ public class CarroRotaRepository {
     // ============================================================================================
 
     /** GET: /api/carros/findAll */
+    /** GET: /api/carros/findAll */
     public Task<List<Carro>> findAll() {
         TaskCompletionSource<List<Carro>> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
                 String token = tokenStorage.getApiKey();
+
                 Request req = new Request.Builder()
-                        .url(URL_API + "api/carros/findAll")
+                        .url(URL_API + "api/carros/findAll") // ajuste esse path se o endpoint for diferente
                         .addHeader("X-API-Key", token)
                         .get()
                         .build();
 
                 try (Response resp = httpClient.newCall(req).execute()) {
-                    if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
+                    if (!resp.isSuccessful()) {
+                        throw new IOException("HTTP " + resp.code() + " - " + resp.message());
+                    }
 
-                    String body = resp.body().string();
+                    String body = resp.body() != null ? resp.body().string() : "[]";
+
+                    // A API retorna um ARRAY na raiz, igual ao JSON que você mandou
                     JSONArray arr = new JSONArray(body);
                     List<Carro> list = new ArrayList<>();
 
                     for (int i = 0; i < arr.length(); i++) {
-                        list.add(jsonToCarro(arr.getJSONObject(i)));
+                        JSONObject obj = arr.getJSONObject(i);
+                        list.add(jsonToCarro(obj));
                     }
+
                     tcs.setResult(list);
                 }
             } catch (Exception e) {
