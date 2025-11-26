@@ -8,6 +8,10 @@ public class WorkerHous {
     private String hour_stop;
     private String hour_after;
 
+    private Boolean carroInicial;
+
+    private Boolean carroFinal;
+
     public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after) {
         this.date = date;
         this.hour_first = hour_first;
@@ -16,6 +20,35 @@ public class WorkerHous {
         this.hour_stop = hour_stop;
         this.hour_after = hour_after;
 
+    }
+    public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after, Boolean carroInicial, Boolean carroFinal) {
+        this.date = date;
+        this.hour_first = hour_first;
+        this.hour_dinner = hour_dinner;
+        this.hour_finish = hour_finish;
+        this.hour_stop = hour_stop;
+        this.hour_after = hour_after;
+        this.carroInicial = carroInicial;
+        this.carroFinal = carroFinal;
+
+    }
+
+    public Boolean getCarroInicial() {
+
+        return carroInicial;
+    }
+
+    public void setCarroInicial(Boolean carroInicial) {
+        this.carroInicial = carroInicial;
+    }
+
+    public Boolean getCarroFinal() {
+        return carroFinal;
+    }
+
+    public void setCarroFinal(Boolean carroFinal) {
+
+        this.carroFinal = carroFinal;
     }
 
     public String getHour_after() {
@@ -74,6 +107,8 @@ public class WorkerHous {
                 ", hour_finish='" + hour_finish + '\'' +
                 ", hour_stop='" + hour_stop + '\'' +
                 ", hour_after='" + hour_after + '\'' +
+                ", carroInicial=" + carroInicial +
+                ", carroFinal=" + carroFinal +
                 '}';
     }
 }

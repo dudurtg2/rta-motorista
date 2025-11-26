@@ -5,7 +5,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
@@ -17,7 +20,12 @@ import android.widget.Toast;
 import android.widget.AdapterView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import androidx.activity.EdgeToEdge;
@@ -27,9 +35,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.example.rta_app.SOLID.api.CarroRotaRepository;
+import com.example.rta_app.SOLID.api.VerificardorDeCarroRepository;
+import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.example.rta_app.SOLID.entities.Carro;
+import com.example.rta_app.SOLID.entities.VerificadoresDoCarro;
+import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.databinding.ActivityCarroRotasBinding;
 
 public class CarroRotasActivity extends AppCompatActivity {
@@ -37,16 +50,29 @@ public class CarroRotasActivity extends AppCompatActivity {
     private ActivityCarroRotasBinding binding;
 
     private CarroRotaRepository carroRotaRepository;
+    private VerificardorDeCarroRepository verificardorDeCarroRepository;
+    private WorkerHourRepository workerHourRepository;
 
     private static final int REQ_FOTO_COMBUSTIVEL = 1;
-    private static final int REQ_FOTO_PARABRISA   = 2;
-    private static final int REQ_FOTO_LATARIA     = 3;
+    private static final int REQ_FOTO_PARABRISA = 2;
+    private static final int REQ_FOTO_LATARIA = 3;
+    private static final int REQ_FOTO_KILOMETRAGEM = 4;
     private static final int REQ_CAMERA_PERMISSION = 100;
+
+
     private int pendingRequestCodeForCamera = -1;
 
+    private List<Carro> carro = new ArrayList<>();
+
+    // Base64 das fotos (sem recompressão – bytes originais do arquivo)
     private String fotoCombustivelBase64;
     private String fotoParabrisaBase64;
     private String fotoLatariaBase64;
+    private String fotokilometragemBase64;
+
+    // Para capturar foto em alta resolução
+    private Uri currentPhotoUri;
+    private String currentPhotoPath;
 
     // Checklist mecânico (em grupos Ruim/Bom)
     private View[] mecanicaRows;
@@ -85,20 +111,24 @@ public class CarroRotasActivity extends AppCompatActivity {
         binding = ActivityCarroRotasBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        carroRotaRepository = new CarroRotaRepository(this);
+        verificardorDeCarroRepository = new VerificardorDeCarroRepository(this);
+        workerHourRepository = new WorkerHourRepository(this);
+
+
         setupChecklistMecanico();
         setupFotoButtons();
         setupSpinnerPlacas();
 
-        carroRotaRepository = new CarroRotaRepository(this);
-
         // Carrega a lista de carros de forma assíncrona
         carroRotaRepository.findAll()
                 .addOnSuccessListener(carros -> {
+                    carro = carros;
                     packingLocal.clear();
                     // Placeholder na posição 0
                     packingLocal.add("Selecione o veículo");
-                    for (Carro carro : carros) {
-                        packingLocal.add(carro.getPlaca());
+                    for (Carro c : carros) {
+                        packingLocal.add(c.getPlaca());
                     }
                     placasAdapter.notifyDataSetChanged();
                 })
@@ -118,7 +148,6 @@ public class CarroRotasActivity extends AppCompatActivity {
                 packingLocal
         );
 
-        // id DishesCategorySpinner -> binding.dishesCategorySpinner
         binding.dishesCategorySpinner.setAdapter(placasAdapter);
         binding.dishesCategorySpinner.setPrompt("Selecione o veículo");
 
@@ -173,18 +202,18 @@ public class CarroRotasActivity extends AppCompatActivity {
 
         // Para cada linha, o par [Ruim, Bom] (na mesma ordem das labels)
         mecanicaChecks = new CheckBox[][]{
-                {binding.chkAguaRuim,        binding.chkAguaBom},
-                {binding.chkOleoMotorRuim,   binding.chkOleoMotorBom},
-                {binding.chkOleoFreioRuim,   binding.chkOleoFreioBom},
+                {binding.chkAguaRuim, binding.chkAguaBom},
+                {binding.chkOleoMotorRuim, binding.chkOleoMotorBom},
+                {binding.chkOleoFreioRuim, binding.chkOleoFreioBom},
                 {binding.chkOleoDirecaoRuim, binding.chkOleoDirecaoBom},
-                {binding.chkFaroisRuim,      binding.chkFaroisBom},
-                {binding.chkPiscasRuim,      binding.chkPiscasBom},
-                {binding.chkLuzFreioRuim,    binding.chkLuzFreioBom},
-                {binding.chkLuzReRuim,       binding.chkLuzReBom},
-                {binding.chkPneusRuim,       binding.chkPneusBom},
-                {binding.chkStepRuim,        binding.chkStepBom},
-                {binding.chkChaveRodasRuim,  binding.chkChaveRodasBom},
-                {binding.chkMacacoRuim,      binding.chkMacacoBom}
+                {binding.chkFaroisRuim, binding.chkFaroisBom},
+                {binding.chkPiscasRuim, binding.chkPiscasBom},
+                {binding.chkLuzFreioRuim, binding.chkLuzFreioBom},
+                {binding.chkLuzReRuim, binding.chkLuzReBom},
+                {binding.chkPneusRuim, binding.chkPneusBom},
+                {binding.chkStepRuim, binding.chkStepBom},
+                {binding.chkChaveRodasRuim, binding.chkChaveRodasBom},
+                {binding.chkMacacoRuim, binding.chkMacacoBom}
         };
 
         mecanicaDefeitos = new String[mecanicaChecks.length];
@@ -201,7 +230,7 @@ public class CarroRotasActivity extends AppCompatActivity {
         for (int groupIndex = 0; groupIndex < mecanicaChecks.length; groupIndex++) {
             final int idx = groupIndex;
             CheckBox ruim = mecanicaChecks[groupIndex][0];
-            CheckBox bom  = mecanicaChecks[groupIndex][1];
+            CheckBox bom = mecanicaChecks[groupIndex][1];
 
             ruim.setOnCheckedChangeListener((buttonView, isChecked) ->
                     onRuimChanged(idx, isChecked));
@@ -376,6 +405,8 @@ public class CarroRotasActivity extends AppCompatActivity {
                     mecanicaChecks[index][1].setChecked(false); // Bom
                     isUpdatingGroup = false;
 
+                    saveDefeitos(desc);
+
                     processGroupChange(index);
                 })
                 .setNegativeButton("Cancelar", (dialog, which) -> {
@@ -384,27 +415,118 @@ public class CarroRotasActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void saveDefeitos(String descricao) {
+        VerificadoresDoCarro verificadoresDoCarro =
+                new VerificadoresDoCarro(
+                        "QUEBRADO",
+                        false,
+                        false,
+                        null,
+                        null,
+                        true,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        descricao,
+                        null,
+                        carro.stream()
+                                .filter(v -> v.getPlaca().equals(placaSelecionada))
+                                .findFirst()
+                                .get()
+                                .getId()
+                );
+
+        verificardorDeCarroRepository.save(verificadoresDoCarro);
+        finish();
+    }
+
     // -----------------------------
     // BOTÕES DE FOTO + CÂMERA
     // -----------------------------
+
+    private WorkerHous wh;
     private void setupFotoButtons() {
         binding.btnFotoCombustivel.setOnClickListener(v -> abrirCamera(REQ_FOTO_COMBUSTIVEL));
         binding.btnFotoParabrisa.setOnClickListener(v -> abrirCamera(REQ_FOTO_PARABRISA));
         binding.btnFotoLataria.setOnClickListener(v -> abrirCamera(REQ_FOTO_LATARIA));
+        binding.btnFotoKilometragem.setOnClickListener(v -> abrirCamera(REQ_FOTO_KILOMETRAGEM));
 
         binding.btnFinalizar.setOnClickListener(v -> {
-            // Aqui você já tem:
-            // - placaSelecionada
-            // - para cada índice i:
-            //      mecanicaChecks[i][0].isChecked() => RUIM
-            //      mecanicaChecks[i][1].isChecked() => BOM
-            //      mecanicaDefeitos[i] => descrição se RUIM
-            // - fotoCombustivelBase64 / fotoParabrisaBase64 / fotoLatariaBase64
 
-            Toast.makeText(this, "Vistoria finalizada (simulado)", Toast.LENGTH_SHORT).show();
+            verificardorDeCarroRepository.save(new VerificadoresDoCarro(
+                    "EM_USO",
+                    true,
+                    true,
+                    null,
+                    null,
+                    true,
+                    fotoCombustivelBase64,
+                    null,
+                    fotoParabrisaBase64,
+                    null,
+                    fotoLatariaBase64,
+                    null,
+                    fotokilometragemBase64,
+                    null,
+                    "Funciona",
+                    "Funciona",
+                    carro.stream()
+                            .filter(c -> c.getPlaca().equals(placaSelecionada))
+                            .findFirst()
+                            .get()
+                            .getId()
+            )).addOnSuccessListener(a -> {
+
+                Toast.makeText(this, "Vistoria finalizada", Toast.LENGTH_SHORT).show();
+
+                workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+
+                         wh = task.getResult();
+                        if (wh == null) {
+                            // fallback se não existir nada salvo
+                            wh = new WorkerHous(
+                                    "", "", "", "", "", "",
+                                    false, false
+                            );
+                        }
+
+                        // Aqui você decide se é inicial ou final
+                        wh.setCarroInicial(true);     // ou wh.setCarroFinal(true);
+
+                        workerHourRepository.saveWorkerHous(wh)
+                                .addOnCompleteListener(t2 -> {
+                                    if (t2.isSuccessful()) {
+                                        Log.d("CarroRota", "Carro finalizado " + wh.toString());
+                                    } else {
+                                        Log.e("CarroRota", "Erro ao salvar WorkerHous", t2.getException());
+                                    }
+                                    // Só fecha a Activity depois de tentar salvar
+                                    finish();
+                                });
+
+                    } else {
+                        Toast.makeText(
+                                this,
+                                "Falha ao carregar apontamento: " +
+                                        (task.getException() != null ? task.getException().getMessage() : ""),
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
+
+            }).addOnFailureListener(e -> {
+                Toast.makeText(this, "Erro ao salvar vistoria: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
         });
     }
 
+    // Abre câmera usando FileProvider e salva foto em ARQUIVO (sem thumbnail 192x192)
     private void abrirCamera(int requestCode) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -421,11 +543,46 @@ public class CarroRotasActivity extends AppCompatActivity {
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, requestCode);
+            try {
+                File photoFile = createImageFile();
+                if (photoFile != null) {
+                    currentPhotoPath = photoFile.getAbsolutePath();
+
+                    // AQUI usamos exatamente a authority do Manifest:
+                    currentPhotoUri = FileProvider.getUriForFile(
+                            this,
+                            "com.example.rta_app.provider", // <- IGUAL ao Manifest
+                            photoFile
+                    );
+
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri);
+                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    startActivityForResult(intent, requestCode);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Erro ao criar arquivo de imagem", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "Não foi possível abrir a câmera", Toast.LENGTH_SHORT).show();
         }
     }
+
+    // Cria arquivo temporário para a foto
+    private File createImageFile() throws IOException {
+        String timeStamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new java.util.Date());
+        String imageFileName = "FOTO_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -451,15 +608,16 @@ public class CarroRotasActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode != Activity.RESULT_OK || data == null) return;
+        if (resultCode != Activity.RESULT_OK || currentPhotoPath == null) return;
 
-        Bundle extras = data.getExtras();
-        if (extras == null) return;
+        Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+        if (bitmap == null) {
+            Toast.makeText(this, "Erro ao carregar foto", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        Bitmap bitmap = (Bitmap) extras.get("data");
-        if (bitmap == null) return;
-
-        String base64 = bitmapToBase64(bitmap);
+        // Base64 sem recompressão (opcional, se quiser)
+        String base64 = fileToBase64(currentPhotoPath);
 
         switch (requestCode) {
             case REQ_FOTO_COMBUSTIVEL:
@@ -479,13 +637,35 @@ public class CarroRotasActivity extends AppCompatActivity {
                 binding.imgPreviewLataria.setVisibility(View.VISIBLE);
                 binding.imgPreviewLataria.setImageBitmap(bitmap);
                 break;
+
+            case REQ_FOTO_KILOMETRAGEM:
+                fotokilometragemBase64 = base64;
+                binding.imgPreviewKilometragem.setVisibility(View.VISIBLE);
+                binding.imgPreviewKilometragem.setImageBitmap(bitmap);
+                break;
         }
     }
 
-    private String bitmapToBase64(Bitmap bitmap) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
-        byte[] bytes = baos.toByteArray();
-        return Base64.encodeToString(bytes, Base64.NO_WRAP);
+    // Converte o ARQUIVO de imagem (JPEG salvo pela câmera) direto em Base64 (sem recompressão)
+    private String fileToBase64(String path) {
+        try {
+            File file = new File(path);
+            FileInputStream fis = new FileInputStream(file);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = fis.read(buffer)) != -1) {
+                baos.write(buffer, 0, read);
+            }
+            fis.close();
+
+            byte[] bytes = baos.toByteArray();
+            return Base64.encodeToString(bytes, Base64.NO_WRAP);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
+
 }

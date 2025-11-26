@@ -52,7 +52,7 @@ public class CarroRotaRepository {
                 String token = tokenStorage.getApiKey();
 
                 Request req = new Request.Builder()
-                        .url(URL_API + "api/carros/findAll") // ajuste esse path se o endpoint for diferente
+                        .url(URL_API + "api/carros/findAllAndroid") // ajuste esse path se o endpoint for diferente
                         .addHeader("X-API-Key", token)
                         .get()
                         .build();

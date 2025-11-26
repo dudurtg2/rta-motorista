@@ -3,6 +3,7 @@ package com.example.rta_app.SOLID.api;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.rta_app.SOLID.entities.VerificadoresDoCarro;
 import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.services.TokenStorage;
 import com.google.android.gms.tasks.Task;
@@ -25,10 +26,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class WorkerHourRepository {
+public class VerificardorDeCarroRepository {
 
-    private static final String TAG = "WorkerHourRepository2";
-    private static final String FILE_NAME = "worker_hours.json";
+    private static final String TAG = "VerificardorDeCarroRepositoryaa";
     private static final String USER_FILE = "user_data.json";
     private static final String BASE_URL = "https://android.lc-transportes.com/";
     private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
@@ -38,7 +38,7 @@ public class WorkerHourRepository {
     private final OkHttpClient httpClient;
     private final ExecutorService executor;
 
-    public WorkerHourRepository(Context context) {
+    public VerificardorDeCarroRepository(Context context) {
         Log.d(TAG, "Constructor: initializing WorkerHourRepository");
         this.context = context.getApplicationContext();
         this.httpClient = new OkHttpClient();
@@ -47,8 +47,8 @@ public class WorkerHourRepository {
     }
 
 
-    public Task<Void> saveHors(WorkerHous workerHous) {
-        Log.d(TAG, "saveHors(): workerHous=" + workerHous);
+    public Task<Void> save(VerificadoresDoCarro verificadoresDoCarro) {
+        Log.d(TAG, "saveHors(): verificadoresDoCarro=" + verificadoresDoCarro);
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
 
         String token = getAccessToken();
@@ -60,13 +60,68 @@ public class WorkerHourRepository {
         }
 
         JSONObject json = new JSONObject();
-        try {
-            json.put("date", workerHous.getDate());
-            json.put("hour_first", workerHous.getHour_first());
-            json.put("hour_dinner", workerHous.getHour_dinner());
-            json.put("hour_finish", workerHous.getHour_finish());
-            json.put("hour_stop", workerHous.getHour_stop());
 
+        /*
+         * {
+         *   "status": "LIVRE",
+         *   "verificadorInicial": true,
+         *   "verificadorFinal": true,
+         *   "dataInicial": "2025-11-25T19:47:54.083Z",
+         *   "dataFinal": "2025-11-25T19:47:54.083Z",
+         *   "finalizado": true,
+         *   "combustivelInicial": "string",
+         *   "combustivelFinal": "string",
+         *   "parabrisaInicio": "string",
+         *   "parabrisaFinal": "string",
+         *   "carro": {
+         *     "id": 0
+         *   },
+         *   "motorista": {
+         *     "id": 0
+         *   },
+         *   "latariaFinal": "string",
+         *   "kilometragemFinal": "string",
+         *   "observacoesAdicionaisInicio": "string",
+         *   "latariaInicio": "string",
+         *   "kilometragemInicio": "string",
+         *   "observacoesAdicionaisFinal": "string"
+         * }
+         */
+
+        try {
+            json.put("status", verificadoresDoCarro.getStatus());
+            json.put("verificadorInicial", verificadoresDoCarro.getVerificadorInicial());
+            json.put("verificadorFinal", verificadoresDoCarro.getVerificadorFinal());
+
+            // Datas no formato ISO-8601 (String). Ajuste se seus getters retornarem Date/LocalDateTime.
+            json.put("dataInicial", verificadoresDoCarro.getDataInicial());
+            json.put("dataFinal", verificadoresDoCarro.getDataFinal());
+
+            json.put("finalizado", verificadoresDoCarro.getFinalizado());
+
+            json.put("combustivelInicial", verificadoresDoCarro.getCombustivelInicial());
+            json.put("combustivelFinal", verificadoresDoCarro.getCombustivelFinal());
+
+            json.put("parabrisaInicio", verificadoresDoCarro.getParabrisaInicio());
+            json.put("parabrisaFinal", verificadoresDoCarro.getParabrisaFinal());
+
+            // Objeto carro
+            JSONObject carroJson = new JSONObject();
+            carroJson.put("id", verificadoresDoCarro.getCarro()); // ou verificadoresDoCarro.getCarro().getId()
+            json.put("carro", carroJson);
+
+            // Objeto motorista
+            JSONObject motoristaJson = new JSONObject();
+            motoristaJson.put("id", driveId); // ou verificadoresDoCarro.getMotorista().getId()
+            json.put("motorista", motoristaJson);
+
+            json.put("latariaFinal", verificadoresDoCarro.getLatariaFinal());
+            json.put("kilometragemFinal", verificadoresDoCarro.getKilometragemFinal());
+
+            json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
+            json.put("latariaInicio", verificadoresDoCarro.getLatariaInicio());
+            json.put("kilometragemInicio", verificadoresDoCarro.getKilometragemInicio());
+            json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
 
         } catch (JSONException e) {
             Log.e(TAG, "saveHors(): JSON error", e);
@@ -74,74 +129,16 @@ public class WorkerHourRepository {
             return tcs.getTask();
         }
 
+        Log.d(TAG, "saveHors(): json=" + json.toString());
+
         RequestBody body = RequestBody.create(json.toString(), JSON_MEDIA);
         Request request = new Request.Builder()
-                .url(BASE_URL + "api/pontos/save/" + driveId)
+                .url(BASE_URL + "api/verificadoresDoCarros/save")
                 .post(body)
                 .addHeader("X-API-Key", token)
                 .build();
 
         executeRequest(request, tcs);
-        return tcs.getTask();
-    }
-
-    public Task<Void> saveWorkerHous(WorkerHous workerHous) {
-        Log.d(TAG, "saveWorkerHous(): workerHous=" + workerHous);
-        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        executor.execute(() -> {
-            try {
-                JSONObject json = new JSONObject();
-                json.put("date", workerHous.getDate());
-                json.put("hour_first", workerHous.getHour_first());
-                json.put("hour_dinner", workerHous.getHour_dinner());
-                json.put("hour_finish", workerHous.getHour_finish());
-                json.put("hour_stop", workerHous.getHour_stop());
-                json.put("hour_after", workerHous.getHour_after());
-                json.put("carro_inicial", workerHous.getCarroInicial());
-                json.put("carro_final", workerHous.getCarroFinal());
-                writeToFile(json.toString());
-                Log.d(TAG, "saveWorkerHous(): local file saved");
-                tcs.setResult(null);
-            } catch (Exception e) {
-                Log.e(TAG, "saveWorkerHous(): error saving local data", e);
-                tcs.setException(e);
-            }
-        });
-        return tcs.getTask();
-    }
-
-    public Task<WorkerHous> getWorkerHous() {
-        Log.d(TAG, "getWorkerHous(): reading from local file");
-        TaskCompletionSource<WorkerHous> tcs = new TaskCompletionSource<>();
-        executor.execute(() -> {
-            try {
-                String data = readFromFile();
-                if (data == null) {
-                    Log.d(TAG, "getWorkerHous(): no file, returning empty WorkerHous");
-                    tcs.setResult(new WorkerHous("", "", "", "", "", ""));
-                } else {
-                    JSONObject json = new JSONObject(data);
-                    Log.d(TAG,json.toString());
-                    WorkerHous wh = new WorkerHous(
-                            json.optString("date", ""),
-                            json.optString("hour_first", ""),
-                            json.optString("hour_dinner", ""),
-                            json.optString("hour_finish", ""),
-                            json.optString("hour_stop", ""),
-                            json.optString("hour_after", ""),
-                            json.optBoolean("carro_inicial", false),
-                            json.optBoolean("carro_final", false)
-
-
-                    );
-                    Log.d(TAG, "getWorkerHous(): parsed WorkerHous=" + wh.toString());
-                    tcs.setResult(wh);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "getWorkerHous(): error reading local data", e);
-                tcs.setException(e);
-            }
-        });
         return tcs.getTask();
     }
 
@@ -164,27 +161,7 @@ public class WorkerHourRepository {
         });
     }
 
-    public void writeToFile(String data) throws IOException {
-        Log.d(TAG, "writeToFile(): writing data length=" + (data != null ? data.length() : 0));
-        try (FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE)) {
-            fos.write(data.getBytes(StandardCharsets.UTF_8));
-        }
-    }
 
-    public String readFromFile() throws IOException {
-        File file = new File(context.getFilesDir(), FILE_NAME);
-        if (!file.exists()) {
-            Log.d(TAG, "readFromFile(): file not found");
-            return null;
-        }
-        try (FileInputStream fis = context.openFileInput(FILE_NAME)) {
-            byte[] buf = new byte[fis.available()];
-            fis.read(buf);
-            String result = new String(buf, StandardCharsets.UTF_8);
-            Log.d(TAG, "readFromFile(): read data length=" + result.length());
-            return result;
-        }
-    }
 
     private String getAccessToken() {
       

@@ -637,7 +637,38 @@
                     android:visibility="gone"
                     tools:visibility="visible" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Kilometragem"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <ImageButton
+                    android:id="@+id/btnFotoKilometragem"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/button_stroke_squad"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="@android:color/white" />
+
+                <ImageView
+                    android:id="@+id/imgPreviewKilometragem"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#333333"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
         </LinearLayout>
 
         <Button

@@ -4,6 +4,7 @@ import static com.example.rta_app.SOLID.services.NetworkService.isNetworkConnect
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -125,6 +126,10 @@ public class WorkHourActivity extends AppCompatActivity {
                     if (workerHous.getHour_first().isEmpty()) {
                         openPonts(valueForHourUpdate);
                     }
+                    if(workerHous.getCarroInicial() == false){
+                        startActivity(new Intent(this, CarroRotasActivity.class));
+                        finish();
+                    }
                     break;
                 case "Almoço":
                     if (workerHous.getHour_dinner().isEmpty()) {
@@ -201,6 +206,11 @@ public class WorkHourActivity extends AppCompatActivity {
             switch (valueForHourUpdate) {
                 case "Entrada":
                     binding.buttonFistHour.setText(workerHous.getHour_first());
+
+                    if(workerHous.getCarroInicial() == false){
+                        startActivity(new Intent(this, CarroRotasActivity.class));
+                        finish();
+                    }
                     break;
                 case "Almoço":
                     binding.buttonDinnerStarHour.setText(workerHous.getHour_dinner());
@@ -242,7 +252,14 @@ public class WorkHourActivity extends AppCompatActivity {
             binding.imageDinnerStarHour.setVisibility(View.VISIBLE);
             binding.buttonDinnerStarHour.setVisibility(View.VISIBLE);
             binding.imageDinnerStarHour.setImageResource(R.drawable.clock_hour);
+
+
+            if(workerHous.getCarroInicial() == false){
+                startActivity(new Intent(this, CarroRotasActivity.class));
+                finish();
+            }
         } else {
+
             binding.buttonFistHour.setText("Entrada");
         }
 
