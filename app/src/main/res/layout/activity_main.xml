@@ -34,20 +34,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/rta" />
+            app:srcCompat="@drawable/rta_black" />
+
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/button_stroke_squad_white_block"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView4"
+            app:layout_constraintEnd_toEndOf="@+id/thebuttonListAddbutton"
+            app:layout_constraintStart_toStartOf="@+id/thebuttonListAddbutton"
+            app:layout_constraintTop_toBottomOf="@+id/thebuttonListAddbutton"
             tools:context=".SOLID.activitys.InTravelActivity">
 
             <EditText
@@ -58,25 +58,22 @@
                 android:ems="10"
                 android:hint="Digite o código de ficha aqui"
                 android:inputType="text"
-                android:textSize="18dp"
-                android:textAlignment="center"
                 android:paddingLeft="20dp"
+                android:textAlignment="center"
                 android:textColor="@color/black"
+                android:textSize="18dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintTop_toTopOf="parent" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/atualizar"
-
             android:layout_width="47dp"
             android:layout_height="51dp"
-
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="32dp"
@@ -94,74 +91,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/listPacketTravelDevo" />
 
-        <ImageView
-            android:id="@+id/inTravelbutton"
-            android:layout_width="0dp"
-            android:layout_height="128dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/button_ripple"
-            android:src="@drawable/bus_marker"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="@+id/buttonWorkHour"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
-
-        <ImageView
-            android:id="@+id/buttonWorkHour"
-            android:layout_width="0dp"
-            android:layout_height="128dp"
-            android:layout_marginStart="16dp"
-
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/button_ripple"
-            android:src="@drawable/archive_clock"
-            app:layout_constraintEnd_toStartOf="@+id/inTravelbutton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
-
-        <ImageView
-            android:id="@+id/buttonList"
-            android:layout_width="0dp"
-            android:layout_height="128dp"
-
-            android:layout_marginTop="8dp"
-            android:background="@drawable/button_ripple"
-            android:src="@drawable/camera"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="@+id/inTravelbutton"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/inTravelbutton"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-        <ImageView
-            android:id="@+id/PackectList"
-            android:layout_width="0dp"
-            android:layout_height="128dp"
-
-            android:layout_marginTop="8dp"
-            android:background="@drawable/button_ripple"
-            android:src="@drawable/box"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintHorizontal_bias="0.0"
-
-            app:layout_constraintStart_toStartOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
-
         <TextView
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="32dp"
-            android:text="v12a99l"
+            android:text="v42a12l"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/listPacketTravelDevo" />
+            app:layout_constraintEnd_toEndOf="@+id/testeImagem"
+            app:layout_constraintHorizontal_bias="0.484"
+            app:layout_constraintStart_toStartOf="@+id/testeImagem"
+            tools:layout_editor_absoluteY="153dp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/Perfil"
@@ -238,67 +177,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            android:text="DEVOLUÇÃO"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toBottomOf="@+id/PackectList" />
-
-
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            android:text="ADICIONAR LISTA"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@+id/buttonList"
-            app:layout_constraintStart_toStartOf="@+id/buttonList"
-            app:layout_constraintTop_toBottomOf="@+id/PackectList" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            android:text="PONTOS"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@+id/buttonWorkHour"
-            app:layout_constraintStart_toStartOf="@+id/buttonWorkHour"
-            app:layout_constraintTop_toBottomOf="@+id/buttonWorkHour" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            android:text="ROTA"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@+id/inTravelbutton"
-            app:layout_constraintStart_toStartOf="@+id/inTravelbutton"
-            app:layout_constraintTop_toBottomOf="@+id/inTravelbutton" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listPacketTravelDevo"
@@ -338,6 +216,218 @@
             app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
             app:layout_constraintStart_toStartOf="@+id/constraintLayout"
             app:layout_constraintTop_toBottomOf="@+id/coletaLine" />
+
+
+        <ImageView
+            android:id="@+id/theinTravelbutton"
+            android:layout_width="0dp"
+            android:layout_height="113dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_stroke_squad_white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+        <ImageView
+            android:id="@+id/inTravelImagem"
+            android:layout_width="120dp"
+            android:layout_height="0dp"
+            android:background="@drawable/button_stroke_squad_clay"
+            android:src="@drawable/bus_marker"
+            app:layout_constraintBottom_toBottomOf="@+id/theinTravelbutton"
+            app:layout_constraintStart_toStartOf="@+id/theinTravelbutton"
+            app:layout_constraintTop_toTopOf="@+id/theinTravelbutton" />
+        <TextView
+            android:id="@+id/textinTravelTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="ROTA"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/inTravelImagem"
+            app:layout_constraintTop_toTopOf="@+id/theinTravelbutton" />
+
+        <TextView
+            android:id="@+id/textinDescritionText"
+            android:layout_width="220dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="Após adicionar os romaneios à rota click para roteirizar a rota e realizar baixa dos romaneios."
+            app:layout_constraintBottom_toBottomOf="@+id/theinTravelbutton"
+            app:layout_constraintEnd_toEndOf="@+id/theinTravelbutton"
+            app:layout_constraintHorizontal_bias="0.018"
+            app:layout_constraintStart_toEndOf="@+id/inTravelImagem"
+            app:layout_constraintTop_toBottomOf="@+id/textinTravelTitle"
+            app:layout_constraintVertical_bias="0.0" />
+
+
+        <ImageView
+            android:id="@+id/theWorkHourbutton"
+            android:layout_width="0dp"
+            android:layout_height="113dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_stroke_squad_white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/theinTravelbutton" />
+
+        <ImageView
+            android:id="@+id/WorkHourImagem"
+            android:layout_width="120dp"
+            android:layout_height="0dp"
+            android:background="@drawable/button_stroke_squad_clay"
+            android:src="@drawable/archive_clock"
+            app:layout_constraintBottom_toBottomOf="@+id/theWorkHourbutton"
+            app:layout_constraintStart_toStartOf="@+id/theWorkHourbutton"
+            app:layout_constraintTop_toTopOf="@+id/theWorkHourbutton" />
+        <TextView
+            android:id="@+id/textWorkHourTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="PONTOS E VISTORIA"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/WorkHourImagem"
+            app:layout_constraintTop_toTopOf="@+id/theWorkHourbutton" />
+
+        <TextView
+            android:id="@+id/textWorkHourDescritionText"
+            android:layout_width="220dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="Responsável pelo registro de pontos e controle das horas trabalhadas, e vistoria dos carros."
+            app:layout_constraintBottom_toBottomOf="@+id/theWorkHourbutton"
+            app:layout_constraintEnd_toEndOf="@+id/theWorkHourbutton"
+            app:layout_constraintHorizontal_bias="0.018"
+            app:layout_constraintStart_toEndOf="@+id/WorkHourImagem"
+            app:layout_constraintTop_toBottomOf="@+id/textWorkHourTitle"
+            app:layout_constraintVertical_bias="0.0" />
+
+
+        <ImageView
+            android:id="@+id/thePackectListbutton"
+            android:layout_width="0dp"
+            android:layout_height="113dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_stroke_squad_white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/theWorkHourbutton" />
+
+        <ImageView
+            android:id="@+id/PackectListImagem"
+            android:layout_width="120dp"
+            android:layout_height="0dp"
+            android:background="@drawable/button_stroke_squad_clay"
+            android:src="@drawable/box"
+            app:layout_constraintBottom_toBottomOf="@+id/thePackectListbutton"
+            app:layout_constraintStart_toStartOf="@+id/thePackectListbutton"
+            app:layout_constraintTop_toTopOf="@+id/thePackectListbutton" />
+        <TextView
+            android:id="@+id/textPackectListTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="DEVOLUÇÃO"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/PackectListImagem"
+            app:layout_constraintTop_toTopOf="@+id/thePackectListbutton" />
+
+        <TextView
+            android:id="@+id/textPackectListDescritionText"
+            android:layout_width="220dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="Responsável pelo registro e tratamento das devoluções."
+            app:layout_constraintBottom_toBottomOf="@+id/thePackectListbutton"
+            app:layout_constraintEnd_toEndOf="@+id/thePackectListbutton"
+            app:layout_constraintHorizontal_bias="0.018"
+            app:layout_constraintStart_toEndOf="@+id/PackectListImagem"
+            app:layout_constraintTop_toBottomOf="@+id/textPackectListTitle"
+            app:layout_constraintVertical_bias="0.0" />
+
+
+        <ImageView
+            android:id="@+id/thebuttonListAddbutton"
+            android:layout_width="0dp"
+            android:layout_height="113dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_stroke_squad_white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/thePackectListbutton" />
+
+        <ImageView
+            android:id="@+id/buttonListAddImagem"
+            android:layout_width="120dp"
+            android:layout_height="0dp"
+            android:background="@drawable/button_stroke_squad_clay"
+            android:src="@drawable/camera"
+            app:layout_constraintBottom_toBottomOf="@+id/thebuttonListAddbutton"
+            app:layout_constraintStart_toStartOf="@+id/thebuttonListAddbutton"
+            app:layout_constraintTop_toTopOf="@+id/thebuttonListAddbutton" />
+        <TextView
+            android:id="@+id/textbuttonListAddTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="ADICIONAR LISTA"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/buttonListAddImagem"
+            app:layout_constraintTop_toTopOf="@+id/thebuttonListAddbutton" />
+
+        <TextView
+            android:id="@+id/textbuttonListAddDescritionText"
+            android:layout_width="220dp"
+            android:layout_height="70dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="Após adicionar os romaneios à rota click para roteirizar a rota e realizar baixa dos romaneios."
+            app:layout_constraintBottom_toBottomOf="@+id/thebuttonListAddbutton"
+            app:layout_constraintEnd_toEndOf="@+id/thebuttonListAddbutton"
+            app:layout_constraintHorizontal_bias="0.018"
+            app:layout_constraintStart_toEndOf="@+id/buttonListAddImagem"
+            app:layout_constraintTop_toBottomOf="@+id/textbuttonListAddTitle"
+            app:layout_constraintVertical_bias="0.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

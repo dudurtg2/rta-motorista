@@ -2,20 +2,14 @@ package com.example.rta_app.SOLID.activitys;
 
 import static com.example.rta_app.SOLID.services.NetworkService.isNetworkConnected;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.aplication.WorkerAplication;
@@ -23,8 +17,6 @@ import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 
 
@@ -43,7 +35,6 @@ public class WorkHourActivity extends AppCompatActivity {
     private Boolean isValidate = true;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,8 +48,6 @@ public class WorkHourActivity extends AppCompatActivity {
         setupClickListeners();
 
     }
-
-
 
 
     private void getUser() {
@@ -88,7 +77,9 @@ public class WorkHourActivity extends AppCompatActivity {
         binding.imageFistHour.setOnClickListener(v -> openPontsIsFinish("Entrada"));
         binding.imageDinnerStarHour.setOnClickListener(v -> openPontsIsFinish("Almoço"));
         binding.imageDinnerFinishHour.setOnClickListener(v -> openPontsIsFinish("Saída"));
-        binding.imageStop.setOnClickListener(v -> openPontsIsFinish("Fim"));
+        binding.imageStop.setOnClickListener(v -> {
+            testForVerificador(0);
+        });
     }
 
     private void alert() {
@@ -126,10 +117,7 @@ public class WorkHourActivity extends AppCompatActivity {
                     if (workerHous.getHour_first().isEmpty()) {
                         openPonts(valueForHourUpdate);
                     }
-                    if(workerHous.getCarroInicial() == false){
-                        startActivity(new Intent(this, CarroRotasActivity.class));
-                        finish();
-                    }
+
                     break;
                 case "Almoço":
                     if (workerHous.getHour_dinner().isEmpty()) {
@@ -148,6 +136,7 @@ public class WorkHourActivity extends AppCompatActivity {
                                 .setMessage("Para registrar o ponto de saida,\nVocê precisa estar conectado\na internet")
                                 .setNeutralButton("Ok, Entendi", (dialog, which) -> finish()).show();
                     } else if (workerHous.getHour_stop().isEmpty()) {
+
                         openPonts(valueForHourUpdate);
                     }
             }
@@ -157,8 +146,11 @@ public class WorkHourActivity extends AppCompatActivity {
     private void openPonts(String valueForHourUpdate) {
 
         if (valueForHourUpdate == "Fim" && !isNetworkConnected(this)) {
+
             return;
         }
+
+
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar registro de hora")
                 .setMessage("Deseja registrar o horário de " + valueForHourUpdate + "?\nDia: "
@@ -169,12 +161,46 @@ public class WorkHourActivity extends AppCompatActivity {
                 .show();
     }
 
+    private Boolean testForVerificador(int o){
+        if (o == 0){
+            workerHourRepository.getWorkerHous().addOnSuccessListener(c -> {
+                if (c.getCarroFinal() == false) {
+
+                    new AlertDialog.Builder(this)
+                            .setTitle("Alerta")
+                            .setMessage("Para registrar o ponto de saida,\nVocê precisa fazer a verificarçao final.")
+                            .setNeutralButton("Ok, Entendi", (dialog, which) -> {
+                                startActivity(new Intent(this, CarroRotasActivity.class));
+                                finish();
+                            }).show();
+                    return;
+                } else {
+                    openPontsIsFinish("Fim");
+                }
+            });
+        } else {
+            workerHourRepository.getWorkerHous().addOnSuccessListener(c -> {
+                if (c.getCarroInicial() == false) {
+
+                    startActivity(new Intent(this, CarroRotasActivity.class));
+                    finish();
+                    return;
+                }
+            });
+        }
+
+
+        return true;
+    }
+
     private void updateHours(String valueForHourUpdate) {
         UpdateWorkHours(valueForHourUpdate).addOnSuccessListener(aVoid -> {
             workerHourRepository.getWorkerHous().addOnSuccessListener(updatedTask -> {
                 WorkerHous updatedWorkerHous = updatedTask;
                 if (valueForHourUpdate.equals("Fim")) {
+
                     updateToSheets();
+
                 }
                 updateButtonText(valueForHourUpdate, updatedWorkerHous);
                 loadInitialData();
@@ -186,6 +212,7 @@ public class WorkHourActivity extends AppCompatActivity {
         isValidate = false;
         try {
             if (isNetworkConnected(this)) {
+
 
                 workerAplication.Finish(binding.UserNameDisplay.getText().toString()).addOnSuccessListener(v -> {
                     binding.progressBar.setVisibility(View.GONE);
@@ -206,11 +233,6 @@ public class WorkHourActivity extends AppCompatActivity {
             switch (valueForHourUpdate) {
                 case "Entrada":
                     binding.buttonFistHour.setText(workerHous.getHour_first());
-
-                    if(workerHous.getCarroInicial() == false){
-                        startActivity(new Intent(this, CarroRotasActivity.class));
-                        finish();
-                    }
                     break;
                 case "Almoço":
                     binding.buttonDinnerStarHour.setText(workerHous.getHour_dinner());
@@ -254,10 +276,7 @@ public class WorkHourActivity extends AppCompatActivity {
             binding.imageDinnerStarHour.setImageResource(R.drawable.clock_hour);
 
 
-            if(workerHous.getCarroInicial() == false){
-                startActivity(new Intent(this, CarroRotasActivity.class));
-                finish();
-            }
+            testForVerificador(1);
         } else {
 
             binding.buttonFistHour.setText("Entrada");
@@ -283,6 +302,7 @@ public class WorkHourActivity extends AppCompatActivity {
             binding.imageStop.setVisibility(View.VISIBLE);
             binding.buttonStop.setVisibility(View.VISIBLE);
             binding.imageStop.setImageResource(R.drawable.clock_hour);
+
         } else {
             binding.buttonDinnerFinishHour.setText("Saída");
         }
@@ -321,9 +341,8 @@ public class WorkHourActivity extends AppCompatActivity {
 
             long diffInMinutes = (currentDate.getTime() - previousDateTimeParsed.getTime()) / (1000 * 60);
 
-            return diffInMinutes >= 15;
-
-
+            return true;
+           /* return diffInMinutes >= 15;*/
 
 
         } catch (ParseException e) {

@@ -12,6 +12,8 @@ public class WorkerHous {
 
     private Boolean carroFinal;
 
+    private Long idVerificardor;
+
     public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after) {
         this.date = date;
         this.hour_first = hour_first;
@@ -21,7 +23,7 @@ public class WorkerHous {
         this.hour_after = hour_after;
 
     }
-    public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after, Boolean carroInicial, Boolean carroFinal) {
+    public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after, Boolean carroInicial, Boolean carroFinal, Long idVerificardor) {
         this.date = date;
         this.hour_first = hour_first;
         this.hour_dinner = hour_dinner;
@@ -30,12 +32,28 @@ public class WorkerHous {
         this.hour_after = hour_after;
         this.carroInicial = carroInicial;
         this.carroFinal = carroFinal;
+        this.idVerificardor = idVerificardor;
 
+
+    }
+    public Long getIdVerificardor() {
+        return idVerificardor;
+    }
+
+    public void setIdVerificardor(Long idVerificardor) {
+        this.idVerificardor = idVerificardor;
     }
 
     public Boolean getCarroInicial() {
+        if (carroInicial == null) {
+            return false;
+        }
 
-        return carroInicial;
+        if (carroInicial) {
+            return true;
+        }
+
+        return false;
     }
 
     public void setCarroInicial(Boolean carroInicial) {
@@ -43,7 +61,14 @@ public class WorkerHous {
     }
 
     public Boolean getCarroFinal() {
-        return carroFinal;
+        if (carroFinal == null) {
+            return false;
+        }
+        if (carroFinal) {
+            return true;
+        }
+
+        return false;
     }
 
     public void setCarroFinal(Boolean carroFinal) {

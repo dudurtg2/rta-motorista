@@ -8,6 +8,11 @@
     <color name="yellow">#FFFFA300</color>
     <color name="orange">#a86232</color>
 
+    <color name="login_bg_dark">#2C2C2C</color>
+    <color name="login_header_blue">#2196F3</color>
+    <color name="login_input_bg">#3A3A3A</color>
+    <color name="login_input_stroke">#555555</color>
+    <color name="login_hint_text">#AAAAAA</color>
 
 
 

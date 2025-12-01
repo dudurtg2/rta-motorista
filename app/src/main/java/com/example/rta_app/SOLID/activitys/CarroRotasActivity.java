@@ -99,6 +99,8 @@ public class CarroRotasActivity extends AppCompatActivity {
     // Descrição dos defeitos (quando marcado Ruim)
     private String[] mecanicaDefeitos;
 
+    private WorkerHous workerHous;
+
     // Lista de placas para o Spinner
     private final List<String> packingLocal = new ArrayList<>();
     private ArrayAdapter<String> placasAdapter;
@@ -119,8 +121,18 @@ public class CarroRotasActivity extends AppCompatActivity {
         setupChecklistMecanico();
         setupFotoButtons();
         setupSpinnerPlacas();
+        workerHourRepository.getWorkerHous().addOnSuccessListener(t -> {
+            workerHous = t;
+            if(t.getCarroInicial()){
 
-        // Carrega a lista de carros de forma assíncrona
+                binding.dishesCategorySpinner.setVisibility(View.GONE);
+                resetAndEnableChecklist();
+            }
+        });
+
+
+
+
         carroRotaRepository.findAll()
                 .addOnSuccessListener(carros -> {
                     carro = carros;
@@ -136,6 +148,8 @@ public class CarroRotasActivity extends AppCompatActivity {
                     Log.e("CarroRota", "Erro ao buscar carros", e);
                     Toast.makeText(this, "Erro ao buscar carros", Toast.LENGTH_SHORT).show();
                 });
+
+
     }
 
     // -----------------------------
@@ -440,16 +454,20 @@ public class CarroRotasActivity extends AppCompatActivity {
                                 .get()
                                 .getId()
                 );
+        workerHous.setCarroFinal(true);
+
+        workerHourRepository.saveWorkerHous(workerHous).addOnSuccessListener(t -> {
+            Toast.makeText(this, "Hora inicial registrada", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MainActivity.class));
+            finishAffinity(); // API 16+
+
+        });
 
         verificardorDeCarroRepository.save(verificadoresDoCarro);
         finish();
     }
 
-    // -----------------------------
-    // BOTÕES DE FOTO + CÂMERA
-    // -----------------------------
 
-    private WorkerHous wh;
     private void setupFotoButtons() {
         binding.btnFotoCombustivel.setOnClickListener(v -> abrirCamera(REQ_FOTO_COMBUSTIVEL));
         binding.btnFotoParabrisa.setOnClickListener(v -> abrirCamera(REQ_FOTO_PARABRISA));
@@ -457,14 +475,52 @@ public class CarroRotasActivity extends AppCompatActivity {
         binding.btnFotoKilometragem.setOnClickListener(v -> abrirCamera(REQ_FOTO_KILOMETRAGEM));
 
         binding.btnFinalizar.setOnClickListener(v -> {
+            binding.progressBarCarros.setVisibility(View.VISIBLE);
+            if (workerHous.getCarroInicial()) {
+                verificardorDeCarroRepository.update(new VerificadoresDoCarro(
+                        "LIVRE",
+                        null,
+                        true,
+                        null,
+                        null,
+                        true,
+                        null,
+                        fotoCombustivelBase64,
+                        null,
+                        fotoParabrisaBase64,
+                        null,
+                        fotoLatariaBase64,
+                        null,
+                        fotokilometragemBase64,
+                        null,
+                        null,
+                        null
+                ),workerHous.getIdVerificardor()).addOnSuccessListener(a -> {
+                    Toast.makeText(this, "Vistoria finalizada", Toast.LENGTH_SHORT).show();
+                    try {
+                        workerHous.setCarroFinal(true);
 
-            verificardorDeCarroRepository.save(new VerificadoresDoCarro(
+                        workerHourRepository.saveWorkerHous(workerHous).addOnSuccessListener(t -> {
+                            Toast.makeText(this, "Hora inicial registrada", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, MainActivity.class));
+                            finishAffinity(); // API 16+
+
+                        });
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Erro ao registrar hora inicial: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                }).addOnFailureListener(e -> {
+                    binding.progressBarCarros.setVisibility(View.GONE);
+                    Toast.makeText(this, "Erro ao salvar vistoria: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            } else {verificardorDeCarroRepository.save(new VerificadoresDoCarro(
                     "EM_USO",
                     true,
-                    true,
                     null,
                     null,
-                    true,
+                    null,
+                    false,
                     fotoCombustivelBase64,
                     null,
                     fotoParabrisaBase64,
@@ -473,8 +529,8 @@ public class CarroRotasActivity extends AppCompatActivity {
                     null,
                     fotokilometragemBase64,
                     null,
-                    "Funciona",
-                    "Funciona",
+                    null,
+                    null,
                     carro.stream()
                             .filter(c -> c.getPlaca().equals(placaSelecionada))
                             .findFirst()
@@ -483,46 +539,26 @@ public class CarroRotasActivity extends AppCompatActivity {
             )).addOnSuccessListener(a -> {
 
                 Toast.makeText(this, "Vistoria finalizada", Toast.LENGTH_SHORT).show();
+                try {
+                    workerHous.setCarroInicial(true);
+                    workerHous.setCarroFinal(false);
+                    workerHous.setIdVerificardor(a);
+                    workerHourRepository.saveWorkerHous(workerHous).addOnSuccessListener(t -> {
+                        Toast.makeText(this, "Hora inicial registrada", Toast.LENGTH_SHORT).show();
 
-                workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
+                        startActivity(new Intent(this, MainActivity.class));
+                        finishAffinity(); // API 16+
 
-                         wh = task.getResult();
-                        if (wh == null) {
-                            // fallback se não existir nada salvo
-                            wh = new WorkerHous(
-                                    "", "", "", "", "", "",
-                                    false, false
-                            );
-                        }
-
-                        // Aqui você decide se é inicial ou final
-                        wh.setCarroInicial(true);     // ou wh.setCarroFinal(true);
-
-                        workerHourRepository.saveWorkerHous(wh)
-                                .addOnCompleteListener(t2 -> {
-                                    if (t2.isSuccessful()) {
-                                        Log.d("CarroRota", "Carro finalizado " + wh.toString());
-                                    } else {
-                                        Log.e("CarroRota", "Erro ao salvar WorkerHous", t2.getException());
-                                    }
-                                    // Só fecha a Activity depois de tentar salvar
-                                    finish();
-                                });
-
-                    } else {
-                        Toast.makeText(
-                                this,
-                                "Falha ao carregar apontamento: " +
-                                        (task.getException() != null ? task.getException().getMessage() : ""),
-                                Toast.LENGTH_SHORT
-                        ).show();
-                    }
-                });
+                    });
+                } catch (Exception e) {
+                    Toast.makeText(this, "Erro ao registrar hora inicial: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
 
             }).addOnFailureListener(e -> {
+                binding.progressBarCarros.setVisibility(View.GONE);
                 Toast.makeText(this, "Erro ao salvar vistoria: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            });
+            });}
+
         });
     }
 
@@ -646,22 +682,23 @@ public class CarroRotasActivity extends AppCompatActivity {
         }
     }
 
-    // Converte o ARQUIVO de imagem (JPEG salvo pela câmera) direto em Base64 (sem recompressão)
+
     private String fileToBase64(String path) {
         try {
-            File file = new File(path);
-            FileInputStream fis = new FileInputStream(file);
+            Bitmap bitmap = BitmapFactory.decodeFile(path);
+            if (bitmap == null) {
+                return null;
+            }
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-            byte[] buffer = new byte[4096];
-            int read;
-            while ((read = fis.read(buffer)) != -1) {
-                baos.write(buffer, 0, read);
-            }
-            fis.close();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+
+            bitmap.recycle();
 
             byte[] bytes = baos.toByteArray();
             return Base64.encodeToString(bytes, Base64.NO_WRAP);
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;

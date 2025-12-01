@@ -99,6 +99,7 @@ public class WorkerHourRepository {
                 json.put("hour_after", workerHous.getHour_after());
                 json.put("carro_inicial", workerHous.getCarroInicial());
                 json.put("carro_final", workerHous.getCarroFinal());
+                json.put("id_verificardor", workerHous.getIdVerificardor());
                 writeToFile(json.toString());
                 Log.d(TAG, "saveWorkerHous(): local file saved");
                 tcs.setResult(null);
@@ -130,7 +131,8 @@ public class WorkerHourRepository {
                             json.optString("hour_stop", ""),
                             json.optString("hour_after", ""),
                             json.optBoolean("carro_inicial", false),
-                            json.optBoolean("carro_final", false)
+                            json.optBoolean("carro_final", false),
+                            json.optLong("id_verificardor", 0L)
 
 
                     );
