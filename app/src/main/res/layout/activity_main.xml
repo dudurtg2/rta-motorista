@@ -56,7 +56,7 @@
                 android:layout_height="43dp"
                 android:background="@android:color/transparent"
                 android:ems="10"
-                android:hint="Digite o código de ficha aqui"
+                android:hint="Digite o código de romaneio aqui"
                 android:inputType="text"
                 android:paddingLeft="20dp"
                 android:textAlignment="center"
@@ -95,12 +95,13 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="120dp"
             android:text="v42a12l"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@+id/testeImagem"
             app:layout_constraintHorizontal_bias="0.484"
             app:layout_constraintStart_toStartOf="@+id/testeImagem"
-            tools:layout_editor_absoluteY="153dp" />
+            app:layout_constraintTop_toTopOf="@+id/testeImagem" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/Perfil"
@@ -421,7 +422,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
-            android:text="Após adicionar os romaneios à rota click para roteirizar a rota e realizar baixa dos romaneios."
+            android:text="Adicione os romaneios à rota click para adicionar os romaneios."
             app:layout_constraintBottom_toBottomOf="@+id/thebuttonListAddbutton"
             app:layout_constraintEnd_toEndOf="@+id/thebuttonListAddbutton"
             app:layout_constraintHorizontal_bias="0.018"
