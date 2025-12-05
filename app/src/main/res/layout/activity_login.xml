@@ -12,7 +12,7 @@
         android:id="@+id/headerBackground"
         android:layout_width="match_parent"
         android:layout_height="260dp"
-        android:background="@drawable/bg_header_curved"
+        android:background="@drawable/bg_button_rounded_blue"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView

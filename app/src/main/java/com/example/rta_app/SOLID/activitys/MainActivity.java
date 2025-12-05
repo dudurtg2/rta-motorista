@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         getUser();
 
         SetupBinding();
-        queryItems();
     }
 
 
@@ -82,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
             integrator.setOrientationLocked(false);
             integrator.initiateScan();
         });
-        binding.testeImagem.setOnClickListener(v -> startActivity(new Intent(this, CarroRotasActivity.class)));
 
 
         binding.RTAprocura.setOnEditorActionListener((v, actionId, event) -> {
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                                         .setTitle("Confirmação")
                                         .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: " + packingList.getLocal() + "\nData: " + packingList.getHoraedia().replace("T", " ").split("\\.")[0])
                                         .setPositiveButton("Coletar", (dialog, which) -> packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
-                                            queryItems();
+
                                             Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();
                                         }))
                                         .setNegativeButton("Não coletar", null)
@@ -129,43 +127,10 @@ public class MainActivity extends AppCompatActivity {
         binding.Perfil.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
 
         binding.thePackectListbutton.setOnClickListener(v -> startActivity(new Intent(this, PacketList.class)));
-        binding.atualizar.setOnClickListener(v ->
-
-                queryItems());
-
 
     }
 
-    public void queryItems() {
-        packingRepository.colectPack().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                List<Coletas> coletas = task.getResult();
-                if (coletas.isEmpty()) {
-                    coletas.add(new Coletas(
-                            "Verifique com a base ou com o entregador",
-                            "Sem devolução",
-                            "0"
 
-                    ));
-                }
-                binding.listPacketTravelDevo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-                binding.listPacketTravelDevo.setAdapter(new AdapterViewRTA(this, coletas));
-            } else {
-                List<Coletas> coletas = task.getResult();
-                if (coletas.isEmpty()) {
-                    coletas.add(new Coletas(
-                            "Verifique com a base ou com o entregador",
-                            "Sem devolução",
-                            "0"
-
-                    ));
-                }
-
-                binding.listPacketTravelDevo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-                binding.listPacketTravelDevo.setAdapter(new AdapterViewRTA(this, coletas));
-            }
-        });
-    }
 
 
     @Override
@@ -186,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                                     .setTitle("Confirmação")
                                     .setMessage("Deseja adicionar a ficha " + packingList.getCodigodeficha() + "?" + "\nCidade: " + packingList.getLocal() + "\nData: " + packingList.getHoraedia().replace("T", " ").split("\\.")[0])
                                     .setPositiveButton("Coletar", (dialog, which) -> packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vda -> {
-                                        queryItems();
+
                                         Toast.makeText(this, codigodeficha + "\n adicionado a rota", Toast.LENGTH_SHORT).show();
                                     }))
                                     .setNegativeButton("Não coletar", null)
@@ -204,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                             String codigodeficha = packingList.getCodigodeficha();
                             if (codigodeficha != null && !codigodeficha.isEmpty()) {
                                 Toast.makeText(this, codigodeficha + "\n recebido e adicionado a rota", Toast.LENGTH_SHORT).show();
-                                packingListRepository.movePackingListForDelivery(packingList).addOnSuccessListener(vad -> queryItems());
+                                packingListRepository.movePackingListForDelivery(packingList);
 
                             } else {
                                 Toast.makeText(this, "Código de ficha inválido", Toast.LENGTH_SHORT).show();

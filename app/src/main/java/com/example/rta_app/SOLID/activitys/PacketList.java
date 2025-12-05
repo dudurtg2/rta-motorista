@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.rta_app.R;
 import com.example.rta_app.SOLID.Views.Packetlista.AdapterViewRTA;
 import com.example.rta_app.SOLID.api.PackingRepository;
+import com.example.rta_app.SOLID.entities.Coletas;
 import com.example.rta_app.SOLID.entities.Packet;
 import com.example.rta_app.databinding.ActivityPacketListBinding;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -40,6 +41,7 @@ public class PacketList extends AppCompatActivity {
         setContentView(binding.getRoot());
         this.packingRepository = new PackingRepository(this);
         queryItems();
+        queryItemsDevo();
         setupBinding();
     }
     private void setupBinding() {
@@ -71,6 +73,11 @@ public class PacketList extends AppCompatActivity {
         });
 
         binding.atualizar.setOnClickListener(v -> queryItems());
+        binding.atualizardevo.setOnClickListener(v ->
+
+                queryItemsDevo());
+
+
     }
     public void queryItems() {
         packingRepository.getListPacking().addOnCompleteListener(task -> {
@@ -103,6 +110,37 @@ public class PacketList extends AppCompatActivity {
         });
     }
 
+    public void queryItemsDevo() {
+        packingRepository.colectPack().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<Coletas> coletas = task.getResult();
+                if (coletas.isEmpty()) {
+                    coletas.add(new Coletas(
+                            "Verifique com a base ou com o entregador",
+                            "Sem devolução",
+                            "0"
+
+                    ));
+                }
+                binding.listPacketTravelDevo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                binding.listPacketTravelDevo.setAdapter(new com.example.rta_app.SOLID.Views.Coletalista.AdapterViewRTA(this, coletas));
+            } else {
+                List<Coletas> coletas = task.getResult();
+                if (coletas.isEmpty()) {
+                    coletas.add(new Coletas(
+                            "Verifique com a base ou com o entregador",
+                            "Sem devolução",
+                            "0"
+
+                    ));
+                }
+
+                binding.listPacketTravelDevo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                binding.listPacketTravelDevo.setAdapter(new com.example.rta_app.SOLID.Views.Coletalista.AdapterViewRTA(this, coletas));
+            }
+        });
+    }
+
     private void alertaSubmit(Boolean success, String scannedCode) {
         if (success) {
             new AlertDialog.Builder(this)
@@ -110,6 +148,7 @@ public class PacketList extends AppCompatActivity {
                     .setMessage("O pacote com o código " + scannedCode + " foi registrado para devolução.")
                     .setPositiveButton("Devolver à base", (dialog, which) -> {
                         queryItems();
+                        queryItemsDevo();
                         Toast.makeText(this, "Adicionado à lista de devolução", Toast.LENGTH_SHORT).show();
                         closeOptionsMenu();
                     }).show();

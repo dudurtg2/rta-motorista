@@ -14,47 +14,82 @@
         android:layout_height="wrap_content"
         android:paddingBottom="40dp">
 
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/Perfil"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-
-            android:layout_marginTop="64dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/button_stroke_squad_white"
-            app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-64dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/tinta" />
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="104dp"
-                android:layout_height="98dp"
-                android:layout_marginStart="307dp"
-                android:alpha="0.4"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/rta_while" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/theWorkHourbutton3"
+            android:layout_width="0dp"
+            android:layout_height="113dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="48dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_stroke_squad_white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/workHourImagem2"
+            android:layout_width="120dp"
+            android:layout_height="0dp"
+            android:background="@drawable/button_stroke_squad_clay"
+            android:src="@drawable/archive_clock"
+            app:layout_constraintBottom_toBottomOf="@+id/theWorkHourbutton3"
+            app:layout_constraintStart_toStartOf="@+id/theWorkHourbutton3"
+            app:layout_constraintTop_toTopOf="@+id/theWorkHourbutton3" />
+
+
+        <TextView
+            android:id="@+id/textWorkHourTitle4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="PONTOS E VISTORIA"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/workHourImagem2"
+            app:layout_constraintTop_toTopOf="@+id/theWorkHourbutton3" />
+
+
+        <TextView
+            android:id="@+id/textWorkHourDescritionText3"
+            android:layout_width="220dp"
+            android:layout_height="70dp"
+            android:layout_marginEnd="16dp"
+            android:text="Responsável pelo registro de pontos e controle das horas trabalhadas, e vistoria dos carros."
+            app:layout_constraintBottom_toBottomOf="@+id/theWorkHourbutton3"
+            app:layout_constraintEnd_toEndOf="@+id/theWorkHourbutton3"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/textWorkHourTitle4"
+            app:layout_constraintTop_toBottomOf="@+id/textWorkHourTitle4" />
 
         <TextView
             android:id="@+id/lblMecanica"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="29dp"
+            android:layout_marginTop="16dp"
             android:letterSpacing="0.05"
             android:text="CHECKLIST MECÂNICO"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Perfil" />
+            app:layout_constraintTop_toBottomOf="@+id/theWorkHourbutton3" />
 
         <LinearLayout
             android:id="@+id/layoutChecklist"
@@ -752,27 +787,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnFinalizar" />
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="120dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="-20dp"
-        android:background="@drawable/button_stroke_squad"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-
-        <ImageView
-            android:id="@+id/testeImagem"
-            android:layout_width="0dp"
-            android:layout_height="150dp"
-            app:layout_constraintBottom_toBottomOf="@+id/imageView2"
-            app:layout_constraintEnd_toEndOf="@+id/imageView2"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/rta_black" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -13,6 +13,16 @@
         android:layout_height="wrap_content"> <!-- Changed to wrap_content -->
 
 
+        <ImageView
+            android:id="@+id/imageView8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-230dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/tinta" />
 
         <ImageView
             android:id="@+id/imageView2"
@@ -44,7 +54,9 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
+            android:layout_marginBottom="32dp"
             android:background="@drawable/button_stroke_squad_white_block"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/thebuttonListAddbutton"
             app:layout_constraintStart_toStartOf="@+id/thebuttonListAddbutton"
             app:layout_constraintTop_toBottomOf="@+id/thebuttonListAddbutton"
@@ -64,31 +76,13 @@
                 android:textSize="18dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.592"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <TextView
-            android:id="@+id/atualizar"
-            android:layout_width="47dp"
-            android:layout_height="51dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/button_ripple"
-            android:clickable="true"
-            android:elevation="2dp"
-            android:focusable="true"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="↻"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/coletaLine" />
 
         <TextView
 
@@ -178,53 +172,12 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listPacketTravelDevo"
-            android:layout_width="0dp"
-            android:layout_height="450dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="4dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/atualizar" />
-
-        <View
-            android:id="@+id/coletaLine"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#000000"
-            app:layout_constraintBottom_toTopOf="@+id/textColeta"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" /> <!-- ou qualquer cor -->
-
-
-        <TextView
-            android:id="@+id/textColeta"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/button_stroke_squad_white_block"
-            android:text="▼ DEVOLUÇÃO PARA COLETAR ▼"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:verticalScrollbarPosition="defaultPosition"
-            app:layout_constraintBottom_toBottomOf="@+id/atualizar"
-            app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/atualizar"
-            app:layout_constraintTop_toTopOf="@+id/atualizar" />
-
         <ImageView
             android:id="@+id/theinTravelbutton"
             android:layout_width="0dp"
             android:layout_height="113dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="32dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/button_stroke_squad_white"
             android:textSize="18sp"

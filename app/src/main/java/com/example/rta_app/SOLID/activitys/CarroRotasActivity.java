@@ -476,6 +476,8 @@ public class CarroRotasActivity extends AppCompatActivity {
 
         binding.btnFinalizar.setOnClickListener(v -> {
             binding.progressBarCarros.setVisibility(View.VISIBLE);
+
+            binding.btnFinalizar.setVisibility(View.GONE);
             if (workerHous.getCarroInicial()) {
                 verificardorDeCarroRepository.update(new VerificadoresDoCarro(
                         "LIVRE",
@@ -512,6 +514,8 @@ public class CarroRotasActivity extends AppCompatActivity {
 
                 }).addOnFailureListener(e -> {
                     binding.progressBarCarros.setVisibility(View.GONE);
+
+                    binding.btnFinalizar.setVisibility(View.VISIBLE);
                     Toast.makeText(this, "Erro ao salvar vistoria: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             } else {verificardorDeCarroRepository.save(new VerificadoresDoCarro(
@@ -555,6 +559,8 @@ public class CarroRotasActivity extends AppCompatActivity {
                 }
 
             }).addOnFailureListener(e -> {
+                binding.btnFinalizar.setVisibility(View.VISIBLE);
+
                 binding.progressBarCarros.setVisibility(View.GONE);
                 Toast.makeText(this, "Erro ao salvar vistoria: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });}
