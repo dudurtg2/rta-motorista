@@ -217,4 +217,28 @@ public class VerificadoresDoCarro {
     public void setMotorista(Long motorista) {
         this.motorista = motorista;
     }
+
+    @Override
+    public String toString() {
+        return "VerificadoresDoCarro{" +
+                "status='" + status + '\'' +
+                ", verificadorInicial=" + verificadorInicial +
+                ", verificadorFinal=" + verificadorFinal +
+                ", dataInicial=" + dataInicial +
+                ", dataFinal=" + dataFinal +
+                ", finalizado=" + finalizado +
+                ", combustivelInicial='" + combustivelInicial + '\'' +
+                ", combustivelFinal='" + combustivelFinal + '\'' +
+                ", parabrisaInicio='" + parabrisaInicio + '\'' +
+                ", parabrisaFinal='" + parabrisaFinal + '\'' +
+                ", LatariaInicio='" + LatariaInicio + '\'' +
+                ", LatariaFinal='" + LatariaFinal + '\'' +
+                ", KilometragemInicio='" + KilometragemInicio + '\'' +
+                ", KilometragemFinal='" + KilometragemFinal + '\'' +
+                ", ObservacoesAdicionaisInicio='" + ObservacoesAdicionaisInicio + '\'' +
+                ", ObservacoesAdicionaisFinal='" + ObservacoesAdicionaisFinal + '\'' +
+                ", carro=" + carro +
+                ", motorista=" + motorista +
+                '}';
+    }
 }

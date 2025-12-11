@@ -13,6 +13,7 @@ public class WorkerHous {
     private Boolean carroFinal;
 
     private Long idVerificardor;
+    private Long idCarro;
 
     public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after) {
         this.date = date;
@@ -23,7 +24,7 @@ public class WorkerHous {
         this.hour_after = hour_after;
 
     }
-    public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after, Boolean carroInicial, Boolean carroFinal, Long idVerificardor) {
+    public WorkerHous(String date, String hour_first, String hour_dinner, String hour_finish, String hour_stop, String hour_after, Boolean carroInicial, Boolean carroFinal, Long idVerificardor, Long idCarro) {
         this.date = date;
         this.hour_first = hour_first;
         this.hour_dinner = hour_dinner;
@@ -33,9 +34,19 @@ public class WorkerHous {
         this.carroInicial = carroInicial;
         this.carroFinal = carroFinal;
         this.idVerificardor = idVerificardor;
+        this.idCarro = idCarro;
 
 
     }
+
+    public Long getIdCarro() {
+        return idCarro;
+    }
+
+    public void setIdCarro(Long idCarro) {
+        this.idCarro = idCarro;
+    }
+
     public Long getIdVerificardor() {
         return idVerificardor;
     }
@@ -134,6 +145,9 @@ public class WorkerHous {
                 ", hour_after='" + hour_after + '\'' +
                 ", carroInicial=" + carroInicial +
                 ", carroFinal=" + carroFinal +
+
+                ", idVerificardor=" + idVerificardor +
+                ", idCarro=" + idCarro +
                 '}';
     }
 }

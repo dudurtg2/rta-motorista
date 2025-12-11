@@ -117,6 +117,71 @@ public class VerificardorDeCarroRepository {
         return tcs.getTask();
     }
 
+    public Task<Long> updateF(VerificadoresDoCarro verificadoresDoCarro, Long id) {
+        Log.d(TAG, "saveHors(): verificadoresDoCarro=" + verificadoresDoCarro.toString());
+        TaskCompletionSource<Long> tcs = new TaskCompletionSource<>();
+
+        String token = getAccessToken();
+        String driveId = getUserId();
+        if (token == null || driveId == null) {
+            Log.e(TAG, "saveHors(): token or userId missing (token=" + token + ", userId=" + driveId + ")");
+            tcs.setException(new IllegalStateException("Token or user ID missing"));
+            return tcs.getTask();
+        }
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("status", verificadoresDoCarro.getStatus());
+            json.put("verificadorInicial", verificadoresDoCarro.getVerificadorInicial());
+            json.put("verificadorFinal", verificadoresDoCarro.getVerificadorFinal());
+
+            // Datas no formato ISO-8601 (String). Ajuste se seus getters retornarem Date/LocalDateTime.
+            json.put("dataInicial", verificadoresDoCarro.getDataInicial());
+            json.put("dataFinal", verificadoresDoCarro.getDataFinal());
+
+            json.put("finalizado", verificadoresDoCarro.getFinalizado());
+
+            json.put("combustivelInicial", verificadoresDoCarro.getCombustivelInicial());
+            json.put("combustivelFinal", verificadoresDoCarro.getCombustivelFinal());
+
+            json.put("parabrisaInicio", verificadoresDoCarro.getParabrisaInicio());
+            json.put("parabrisaFinal", verificadoresDoCarro.getParabrisaFinal());
+
+            JSONObject carroJson = new JSONObject();
+            carroJson.put("id", verificadoresDoCarro.getCarro());
+            json.put("carro", carroJson);
+
+            JSONObject motoristaJson = new JSONObject();
+            motoristaJson.put("id", driveId); // ou verificadoresDoCarro.getMotorista().getId()
+            json.put("motorista", motoristaJson);
+
+            json.put("latariaFinal", verificadoresDoCarro.getLatariaFinal());
+            json.put("kilometragemFinal", verificadoresDoCarro.getKilometragemFinal());
+
+            json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
+            json.put("latariaInicio", verificadoresDoCarro.getLatariaInicio());
+            json.put("kilometragemInicio", verificadoresDoCarro.getKilometragemInicio());
+            json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
+
+        } catch (JSONException e) {
+            Log.e(TAG, "saveHors(): JSON error", e);
+            tcs.setException(e);
+            return tcs.getTask();
+        }
+
+        Log.d(TAG, "Vai salvar(): json=" + json.toString());
+
+        RequestBody body = RequestBody.create(json.toString(), JSON_MEDIA);
+        Request request = new Request.Builder()
+                .url(BASE_URL + "api/verificadoresDoCarros/finalizar/"+id)
+                .put(body)
+                .addHeader("X-API-Key", token)
+                .build();
+
+        executeRequestReturningId(request, tcs);
+        return tcs.getTask();
+    }
 
     public Task<Long> save(VerificadoresDoCarro verificadoresDoCarro) {
         Log.d(TAG, "save(): verificadoresDoCarro=" + verificadoresDoCarro);

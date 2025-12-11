@@ -16,11 +16,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -41,7 +44,13 @@ public class WorkerHourRepository {
     public WorkerHourRepository(Context context) {
         Log.d(TAG, "Constructor: initializing WorkerHourRepository");
         this.context = context.getApplicationContext();
-        this.httpClient = new OkHttpClient();
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)   // tempo para conectar
+                .writeTimeout(60, TimeUnit.SECONDS)     // tempo para enviar o body (upload)
+                .readTimeout(60, TimeUnit.SECONDS)      // tempo esperando a resposta
+                .callTimeout(90, TimeUnit.SECONDS)      // tempo total da chamada
+                .protocols(Collections.singletonList(Protocol.HTTP_1_1))
+                .build();
         this.tokenStorage = new TokenStorage(this.context);
         this.executor = Executors.newSingleThreadExecutor();
     }
@@ -100,6 +109,8 @@ public class WorkerHourRepository {
                 json.put("carro_inicial", workerHous.getCarroInicial());
                 json.put("carro_final", workerHous.getCarroFinal());
                 json.put("id_verificardor", workerHous.getIdVerificardor());
+                json.put("id_carro", workerHous.getIdCarro());
+
                 writeToFile(json.toString());
                 Log.d(TAG, "saveWorkerHous(): local file saved");
                 tcs.setResult(null);
@@ -132,7 +143,9 @@ public class WorkerHourRepository {
                             json.optString("hour_after", ""),
                             json.optBoolean("carro_inicial", false),
                             json.optBoolean("carro_final", false),
-                            json.optLong("id_verificardor", 0L)
+                            json.optLong("id_verificardor", 0L),
+                            json.optLong("id_carro", 0L)
+
 
 
                     );

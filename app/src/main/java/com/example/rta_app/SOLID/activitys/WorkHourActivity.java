@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -31,8 +33,6 @@ public class WorkHourActivity extends AppCompatActivity {
     private WorkerHourRepository workerHourRepository;
     private UsersRepository usersRepository;
     private WorkerAplication workerAplication;
-
-    // Formato de data deve ser constante para evitar recriação
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private static final SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
@@ -81,7 +81,7 @@ public class WorkHourActivity extends AppCompatActivity {
         binding.imageDinnerStarHour.setOnClickListener(v -> processPointClick(PointType.ALMOCO_INICIO));
         binding.imageDinnerFinishHour.setOnClickListener(v -> processPointClick(PointType.ALMOCO_FIM));
 
-        binding.imageStop.setOnClickListener(v ->processPointClick(PointType.FIM) /*checkVehicleInspection(false)*/); // False = Check Final
+        binding.imageStop.setOnClickListener(v ->checkVehicleInspection(false)); // False = Check Final
     }
 
     // Centraliza a lógica de clique
@@ -205,11 +205,7 @@ public class WorkHourActivity extends AppCompatActivity {
         }
     }
 
-    private void restoreUI() {
-        binding.buttonFistHour.setVisibility(View.VISIBLE);
-        binding.imageFistHour.setVisibility(View.VISIBLE);
 
-    }
 
     // CORREÇÃO DA LÓGICA DE TEMPO
     public boolean canRegisterNewPoint(String previousDate, String previousHour) {
@@ -224,6 +220,7 @@ public class WorkHourActivity extends AppCompatActivity {
             long diffInMinutes = diffInMillis / (1000 * 60);
 
             // Retorna TRUE se passou mais de 15 minutos (lógica descomentada e corrigida)
+           /* return diffInMinutes >= 15;*/
             return true;
 
         } catch (ParseException e) {
@@ -286,10 +283,12 @@ public class WorkHourActivity extends AppCompatActivity {
 
     // Agrupei a lógica de atualização da UI para ficar mais legível
     private void updateFullUI(WorkerHous wh) {
+
+
         updateStatusUI(wh.getHour_first(), binding.buttonFistHour, binding.imageFistHour,
                 binding.buttonDinnerStarHour, binding.imageDinnerStarHour, "Entrada");
 
-        /*if (!wh.getHour_first().isEmpty()) checkVehicleInspection(true);*/ // check inicial
+        if (!wh.getHour_first().isEmpty()) checkVehicleInspection(true);
 
         updateStatusUI(wh.getHour_dinner(), binding.buttonDinnerStarHour, binding.imageDinnerStarHour,
                 binding.buttonDinnerFinishHour, binding.imageDinnerFinishHour, "Almoço");
@@ -308,19 +307,38 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     // Método auxiliar para reduzir duplicação no updateUI
-    private void updateStatusUI(String hourValue, android.widget.TextView btn, android.widget.ImageView img,
+    private void updateStatusUI(String hourValue, TextView btn, ImageView img,
                                 View nextBtn, View nextImg, String defaultText) {
-        if (!hourValue.isEmpty()) {
+
+        // TRATAMENTO DE ERRO: Garante que não é null e remove espaços vazios " "
+        boolean temHorario = (hourValue != null && !hourValue.trim().isEmpty());
+
+        if (temHorario) {
             btn.setText(hourValue);
             img.setImageResource(R.drawable.confirm_hour);
             img.setBackgroundResource(R.drawable.button_stroke_squad);
-            if(nextBtn != null) nextBtn.setVisibility(View.VISIBLE);
-            if(nextImg != null) nextImg.setVisibility(View.VISIBLE);
+
+            // Força visibilidade do botão atual (caso ele estivesse sumido)
+            btn.setVisibility(View.VISIBLE);
+            img.setVisibility(View.VISIBLE);
+
+            // Tenta mostrar o próximo
+            if (nextBtn != null) {
+                nextBtn.setVisibility(View.VISIBLE);
+                nextBtn.bringToFront(); // DICA EXTRA: Às vezes resolve problemas de Z-index
+            }
+            if (nextImg != null) {
+                nextImg.setVisibility(View.VISIBLE);
+                nextImg.bringToFront();
+            }
+
         } else {
             btn.setText(defaultText);
+            // Lógica do Else (Opcional: Esconder o próximo se o atual não estiver preenchido)
+            if (nextBtn != null) nextBtn.setVisibility(View.GONE);
+            if (nextImg != null) nextImg.setVisibility(View.GONE);
         }
     }
-
     private void resetUI() {
         binding.buttonStop.setText("Fim");
         binding.buttonDinnerFinishHour.setText("Saída");
