@@ -55,10 +55,13 @@ public class CarroRotasActivity extends AppCompatActivity {
     private VerificardorDeCarroRepository verificardorDeCarroRepository;
     private WorkerHourRepository workerHourRepository;
 
-    private static final int REQ_FOTO_COMBUSTIVEL = 1;
-    private static final int REQ_FOTO_PARABRISA = 2;
-    private static final int REQ_FOTO_LATARIA = 3;
-    private static final int REQ_FOTO_KILOMETRAGEM = 4;
+    private static final int REQ_FOTO_PAINEL = 1;
+
+    private static final int REQ_FOTO_LATARIA_FRENTE = 2;
+    private static final int REQ_FOTO_LATARIA_ATRAS = 3;
+    private static final int REQ_FOTO_LATARIA_ESQUERDA = 4;
+    private static final int REQ_FOTO_LATARIA_DIREITO = 5;
+
     private static final int REQ_CAMERA_PERMISSION = 100;
 
 
@@ -67,10 +70,11 @@ public class CarroRotasActivity extends AppCompatActivity {
     private List<Carro> carro = new ArrayList<>();
 
     // Base64 das fotos (sem recompressão – bytes originais do arquivo)
-    private String fotoCombustivelBase64;
-    private String fotoParabrisaBase64;
-    private String fotoLatariaBase64;
-    private String fotokilometragemBase64;
+    private String fotoPainelBase64;
+    private String fotoLatariaFrenteBase64;
+    private String fotoLatariaAtrasBase64;
+    private String fotoLatariaEsquerdaBase64;
+    private String fotoLatariaDireitaBase64;
 
     // Para capturar foto em alta resolução
     private Uri currentPhotoUri;
@@ -335,7 +339,9 @@ public class CarroRotasActivity extends AppCompatActivity {
             } else {
                 Log.d(TAG, "Último item respondido. Mostrando sessão de fotos e botão finalizar");
                 binding.lblFotos.setVisibility(View.VISIBLE);
+                binding.lblFotos2.setVisibility(View.VISIBLE);
                 binding.layoutFotos.setVisibility(View.VISIBLE);
+                binding.layoutFotos2.setVisibility(View.VISIBLE);
                 binding.btnFinalizar.setVisibility(View.VISIBLE);
             }
         } else {
@@ -360,6 +366,8 @@ public class CarroRotasActivity extends AppCompatActivity {
         binding.lblFotos.setVisibility(View.GONE);
         binding.layoutFotos.setVisibility(View.GONE);
         binding.btnFinalizar.setVisibility(View.GONE);
+        binding.lblFotos2.setVisibility(View.GONE);
+        binding.layoutFotos2.setVisibility(View.GONE);
     }
 
     // Reset total do checklist quando muda a placa e habilita o fluxo
@@ -381,6 +389,8 @@ public class CarroRotasActivity extends AppCompatActivity {
         binding.lblFotos.setVisibility(View.GONE);
         binding.layoutFotos.setVisibility(View.GONE);
         binding.btnFinalizar.setVisibility(View.GONE);
+        binding.lblFotos2.setVisibility(View.GONE);
+        binding.layoutFotos2.setVisibility(View.GONE);
 
         isUpdatingGroup = false;
         checklistEnabled = true;
@@ -411,6 +421,9 @@ public class CarroRotasActivity extends AppCompatActivity {
         binding.lblFotos.setVisibility(View.GONE);
         binding.layoutFotos.setVisibility(View.GONE);
         binding.btnFinalizar.setVisibility(View.GONE);
+
+        binding.lblFotos2.setVisibility(View.GONE);
+        binding.layoutFotos2.setVisibility(View.GONE);
 
         isUpdatingGroup = false;
         checklistEnabled = false;
@@ -481,8 +494,8 @@ public class CarroRotasActivity extends AppCompatActivity {
                     finishAffinity();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Erro ao registrar hora no saveWorkerHous()", e);
-                    Toast.makeText(this, "Erro ao registrar hora: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Erro ao registrar verificação no saveWorkerHous()", e);
+                    Toast.makeText(this, "Erro ao registrar verificação: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -526,25 +539,13 @@ public class CarroRotasActivity extends AppCompatActivity {
         Log.d(TAG, "deveAtualizar=" + deveAtualizar);
 
         VerificadoresDoCarro verificadoresDoCarro =
-                new VerificadoresDoCarro(
-                        "QUEBRADO",
-                        false,   // verificadorInicial?
-                        false,   // verificadorFinal?
-                        null,
-                        null,
-                        true,    // finalizado?
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        descricao,
-                        null,
-                        getCarroSelecionadoId()
-                );
+                VerificadoresDoCarro.builder()
+                        .carro(getCarroSelecionadoId())
+                        .observacoesAdicionaisInicio(descricao)
+                        .observacoesAdicionaisFinal(descricao)
+                        .finalizado(true)
+                        .build();
+
 
         Log.d(TAG, "Objeto VerificadoresDoCarro (QUEBRADO) montado: " + verificadoresDoCarro);
 
@@ -558,7 +559,7 @@ public class CarroRotasActivity extends AppCompatActivity {
                     .addOnSuccessListener(a -> {
                         Log.d(TAG, "updateF() sucesso ao salvar defeitos");
                         Toast.makeText(this, "Defeitos registrados e vistoria atualizada", Toast.LENGTH_SHORT).show();
-                        finalizarPontoEVoltar("Hora final registrada");
+                        finalizarPontoEVoltar("verificação final registrada");
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Erro ao salvar defeitos em updateF()", e);
@@ -573,7 +574,7 @@ public class CarroRotasActivity extends AppCompatActivity {
                         Log.d(TAG, "save() sucesso, idVerificador=" + id);
 
                         Toast.makeText(this, "Defeitos registrados e vistoria criada", Toast.LENGTH_SHORT).show();
-                        finalizarPontoEVoltar("Hora final registrada");
+                        finalizarPontoEVoltar("verificação final registrada");
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Erro ao salvar defeitos em save()", e);
@@ -584,27 +585,53 @@ public class CarroRotasActivity extends AppCompatActivity {
 
     private void setupFotoButtons() {
         Log.d(TAG, "setupFotoButtons()");
-        binding.btnFotoCombustivel.setOnClickListener(v -> {
+        binding.btnFotoLatariaAtras.setOnClickListener(v -> {
             Log.d(TAG, "Clique em btnFotoCombustivel");
-            abrirCamera(REQ_FOTO_COMBUSTIVEL);
+            abrirCamera(REQ_FOTO_LATARIA_ATRAS);
         });
 
-        binding.btnFotoParabrisa.setOnClickListener(v -> {
+        binding.btnFotoLatariaFrente.setOnClickListener(v -> {
             Log.d(TAG, "Clique em btnFotoParabrisa");
-            abrirCamera(REQ_FOTO_PARABRISA);
+            abrirCamera(REQ_FOTO_LATARIA_FRENTE);
         });
 
-        binding.btnFotoLataria.setOnClickListener(v -> {
+        binding.btnFotoLatariaDireita.setOnClickListener(v -> {
             Log.d(TAG, "Clique em btnFotoLataria");
-            abrirCamera(REQ_FOTO_LATARIA);
+            abrirCamera(REQ_FOTO_LATARIA_DIREITO);
         });
 
-        binding.btnFotoKilometragem.setOnClickListener(v -> {
+        binding.btnFotoLatariaEsquerda.setOnClickListener(v -> {
             Log.d(TAG, "Clique em btnFotoKilometragem");
-            abrirCamera(REQ_FOTO_KILOMETRAGEM);
+            abrirCamera(REQ_FOTO_LATARIA_ESQUERDA);
+        });
+
+        binding.btnFotoPainel.setOnClickListener(v -> {
+            Log.d(TAG, "Clique em btnFotoKilometragem");
+            abrirCamera(REQ_FOTO_PAINEL);
         });
 
         binding.btnFinalizar.setOnClickListener(v -> {
+            if (fotoPainelBase64 == null) {
+                Toast.makeText(this, "Foto do painel não selecionada", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (fotoLatariaDireitaBase64 == null) {
+                Toast.makeText(this, "Foto da lataria direita não selecionada", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(fotoLatariaEsquerdaBase64 == null) {
+                Toast.makeText(this, "Foto da lataria esquerda não selecionada", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(fotoLatariaFrenteBase64 == null) {
+                Toast.makeText(this, "Foto da lataria frente não selecionada", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(fotoLatariaAtrasBase64 == null) {
+                Toast.makeText(this, "Foto da lataria atrás não selecionada", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Log.d(TAG, "Clique em btnFinalizar. workerHous=" + workerHous);
             binding.progressBarCarros.setVisibility(View.VISIBLE);
             binding.btnFinalizar.setVisibility(View.GONE);
@@ -612,25 +639,19 @@ public class CarroRotasActivity extends AppCompatActivity {
             if (workerHous != null && workerHous.getCarroInicial()) {
                 Log.d(TAG, "Fluxo de vistoria final (carroInicial == true)");
 
-                VerificadoresDoCarro verFinal = new VerificadoresDoCarro(
-                        "LIVRE",
-                        null,
-                        true,
-                        null,
-                        null,
-                        true,
-                        null,
-                        fotoCombustivelBase64,
-                        null,
-                        fotoParabrisaBase64,
-                        null,
-                        fotoLatariaBase64,
-                        null,
-                        fotokilometragemBase64,
-                        null,
-                        null,
-                        workerHous.getIdCarro()
-                );
+                VerificadoresDoCarro verFinal =
+                        VerificadoresDoCarro.builder()
+                        .carro(getCarroSelecionadoId())
+                                .status("LIVRE")
+                                .verificadorFinal(true)
+                                .frenteFinal(fotoLatariaFrenteBase64)
+                                .atrasFinal(fotoLatariaAtrasBase64)
+                                .latariaEsquerdaFinal(fotoLatariaEsquerdaBase64)
+                                .latariaDireitaFinal(fotoLatariaDireitaBase64)
+                                .painelFinal(fotoPainelBase64)
+                                .carro(getCarroSelecionadoId())
+                                .finalizado(true)
+                                .build();
 
                 Log.d(TAG, "Objeto VerificadoresDoCarro (LIVRE) montado: " + verFinal);
 
@@ -641,12 +662,12 @@ public class CarroRotasActivity extends AppCompatActivity {
                             try {
                                 workerHous.setCarroFinal(true);
                                 Log.d(TAG, "workerHous.setCarroFinal(true)");
-                                finalizarPontoEVoltar("Hora final registrada");
+                                finalizarPontoEVoltar("verificação final registrada");
                             } catch (Exception e) {
-                                Log.e(TAG, "Erro ao registrar hora final após update()", e);
+                                Log.e(TAG, "Erro ao registrar verificação final após update()", e);
                                 binding.progressBarCarros.setVisibility(View.GONE);
                                 binding.btnFinalizar.setVisibility(View.VISIBLE);
-                                Toast.makeText(this, "Erro ao registrar hora final: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Erro ao registrar verificação final: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(e -> {
@@ -659,25 +680,19 @@ public class CarroRotasActivity extends AppCompatActivity {
             } else {
                 Log.d(TAG, "Fluxo de vistoria inicial (carroInicial == false ou workerHous null)");
 
-                VerificadoresDoCarro verInicial = new VerificadoresDoCarro(
-                        "EM_USO",
-                        true,
-                        null,
-                        null,
-                        null,
-                        false,
-                        fotoCombustivelBase64,
-                        null,
-                        fotoParabrisaBase64,
-                        null,
-                        fotoLatariaBase64,
-                        null,
-                        fotokilometragemBase64,
-                        null,
-                        null,
-                        null,
-                        getCarroSelecionadoId()
-                );
+                VerificadoresDoCarro verInicial =
+                        VerificadoresDoCarro.builder()
+                                .carro(getCarroSelecionadoId())
+                                .status("EM_USO")
+                                .verificadorInicial(true)
+                                .frenteInicial(fotoLatariaFrenteBase64)
+                                .atrasInicio(fotoLatariaAtrasBase64)
+                                .latariaEsquerdaInicio(fotoLatariaEsquerdaBase64)
+                                .latariaDireitaInicio(fotoLatariaDireitaBase64)
+                                .painelInicio(fotoPainelBase64)
+                                .carro(getCarroSelecionadoId())
+                                .finalizado(false)
+                                .build();
 
                 Log.d(TAG, "Objeto VerificadoresDoCarro (EM_USO) montado: " + verInicial);
 
@@ -691,12 +706,12 @@ public class CarroRotasActivity extends AppCompatActivity {
                                 workerHous.setIdVerificardor(id);
                                 workerHous.setIdCarro(getCarroSelecionadoId());
                                 Log.d(TAG, "workerHous atualizado com dados de vistoria inicial: " + workerHous);
-                                finalizarPontoEVoltar("Hora inicial registrada");
+                                finalizarPontoEVoltar("Verificação inicial registrada");
                             } catch (Exception e) {
-                                Log.e(TAG, "Erro ao registrar hora inicial após save()", e);
+                                Log.e(TAG, "Erro ao registrar verificação inicial após save()", e);
                                 binding.progressBarCarros.setVisibility(View.GONE);
                                 binding.btnFinalizar.setVisibility(View.VISIBLE);
-                                Toast.makeText(this, "Erro ao registrar hora inicial: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Erro ao registrar verificação inicial: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(e -> {
@@ -826,34 +841,39 @@ public class CarroRotasActivity extends AppCompatActivity {
         Log.d(TAG, "Foto convertida para Base64 (length=" + (base64 != null ? base64.length() : -1) + ") para requestCode=" + requestCode);
 
         switch (requestCode) {
-            case REQ_FOTO_COMBUSTIVEL:
+            case REQ_FOTO_LATARIA_ATRAS:
                 Log.d(TAG, "Assinando fotoCombustivelBase64 & preview");
-                fotoCombustivelBase64 = base64;
-                binding.imgPreviewCombustivel.setVisibility(View.VISIBLE);
-                binding.imgPreviewCombustivel.setImageBitmap(bitmap);
+                fotoLatariaAtrasBase64 = base64;
+                binding.imgPreviewLatariaAtras.setVisibility(View.VISIBLE);
+                binding.imgPreviewLatariaAtras.setImageBitmap(bitmap);
                 break;
 
-            case REQ_FOTO_PARABRISA:
+            case REQ_FOTO_LATARIA_ESQUERDA:
                 Log.d(TAG, "Assinando fotoParabrisaBase64 & preview");
-                fotoParabrisaBase64 = base64;
-                binding.imgPreviewParabrisa.setVisibility(View.VISIBLE);
-                binding.imgPreviewParabrisa.setImageBitmap(bitmap);
+                fotoLatariaEsquerdaBase64 = base64;
+                binding.imgPreviewLatariaEsquerda.setVisibility(View.VISIBLE);
+                binding.imgPreviewLatariaEsquerda.setImageBitmap(bitmap);
                 break;
 
-            case REQ_FOTO_LATARIA:
+            case REQ_FOTO_LATARIA_DIREITO:
                 Log.d(TAG, "Assinando fotoLatariaBase64 & preview");
-                fotoLatariaBase64 = base64;
-                binding.imgPreviewLataria.setVisibility(View.VISIBLE);
-                binding.imgPreviewLataria.setImageBitmap(bitmap);
+                fotoLatariaDireitaBase64 = base64;
+                binding.imgPreviewLatariaDireita.setVisibility(View.VISIBLE);
+                binding.imgPreviewLatariaDireita.setImageBitmap(bitmap);
                 break;
 
-            case REQ_FOTO_KILOMETRAGEM:
+            case REQ_FOTO_LATARIA_FRENTE:
                 Log.d(TAG, "Assinando fotokilometragemBase64 & preview");
-                fotokilometragemBase64 = base64;
-                binding.imgPreviewKilometragem.setVisibility(View.VISIBLE);
-                binding.imgPreviewKilometragem.setImageBitmap(bitmap);
+                fotoLatariaFrenteBase64 = base64;
+                binding.imgPreviewLatariaFrente.setVisibility(View.VISIBLE);
+                binding.imgPreviewLatariaFrente.setImageBitmap(bitmap);
                 break;
-
+            case REQ_FOTO_PAINEL:
+                Log.d(TAG, "Assinando fotokilometragemBase64 & preview");
+                fotoPainelBase64 = base64;
+                binding.imgPreviewPainel.setVisibility(View.VISIBLE);
+                binding.imgPreviewPainel.setImageBitmap(bitmap);
+                break;
             default:
                 Log.w(TAG, "requestCode desconhecido em onActivityResult(): " + requestCode);
                 break;

@@ -103,4 +103,8 @@ dependencies {
     androidTestImplementation libs.ui.test.junit4
     debugImplementation libs.ui.tooling
     debugImplementation libs.ui.test.manifest
+    compileOnly 'org.projectlombok:lombok:1.18.30' // Use a versão mais recente
+
+    // OBRIGATÓRIO para gerar o código (builder, getters, etc)
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 }

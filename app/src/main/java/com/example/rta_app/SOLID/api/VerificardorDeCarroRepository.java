@@ -45,10 +45,10 @@ public class VerificardorDeCarroRepository {
         Log.d(TAG, "Constructor: initializing WorkerHourRepository");
         this.context = context.getApplicationContext();
         httpClient = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)   // tempo para conectar
-                .writeTimeout(60, TimeUnit.SECONDS)     // tempo para enviar o body (upload)
-                .readTimeout(60, TimeUnit.SECONDS)      // tempo esperando a resposta
-                .callTimeout(90, TimeUnit.SECONDS)      // tempo total da chamada
+                .connectTimeout(300, TimeUnit.SECONDS)   // tempo para conectar
+                .writeTimeout(600, TimeUnit.SECONDS)     // tempo para enviar o body (upload)
+                .readTimeout(600, TimeUnit.SECONDS)      // tempo esperando a resposta
+                .callTimeout(900, TimeUnit.SECONDS)      // tempo total da chamada
                 .protocols(Collections.singletonList(Protocol.HTTP_1_1))
                 .build();
         this.tokenStorage = new TokenStorage(this.context);
@@ -80,22 +80,28 @@ public class VerificardorDeCarroRepository {
 
             json.put("finalizado", verificadoresDoCarro.getFinalizado());
 
-            json.put("combustivelInicial", verificadoresDoCarro.getCombustivelInicial());
-            json.put("combustivelFinal", verificadoresDoCarro.getCombustivelFinal());
+            json.put("latariaEsquerdaInicio", verificadoresDoCarro.getLatariaEsquerdaInicio());
+            json.put("latariaEsquerdaFinal", verificadoresDoCarro.getLatariaEsquerdaFinal());
+            json.put("latariaDireitaInicio", verificadoresDoCarro.getLatariaDireitaInicio());
+            json.put("latariaDireitaFinal", verificadoresDoCarro.getLatariaDireitaFinal());
+            json.put("painelInicio", verificadoresDoCarro.getPainelInicio());
+            json.put("painelFinal", verificadoresDoCarro.getPainelFinal());
+            json.put("frenteInicial", verificadoresDoCarro.getFrenteInicial());
+            json.put("frenteFinal", verificadoresDoCarro.getFrenteFinal());
+            json.put("atrasInicio", verificadoresDoCarro.getAtrasInicio());
+            json.put("atrasFinal", verificadoresDoCarro.getAtrasFinal());
 
-            json.put("parabrisaInicio", verificadoresDoCarro.getParabrisaInicio());
-            json.put("parabrisaFinal", verificadoresDoCarro.getParabrisaFinal());
+
+
 
             JSONObject motoristaJson = new JSONObject();
             motoristaJson.put("id", driveId); // ou verificadoresDoCarro.getMotorista().getId()
             json.put("motorista", motoristaJson);
 
-            json.put("latariaFinal", verificadoresDoCarro.getLatariaFinal());
-            json.put("kilometragemFinal", verificadoresDoCarro.getKilometragemFinal());
+
 
             json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
-            json.put("latariaInicio", verificadoresDoCarro.getLatariaInicio());
-            json.put("kilometragemInicio", verificadoresDoCarro.getKilometragemInicio());
+
             json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
 
         } catch (JSONException e) {
@@ -141,13 +147,16 @@ public class VerificardorDeCarroRepository {
             json.put("dataFinal", verificadoresDoCarro.getDataFinal());
 
             json.put("finalizado", verificadoresDoCarro.getFinalizado());
-
-            json.put("combustivelInicial", verificadoresDoCarro.getCombustivelInicial());
-            json.put("combustivelFinal", verificadoresDoCarro.getCombustivelFinal());
-
-            json.put("parabrisaInicio", verificadoresDoCarro.getParabrisaInicio());
-            json.put("parabrisaFinal", verificadoresDoCarro.getParabrisaFinal());
-
+            json.put("latariaEsquerdaInicio", verificadoresDoCarro.getLatariaEsquerdaInicio());
+            json.put("latariaEsquerdaFinal", verificadoresDoCarro.getLatariaEsquerdaFinal());
+            json.put("latariaDireitaInicio", verificadoresDoCarro.getLatariaDireitaInicio());
+            json.put("latariaDireitaFinal", verificadoresDoCarro.getLatariaDireitaFinal());
+            json.put("painelInicio", verificadoresDoCarro.getPainelInicio());
+            json.put("painelFinal", verificadoresDoCarro.getPainelFinal());
+            json.put("frenteInicial", verificadoresDoCarro.getFrenteInicial());
+            json.put("frenteFinal", verificadoresDoCarro.getFrenteFinal());
+            json.put("atrasInicio", verificadoresDoCarro.getAtrasInicio());
+            json.put("atrasFinal", verificadoresDoCarro.getAtrasFinal());
             JSONObject carroJson = new JSONObject();
             carroJson.put("id", verificadoresDoCarro.getCarro());
             json.put("carro", carroJson);
@@ -156,12 +165,9 @@ public class VerificardorDeCarroRepository {
             motoristaJson.put("id", driveId); // ou verificadoresDoCarro.getMotorista().getId()
             json.put("motorista", motoristaJson);
 
-            json.put("latariaFinal", verificadoresDoCarro.getLatariaFinal());
-            json.put("kilometragemFinal", verificadoresDoCarro.getKilometragemFinal());
 
             json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
-            json.put("latariaInicio", verificadoresDoCarro.getLatariaInicio());
-            json.put("kilometragemInicio", verificadoresDoCarro.getKilometragemInicio());
+
             json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
 
         } catch (JSONException e) {
@@ -207,11 +213,16 @@ public class VerificardorDeCarroRepository {
 
             json.put("finalizado", verificadoresDoCarro.getFinalizado());
 
-            json.put("combustivelInicial", verificadoresDoCarro.getCombustivelInicial());
-            json.put("combustivelFinal", verificadoresDoCarro.getCombustivelFinal());
-
-            json.put("parabrisaInicio", verificadoresDoCarro.getParabrisaInicio());
-            json.put("parabrisaFinal", verificadoresDoCarro.getParabrisaFinal());
+            json.put("latariaEsquerdaInicio", verificadoresDoCarro.getLatariaEsquerdaInicio());
+            json.put("latariaEsquerdaFinal", verificadoresDoCarro.getLatariaEsquerdaFinal());
+            json.put("latariaDireitaInicio", verificadoresDoCarro.getLatariaDireitaInicio());
+            json.put("latariaDireitaFinal", verificadoresDoCarro.getLatariaDireitaFinal());
+            json.put("painelInicio", verificadoresDoCarro.getPainelInicio());
+            json.put("painelFinal", verificadoresDoCarro.getPainelFinal());
+            json.put("frenteInicial", verificadoresDoCarro.getFrenteInicial());
+            json.put("frenteFinal", verificadoresDoCarro.getFrenteFinal());
+            json.put("atrasInicio", verificadoresDoCarro.getAtrasInicio());
+            json.put("atrasFinal", verificadoresDoCarro.getAtrasFinal());
 
             // Objeto carro
             JSONObject carroJson = new JSONObject();
@@ -223,12 +234,7 @@ public class VerificardorDeCarroRepository {
             motoristaJson.put("id", driveId);
             json.put("motorista", motoristaJson);
 
-            json.put("latariaFinal", verificadoresDoCarro.getLatariaFinal());
-            json.put("kilometragemFinal", verificadoresDoCarro.getKilometragemFinal());
-
             json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
-            json.put("latariaInicio", verificadoresDoCarro.getLatariaInicio());
-            json.put("kilometragemInicio", verificadoresDoCarro.getKilometragemInicio());
             json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
 
         } catch (JSONException e) {

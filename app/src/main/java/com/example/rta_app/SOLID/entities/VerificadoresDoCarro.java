@@ -3,74 +3,79 @@ package com.example.rta_app.SOLID.entities;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-
+@Builder
+@Data
 public class VerificadoresDoCarro {
 
 
     private String status;
     private Boolean verificadorInicial;
+
     private Boolean verificadorFinal;
+
     private LocalDateTime dataInicial;
+
     private LocalDateTime dataFinal;
+
     private Boolean finalizado;
-    private String combustivelInicial;
-    private String combustivelFinal;
-    private String parabrisaInicio;
-    private String parabrisaFinal;
-    private String LatariaInicio;
-    private String LatariaFinal;
-    private String KilometragemInicio;
-    private String KilometragemFinal;
-    private String ObservacoesAdicionaisInicio;
-    private String ObservacoesAdicionaisFinal;
+
+    private String frenteInicial;
+
+    private String frenteFinal;
+
+    private String atrasInicio;
+
+    private String atrasFinal;
+
+    private String latariaEsquerdaInicio;
+
+    private String latariaEsquerdaFinal;
+
+    private String latariaDireitaInicio;
+
+    private String latariaDireitaFinal;
+
+    private String painelInicio;
+
+    private String painelFinal;
+
+    private String observacoesAdicionaisInicio;
+
+    private String observacoesAdicionaisFinal;
+
     private Long carro;
     private Long motorista;
 
-    public VerificadoresDoCarro(String status,
-                                Boolean verificadorInicial,
-                                Boolean verificadorFinal,
-                                LocalDateTime dataInicial,
-                                LocalDateTime dataFinal,
-                                Boolean finalizado,
-                                String combustivelInicial,
-                                String combustivelFinal,
-                                String parabrisaInicio,
-                                String parabrisaFinal,
-                                String latariaInicio,
-                                String latariaFinal,
-                                String kilometragemInicio,
-                                String kilometragemFinal,
-                                String observacoesAdicionaisInicio,
-                                String observacoesAdicionaisFinal,
-                                Long carro) {
+    public VerificadoresDoCarro(String status, Boolean verificadorInicial, Boolean verificadorFinal, LocalDateTime dataInicial, LocalDateTime dataFinal, Boolean finalizado, String frenteInicial, String frenteFinal, String atrasInicio, String atrasFinal, String latariaEsquerdaInicio, String latariaEsquerdaFinal, String latariaDireitaInicio, String latariaDireitaFinal, String painelInicio, String painelFinal, String observacoesAdicionaisInicio, String observacoesAdicionaisFinal, Long carro, Long motorista) {
         this.status = status;
         this.verificadorInicial = verificadorInicial;
         this.verificadorFinal = verificadorFinal;
         this.dataInicial = dataInicial;
         this.dataFinal = dataFinal;
         this.finalizado = finalizado;
-        this.combustivelInicial = combustivelInicial;
-        this.combustivelFinal = combustivelFinal;
-        this.parabrisaInicio = parabrisaInicio;
-        this.parabrisaFinal = parabrisaFinal;
-        LatariaInicio = latariaInicio;
-        LatariaFinal = latariaFinal;
-        KilometragemInicio = kilometragemInicio;
-        KilometragemFinal = kilometragemFinal;
-        ObservacoesAdicionaisInicio = observacoesAdicionaisInicio;
-        ObservacoesAdicionaisFinal = observacoesAdicionaisFinal;
+        this.frenteInicial = frenteInicial;
+        this.frenteFinal = frenteFinal;
+        this.atrasInicio = atrasInicio;
+        this.atrasFinal = atrasFinal;
+        this.latariaEsquerdaInicio = latariaEsquerdaInicio;
+        this.latariaEsquerdaFinal = latariaEsquerdaFinal;
+        this.latariaDireitaInicio = latariaDireitaInicio;
+        this.latariaDireitaFinal = latariaDireitaFinal;
+        this.painelInicio = painelInicio;
+        this.painelFinal = painelFinal;
+        this.observacoesAdicionaisInicio = observacoesAdicionaisInicio;
+        this.observacoesAdicionaisFinal = observacoesAdicionaisFinal;
         this.carro = carro;
-    }
-
-    public VerificadoresDoCarro() {
+        this.motorista = motorista;
     }
 
 
@@ -122,84 +127,101 @@ public class VerificadoresDoCarro {
         this.finalizado = finalizado;
     }
 
-    public String getCombustivelInicial() {
-        return combustivelInicial;
+    public String getFrenteInicial() {
+        return frenteInicial;
     }
 
-    public void setCombustivelInicial(String combustivelInicial) {
-        this.combustivelInicial = combustivelInicial;
+    public void setFrenteInicial(String frenteInicial) {
+        this.frenteInicial = frenteInicial;
     }
 
-    public String getCombustivelFinal() {
-        return combustivelFinal;
+    public String getFrenteFinal() {
+        return frenteFinal;
     }
 
-    public void setCombustivelFinal(String combustivelFinal) {
-        this.combustivelFinal = combustivelFinal;
+    public void setFrenteFinal(String frenteFinal) {
+        this.frenteFinal = frenteFinal;
     }
 
-    public String getParabrisaInicio() {
-        return parabrisaInicio;
+    public String getAtrasInicio() {
+        return atrasInicio;
     }
 
-    public void setParabrisaInicio(String parabrisaInicio) {
-        this.parabrisaInicio = parabrisaInicio;
+    public void setAtrasInicio(String atrasInicio) {
+        this.atrasInicio = atrasInicio;
     }
 
-    public String getParabrisaFinal() {
-        return parabrisaFinal;
+    public String getAtrasFinal() {
+        return atrasFinal;
     }
 
-    public void setParabrisaFinal(String parabrisaFinal) {
-        this.parabrisaFinal = parabrisaFinal;
+    public void setAtrasFinal(String atrasFinal) {
+        this.atrasFinal = atrasFinal;
     }
 
-    public String getLatariaInicio() {
-        return LatariaInicio;
+    public String getLatariaEsquerdaInicio() {
+        return latariaEsquerdaInicio;
     }
 
-    public void setLatariaInicio(String latariaInicio) {
-        LatariaInicio = latariaInicio;
+    public void setLatariaEsquerdaInicio(String latariaEsquerdaInicio) {
+        this.latariaEsquerdaInicio = latariaEsquerdaInicio;
     }
 
-    public String getLatariaFinal() {
-        return LatariaFinal;
+    public String getLatariaEsquerdaFinal() {
+        return latariaEsquerdaFinal;
     }
 
-    public void setLatariaFinal(String latariaFinal) {
-        LatariaFinal = latariaFinal;
+    public void setLatariaEsquerdaFinal(String latariaEsquerdaFinal) {
+        this.latariaEsquerdaFinal = latariaEsquerdaFinal;
     }
 
-    public String getKilometragemInicio() {
-        return KilometragemInicio;
+    public String getLatariaDireitaInicio() {
+        return latariaDireitaInicio;
     }
 
-    public void setKilometragemInicio(String kilometragemInicio) {
-        KilometragemInicio = kilometragemInicio;
+    public void setLatariaDireitaInicio(String latariaDireitaInicio) {
+        this.latariaDireitaInicio = latariaDireitaInicio;
     }
 
-    public String getKilometragemFinal() {
-        return KilometragemFinal;
+    public String getLatariaDireitaFinal() {
+        return latariaDireitaFinal;
     }
 
-    public void setKilometragemFinal(String kilometragemFinal) {
-        KilometragemFinal = kilometragemFinal;
+    public void setLatariaDireitaFinal(String latariaDireitaFinal) {
+        this.latariaDireitaFinal = latariaDireitaFinal;
     }
 
-    public String getObservacoesAdicionaisInicio() {
-        return ObservacoesAdicionaisInicio;
+    public String getPainelInicio() {
+        return painelInicio;
     }
 
-    public void setObservacoesAdicionaisInicio(String observacoesAdicionaisInicio) {
-        ObservacoesAdicionaisInicio = observacoesAdicionaisInicio;
+    public void setPainelInicio(String painelInicio) {
+        this.painelInicio = painelInicio;
     }
+
+    public String getPainelFinal() {
+        return painelFinal;
+    }
+
+    public void setPainelFinal(String painelFinal) {
+        this.painelFinal = painelFinal;
+    }
+
 
     public String getObservacoesAdicionaisFinal() {
-        return ObservacoesAdicionaisFinal;
+        return observacoesAdicionaisFinal;
     }
 
     public void setObservacoesAdicionaisFinal(String observacoesAdicionaisFinal) {
-        ObservacoesAdicionaisFinal = observacoesAdicionaisFinal;
+        this.observacoesAdicionaisFinal = observacoesAdicionaisFinal;
+    }
+
+    public String getObservacoesAdicionaisInicio() {
+        return observacoesAdicionaisInicio;
+    }
+
+    public void setObservacoesAdicionaisInicio(String observacoesAdicionaisInicio) {
+        this.observacoesAdicionaisInicio = observacoesAdicionaisInicio;
     }
 
     public Long getCarro() {
@@ -216,29 +238,5 @@ public class VerificadoresDoCarro {
 
     public void setMotorista(Long motorista) {
         this.motorista = motorista;
-    }
-
-    @Override
-    public String toString() {
-        return "VerificadoresDoCarro{" +
-                "status='" + status + '\'' +
-                ", verificadorInicial=" + verificadorInicial +
-                ", verificadorFinal=" + verificadorFinal +
-                ", dataInicial=" + dataInicial +
-                ", dataFinal=" + dataFinal +
-                ", finalizado=" + finalizado +
-                ", combustivelInicial='" + combustivelInicial + '\'' +
-                ", combustivelFinal='" + combustivelFinal + '\'' +
-                ", parabrisaInicio='" + parabrisaInicio + '\'' +
-                ", parabrisaFinal='" + parabrisaFinal + '\'' +
-                ", LatariaInicio='" + LatariaInicio + '\'' +
-                ", LatariaFinal='" + LatariaFinal + '\'' +
-                ", KilometragemInicio='" + KilometragemInicio + '\'' +
-                ", KilometragemFinal='" + KilometragemFinal + '\'' +
-                ", ObservacoesAdicionaisInicio='" + ObservacoesAdicionaisInicio + '\'' +
-                ", ObservacoesAdicionaisFinal='" + ObservacoesAdicionaisFinal + '\'' +
-                ", carro=" + carro +
-                ", motorista=" + motorista +
-                '}';
     }
 }
