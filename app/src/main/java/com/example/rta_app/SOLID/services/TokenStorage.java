@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
@@ -13,49 +14,82 @@ import java.security.GeneralSecurityException;
 
 public class TokenStorage {
 
-    private static final String TAG        = "ApiKeyStorage";
-
-    // Mesmo nome que você já usava
-    private static final String PREF_FILE  = "secure_prefs";
+    private static final String TAG = "ApiKeyStorage";
+    private static final String PREF_FILE = "secure_prefs";
     private static final String KEY_APIKEY = "apiKey";
-
-    // Nome do SharedPreferences interno onde o AndroidX guarda o keyset criptografado.
-    // Se não existir, o deleteSharedPreferences simplesmente não faz nada.
     private static final String ANDROIDX_KEYSET_PREF = "__androidx_security_crypto_encrypted_prefs__";
+    private static final String FALLBACK_PREF_FILE = "secure_prefs_fallback";
 
-    private final SharedPreferences securePrefs;
+    private static final Object LOCK = new Object();
+    private static volatile SharedPreferences cachedPrefs;
+    private static volatile boolean usingFallbackPrefs = false;
 
-    public TokenStorage(Context context) {
-        this.securePrefs = initEncryptedPrefs(context);
-        Log.d(TAG, "EncryptedSharedPreferences inicializado para API Key");
+    private final Context appContext;
+
+    public TokenStorage(@NonNull Context context) {
+        this.appContext = context.getApplicationContext();
     }
 
-    private SharedPreferences initEncryptedPrefs(Context context) {
+    public static void warmUpAsync(@NonNull Context context) {
+        Context appContext = context.getApplicationContext();
+        Thread t = new Thread(() -> {
+            try {
+                new TokenStorage(appContext).getPrefs();
+            } catch (Exception e) {
+                Log.e(TAG, "warmUpAsync(): falha ao inicializar storage", e);
+            }
+        }, "token-storage-warmup");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private SharedPreferences getPrefs() {
+        SharedPreferences local = cachedPrefs;
+        if (local != null) {
+            return local;
+        }
+
+        synchronized (LOCK) {
+            local = cachedPrefs;
+            if (local != null) {
+                return local;
+            }
+
+            try {
+                local = createEncryptedPrefs(appContext);
+                usingFallbackPrefs = false;
+                Log.i(TAG, "EncryptedSharedPreferences inicializado com sucesso");
+            } catch (Exception firstError) {
+                Log.e(TAG, "Falha ao inicializar EncryptedSharedPreferences. Tentando resetar o keyset.", firstError);
+                resetEncryptedPrefs(appContext);
+
+                try {
+                    local = createEncryptedPrefs(appContext);
+                    usingFallbackPrefs = false;
+                    Log.i(TAG, "EncryptedSharedPreferences recriado com sucesso após reset");
+                } catch (Exception secondError) {
+                    Log.e(TAG, "Falha definitiva no storage criptografado. Usando fallback local.", secondError);
+                    local = appContext.getSharedPreferences(FALLBACK_PREF_FILE, Context.MODE_PRIVATE);
+                    usingFallbackPrefs = true;
+                }
+            }
+
+            cachedPrefs = local;
+            return local;
+        }
+    }
+
+    private static void resetEncryptedPrefs(Context context) {
         try {
-            Log.i(TAG, "Inicializando EncryptedSharedPreferences (primeira tentativa)");
-            return createEncryptedPrefs(context);
+            context.deleteSharedPreferences(PREF_FILE);
         } catch (Exception e) {
-            Log.e(TAG, "Falha ao inicializar EncryptedSharedPreferences (provavelmente keyset corrompido). Tentando resetar.", e);
+            Log.e(TAG, "Erro ao apagar prefs criptografados", e);
+        }
 
-            // Apaga prefs criptografadas e o prefs interno do keyset
-            try {
-                Log.w(TAG, "Apagando SharedPreferences criptografados: " + PREF_FILE);
-                context.deleteSharedPreferences(PREF_FILE);
-
-                Log.w(TAG, "Apagando SharedPreferences do keyset interno: " + ANDROIDX_KEYSET_PREF);
-                context.deleteSharedPreferences(ANDROIDX_KEYSET_PREF);
-            } catch (Exception ex) {
-                Log.e(TAG, "Erro ao apagar SharedPreferences/Keyset corrompidos.", ex);
-            }
-
-            // Tenta criar tudo de novo do zero
-            try {
-                Log.i(TAG, "Recriando EncryptedSharedPreferences após reset.");
-                return createEncryptedPrefs(context);
-            } catch (Exception e2) {
-                Log.e(TAG, "Falha DEFINITIVA ao inicializar EncryptedSharedPreferences.", e2);
-                throw new RuntimeException("Erro ao inicializar EncryptedSharedPreferences", e2);
-            }
+        try {
+            context.deleteSharedPreferences(ANDROIDX_KEYSET_PREF);
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao apagar keyset interno", e);
         }
     }
 
@@ -75,27 +109,24 @@ public class TokenStorage {
         );
     }
 
-    /** Salva a API Key. */
     public void saveApiKey(@Nullable String apiKey) {
-        securePrefs.edit()
-                .putString(KEY_APIKEY, apiKey)
-                .apply();
-        Log.d(TAG, "API Key salva com sucesso (nula? " + (apiKey == null) + ")");
+        String safeValue = apiKey == null ? "" : apiKey.trim();
+        getPrefs().edit().putString(KEY_APIKEY, safeValue).apply();
+        Log.d(TAG, "API Key salva (vazia? " + safeValue.isEmpty() + ", fallback? " + usingFallbackPrefs + ")");
     }
 
-    /** Retorna a API Key (ou null se não existir). */
-    @Nullable
+    @NonNull
     public String getApiKey() {
-        String key = securePrefs.getString(KEY_APIKEY, null);
-        Log.d(TAG, "getApiKey(): " + key);
-        return key;
+        String key = getPrefs().getString(KEY_APIKEY, "");
+        return key == null ? "" : key;
     }
 
-    /** Remove a API Key do storage. */
+    public boolean hasApiKey() {
+        return !getApiKey().isEmpty();
+    }
+
     public void clear() {
-        securePrefs.edit()
-                .remove(KEY_APIKEY)
-                .apply();
+        getPrefs().edit().remove(KEY_APIKEY).apply();
         Log.d(TAG, "API Key removida do storage");
     }
 }

@@ -1,10 +1,16 @@
 package com.example.rta_app.SOLID.activitys;
 
+import static androidx.fragment.app.FragmentManager.TAG;
 import static com.example.rta_app.SOLID.services.NetworkService.isNetworkConnected;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,14 +18,18 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.example.rta_app.R;
-import com.example.rta_app.SOLID.aplication.WorkerAplication;
-import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.api.WorkerHourRepository;
+import com.example.rta_app.SOLID.aplication.WorkerAplication;
+import com.example.rta_app.SOLID.entities.WorkerHous;
 import com.example.rta_app.SOLID.entities.utils.PointType;
 import com.example.rta_app.databinding.ActivityWorkHourBinding;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.Task;
 
 import java.text.ParseException;
@@ -33,6 +43,8 @@ public class WorkHourActivity extends AppCompatActivity {
     private WorkerHourRepository workerHourRepository;
     private UsersRepository usersRepository;
     private WorkerAplication workerAplication;
+    private FusedLocationProviderClient fusedLocationClient;
+
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private static final SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
@@ -55,6 +67,7 @@ public class WorkHourActivity extends AppCompatActivity {
         workerHourRepository = new WorkerHourRepository(this);
         usersRepository = new UsersRepository(this);
         workerAplication = new WorkerAplication(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     @Override
@@ -76,31 +89,30 @@ public class WorkHourActivity extends AppCompatActivity {
                 this::updateToSheets
         ));
 
-        // Usando o Enum sugerido
         binding.imageFistHour.setOnClickListener(v -> processPointClick(PointType.ENTRADA));
         binding.imageDinnerStarHour.setOnClickListener(v -> processPointClick(PointType.ALMOCO_INICIO));
         binding.imageDinnerFinishHour.setOnClickListener(v -> processPointClick(PointType.ALMOCO_FIM));
-
-        binding.imageStop.setOnClickListener(v ->checkVehicleInspection(false)); // False = Check Final
+        binding.imageStop.setOnClickListener(v -> processPointClick(PointType.FIM));
     }
 
-    // Centraliza a lógica de clique
     private void processPointClick(PointType type) {
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                WorkerHous workerHous = task.getResult();
-                if (workerHous != null && workerHous.getHour_stop().isEmpty()) {
-                    validateAndOpenPoint(type, workerHous);
-                } else {
-                    updateToSheets();
-                }
+            if (!task.isSuccessful()) {
+                showToast("Erro ao carregar ponto atual");
+                return;
+            }
+
+            WorkerHous workerHous = task.getResult();
+            if (workerHous != null && isBlank(workerHous.getHour_stop())) {
+                validateAndOpenPoint(type, workerHous);
+            } else {
+                updateToSheets();
             }
         });
     }
 
     private void validateAndOpenPoint(PointType type, WorkerHous workerHous) {
-        // Validação de 15/20 minutos
-        if (!workerHous.getHour_after().isEmpty() && !canRegisterNewPoint(workerHous.getDate(), workerHous.getHour_after())) {
+        if (!isBlank(workerHous.getHour_after()) && !canRegisterNewPoint(workerHous.getDate(), workerHous.getHour_after())) {
             showAlert("Alerta", "Você não pode registrar mais de \n15 minutos após o horário anterior");
             return;
         }
@@ -110,19 +122,25 @@ public class WorkHourActivity extends AppCompatActivity {
             return;
         }
 
-        // Validação específica para o FIM
         if (type == PointType.FIM && !isNetworkConnected(this)) {
             showAlert("Alerta", "Para registrar a saída, você precisa estar conectado à internet", this::finish);
             return;
         }
 
-        // Verifica se o campo correspondente está vazio antes de tentar registrar
         boolean canRegister = false;
         switch (type) {
-            case ENTRADA: canRegister = workerHous.getHour_first().isEmpty(); break;
-            case ALMOCO_INICIO: canRegister = workerHous.getHour_dinner().isEmpty(); break;
-            case ALMOCO_FIM: canRegister = workerHous.getHour_finish().isEmpty(); break;
-            case FIM: canRegister = workerHous.getHour_stop().isEmpty(); break;
+            case ENTRADA:
+                canRegister = isBlank(workerHous.getHour_first());
+                break;
+            case ALMOCO_INICIO:
+                canRegister = isBlank(workerHous.getHour_dinner());
+                break;
+            case ALMOCO_FIM:
+                canRegister = isBlank(workerHous.getHour_finish());
+                break;
+            case FIM:
+                canRegister = isBlank(workerHous.getHour_stop());
+                break;
         }
 
         if (canRegister) {
@@ -143,14 +161,11 @@ public class WorkHourActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Refatorado o método testForVerificador para checkVehicleInspection
     private void checkVehicleInspection(boolean isInitialCheck) {
         workerHourRepository.getWorkerHous().addOnSuccessListener(workerHous -> {
             boolean isVerified = isInitialCheck ? workerHous.getCarroInicial() : workerHous.getCarroFinal();
 
             if (!isVerified) {
-                // Se for verificação inicial e falhar, ou final e falhar, vai pra tela de rotas
-                // Nota: Mantive sua lógica original, mas simplificada
                 String msg = isInitialCheck ? "faça a verificação inicial" : "Para registrar a saída, faça a verificação final.";
 
                 new AlertDialog.Builder(this)
@@ -169,15 +184,19 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void savePoint(PointType type) {
-        updateWorkerHoursData(type).addOnSuccessListener(aVoid -> {
-            workerHourRepository.getWorkerHous().addOnSuccessListener(workerHous -> {
-                if (type == PointType.FIM) {
-                    updateToSheets();
-                }
-                updateButtonUI(type, workerHous);
-                loadInitialData(); // Recarrega a tela
-            });
-        });
+        getCurrentPointLocation(location ->
+                updateWorkerHoursData(type, location)
+                        .addOnSuccessListener(aVoid -> workerHourRepository.getWorkerHous()
+                                .addOnSuccessListener(workerHous -> {
+                                    if (type == PointType.FIM) {
+                                        updateToSheets();
+                                    }
+                                    updateButtonUI(type, workerHous);
+                                    loadInitialData();
+                                })
+                        )
+                        .addOnFailureListener(e -> showToast("Erro ao salvar ponto: " + e.getMessage()))
+        );
     }
 
     private void updateToSheets() {
@@ -205,64 +224,105 @@ public class WorkHourActivity extends AppCompatActivity {
         }
     }
 
-
-
-    // CORREÇÃO DA LÓGICA DE TEMPO
     public boolean canRegisterNewPoint(String previousDate, String previousHour) {
         try {
             String previousDateTimeStr = previousDate + " " + previousHour;
             Date previousDateTime = FULL_DATE_FORMAT.parse(previousDateTimeStr);
             Date now = new Date();
 
-            if (previousDateTime == null) return true;
+            if (previousDateTime == null) {
+                return true;
+            }
 
             long diffInMillis = now.getTime() - previousDateTime.getTime();
             long diffInMinutes = diffInMillis / (1000 * 60);
 
-            // Retorna TRUE se passou mais de 15 minutos (lógica descomentada e corrigida)
-           /* return diffInMinutes >= 15;*/
-            return true;
-
+            return diffInMinutes >= 2;
         } catch (ParseException e) {
             e.printStackTrace();
-            return true; // Se der erro no parse, permite bater o ponto para não travar o user
+            return true;
         }
     }
 
-    // Atualização do Objeto de Dados
-    private Task<Void> updateWorkerHoursData(PointType type) {
+    private Task<Void> updateWorkerHoursData(PointType type, Location location) {
         String currentTime = TIME_FORMAT.format(new Date());
         String currentDate = DATE_FORMAT.format(new Date());
 
+        final String latitude = location != null ? String.valueOf(location.getLatitude()) : "";
+        final String longitude = location != null ? String.valueOf(location.getLongitude()) : "";
+
         return workerHourRepository.getWorkerHous().continueWithTask(task -> {
             WorkerHous workerHous = task.getResult();
-            if (workerHous == null || workerHous.getDate().isEmpty()) {
-                workerHous = new WorkerHous(currentDate, "", "", "", "", currentTime);
+
+            if (workerHous == null || isBlank(workerHous.getDate())) {
+                workerHous = new WorkerHous(
+                        currentDate,
+                        "",
+                        "",
+                        "",
+                        "",
+                        currentTime,
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        ""
+                );
             }
+
 
             switch (type) {
-                case ENTRADA: workerHous.setHour_first(currentTime); break;
-                case ALMOCO_INICIO: workerHous.setHour_dinner(currentTime); break;
-                case ALMOCO_FIM: workerHous.setHour_finish(currentTime); break;
-                case FIM: workerHous.setHour_stop(currentTime); break;
-            }
-            workerHous.setHour_after(currentTime);
+                case ENTRADA:
+                    workerHous.setHour_first(currentTime);
+                    workerHous.setLatitude_first(latitude);
+                    workerHous.setLongitude_first(longitude);
+                    break;
 
+                case ALMOCO_INICIO:
+                    workerHous.setHour_dinner(currentTime);
+                    workerHous.setLatitude_dinner(latitude);
+                    workerHous.setLongitude_dinner(longitude);
+                    break;
+
+                case ALMOCO_FIM:
+                    workerHous.setHour_finish(currentTime);
+                    workerHous.setLatitude_finish(latitude);
+                    workerHous.setLongitude_finish(longitude);
+                    break;
+
+                case FIM:
+                    workerHous.setHour_stop(currentTime);
+                    workerHous.setLatitude_stop(latitude);
+                    workerHous.setLongitude_stop(longitude);
+                    break;
+            }
+
+            workerHous.setHour_after(currentTime);
             return workerHourRepository.saveWorkerHous(workerHous);
         });
     }
 
-    // --- Métodos de UI e Auxiliares ---
-
     private void updateButtonUI(PointType type, WorkerHous workerHous) {
-        if (workerHous == null) return;
+        if (workerHous == null) {
+            return;
+        }
 
-        // Exemplo simplificado, você pode adaptar para os outros botões
         switch (type) {
-            case ENTRADA: binding.buttonFistHour.setText(workerHous.getHour_first()); break;
-            case ALMOCO_INICIO: binding.buttonDinnerStarHour.setText(workerHous.getHour_dinner()); break;
-            case ALMOCO_FIM: binding.buttonDinnerFinishHour.setText(workerHous.getHour_finish()); break;
-            case FIM: binding.buttonStop.setText(workerHous.getHour_stop()); break;
+            case ENTRADA:
+                binding.buttonFistHour.setText(workerHous.getHour_first());
+                break;
+            case ALMOCO_INICIO:
+                binding.buttonDinnerStarHour.setText(workerHous.getHour_dinner());
+                break;
+            case ALMOCO_FIM:
+                binding.buttonDinnerFinishHour.setText(workerHous.getHour_finish());
+                break;
+            case FIM:
+                binding.buttonStop.setText(workerHous.getHour_stop());
+                break;
         }
     }
 
@@ -270,6 +330,7 @@ public class WorkHourActivity extends AppCompatActivity {
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 WorkerHous workerHous = task.getResult();
+                Log.i("TESTEEEEE", "workerHous=" + workerHous.toString());
                 if (workerHous != null) {
                     updateFullUI(workerHous);
                 } else {
@@ -281,14 +342,9 @@ public class WorkHourActivity extends AppCompatActivity {
         });
     }
 
-    // Agrupei a lógica de atualização da UI para ficar mais legível
     private void updateFullUI(WorkerHous wh) {
-
-
         updateStatusUI(wh.getHour_first(), binding.buttonFistHour, binding.imageFistHour,
                 binding.buttonDinnerStarHour, binding.imageDinnerStarHour, "Entrada");
-
-        if (!wh.getHour_first().isEmpty()) checkVehicleInspection(true);
 
         updateStatusUI(wh.getHour_dinner(), binding.buttonDinnerStarHour, binding.imageDinnerStarHour,
                 binding.buttonDinnerFinishHour, binding.imageDinnerFinishHour, "Almoço");
@@ -296,49 +352,45 @@ public class WorkHourActivity extends AppCompatActivity {
         updateStatusUI(wh.getHour_finish(), binding.buttonDinnerFinishHour, binding.imageDinnerFinishHour,
                 binding.buttonStop, binding.imageStop, "Saída");
 
-        if (!wh.getHour_stop().isEmpty()) {
-            // Lógica de quando o dia acabou
+        if (!isBlank(wh.getHour_stop())) {
             binding.buttonStop.setText(wh.getHour_stop());
             binding.progressBar.setVisibility(View.VISIBLE);
-            // ... esconder outros botões (simplifiquei aqui para caber)
         } else {
             binding.buttonStop.setText("Fim do Expediente");
         }
     }
 
-    // Método auxiliar para reduzir duplicação no updateUI
     private void updateStatusUI(String hourValue, TextView btn, ImageView img,
                                 View nextBtn, View nextImg, String defaultText) {
-
-        // TRATAMENTO DE ERRO: Garante que não é null e remove espaços vazios " "
-        boolean temHorario = (hourValue != null && !hourValue.trim().isEmpty());
+        boolean temHorario = !isBlank(hourValue);
 
         if (temHorario) {
             btn.setText(hourValue);
             img.setImageResource(R.drawable.confirm_hour);
             img.setBackgroundResource(R.drawable.button_stroke_squad);
 
-            // Força visibilidade do botão atual (caso ele estivesse sumido)
             btn.setVisibility(View.VISIBLE);
             img.setVisibility(View.VISIBLE);
 
-            // Tenta mostrar o próximo
             if (nextBtn != null) {
                 nextBtn.setVisibility(View.VISIBLE);
-                nextBtn.bringToFront(); // DICA EXTRA: Às vezes resolve problemas de Z-index
+                nextBtn.bringToFront();
             }
             if (nextImg != null) {
                 nextImg.setVisibility(View.VISIBLE);
                 nextImg.bringToFront();
             }
-
         } else {
             btn.setText(defaultText);
-            // Lógica do Else (Opcional: Esconder o próximo se o atual não estiver preenchido)
-            if (nextBtn != null) nextBtn.setVisibility(View.GONE);
-            if (nextImg != null) nextImg.setVisibility(View.GONE);
+            if (nextBtn != null) {
+                nextBtn.setVisibility(View.GONE);
+            }
+            if (nextImg != null) {
+                nextImg.setVisibility(View.GONE);
+            }
         }
     }
+
     private void resetUI() {
         binding.buttonStop.setText("Fim");
         binding.buttonDinnerFinishHour.setText("Saída");
@@ -351,7 +403,11 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void showAlert(String title, String msg) {
-        new AlertDialog.Builder(this).setTitle(title).setMessage(msg).setNeutralButton("Ok", null).show();
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(msg)
+                .setNeutralButton("Ok", null)
+                .show();
     }
 
     private void showAlert(String title, String msg, Runnable onOk) {
@@ -368,5 +424,40 @@ public class WorkHourActivity extends AppCompatActivity {
                 .setMessage(msg)
                 .setNeutralButton("Ok", (d, w) -> onConfirm.run())
                 .show();
+    }
+
+    private boolean hasLocationPermission() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getCurrentPointLocation(PointLocationCallback callback) {
+        if (!hasLocationPermission()) {
+            callback.onLocationResult(null);
+            return;
+        }
+
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        callback.onLocationResult(location);
+                    } else {
+                        fusedLocationClient.getLastLocation()
+                                .addOnSuccessListener(callback::onLocationResult)
+                                .addOnFailureListener(e -> callback.onLocationResult(null));
+                    }
+                })
+                .addOnFailureListener(e -> fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(callback::onLocationResult)
+                        .addOnFailureListener(err -> callback.onLocationResult(null)));
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private interface PointLocationCallback {
+        void onLocationResult(Location location);
     }
 }

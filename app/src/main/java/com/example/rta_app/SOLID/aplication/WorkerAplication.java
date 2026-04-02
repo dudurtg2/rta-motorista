@@ -59,7 +59,7 @@ public class WorkerAplication {
                         throw task.getException();
                     }
                     Log.d(TAG, "Finish(): criando WorkerHous vazio para reset");
-                    WorkerHous reset = new WorkerHous("", "", "", "", "", "");
+                    WorkerHous reset = new WorkerHous("", "", "", "", "", "","", "", "", "","", "", "", "");
                     return workerHourRepository.saveWorkerHous(reset)
                             .addOnSuccessListener(v -> Log.d(TAG, "Finish(): reset WorkerHous salvo com sucesso"));
                 })

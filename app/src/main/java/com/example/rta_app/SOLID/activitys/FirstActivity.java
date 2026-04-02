@@ -9,84 +9,90 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.rta_app.SOLID.activitys.tracker.LocationTracker;
-import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.services.NetworkService;
 import com.example.rta_app.SOLID.services.TokenStorage;
 import com.example.rta_app.databinding.ActivityFirstBinding;
 
-public class FirstActivity extends AppCompatActivity {
-    private static final String TAG = "FirstActivityaa";
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-    private TokenStorage tokenStorage;
-    private UsersRepository usersRepository;
-    private NetworkService networkService;
+public class FirstActivity extends AppCompatActivity {
+    private static final String TAG = "FirstActivity";
+
+    private final ExecutorService startupExecutor = Executors.newSingleThreadExecutor();
+
     private ActivityFirstBinding binding;
+    private TokenStorage tokenStorage;
+    private NetworkService networkService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "onCreate(): início");
-
-        // edge-to-edge
         EdgeToEdge.enable(this);
-        Log.i(TAG, "EdgeToEdge habilitado");
 
-        // inflar layout
         binding = ActivityFirstBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        Log.i(TAG, "Layout definido");
 
-        // inicializar serviços
-        tokenStorage   = new TokenStorage(this);
-        usersRepository = new UsersRepository(this);
+        tokenStorage = new TokenStorage(getApplicationContext());
         networkService = new NetworkService();
-        Log.i(TAG, "TokenService, TokenStorage, UsersRepo e NetworkService inicializados");
 
-        // checar rede
+        TokenStorage.warmUpAsync(getApplicationContext());
+        decideNextScreen();
+    }
+
+    private void decideNextScreen() {
         boolean connected = networkService.isNetworkConnected(this);
-        Log.i(TAG, "isNetworkConnected = " + connected);
+        Log.i(TAG, "isNetworkConnected=" + connected);
+
         if (!connected) {
-            Log.i(TAG, "Sem conexão; redirecionando para WorkHourActivity");
             Toast.makeText(this, "Sem conexão com a internet", Toast.LENGTH_SHORT).show();
             startWorkHour();
             return;
         }
 
-        // validar/refresh token
-        Log.i(TAG, "Iniciando validateAndRefreshToken()");
+        startupExecutor.execute(() -> {
+            String apiKey = tokenStorage.getApiKey();
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
 
-                    String access = tokenStorage.getApiKey();
-                    Log.i(TAG, "tokenStorage.getAccessToken() = " + access);
-                    if (access == null || access.isEmpty()) {
-                        Log.i(TAG, "Access token ausente; redirecionando para LoginActivity");
-                        startLogin();
-                    } else {
-                        Log.i(TAG, "Access token presente; redirecionando para MainActivity");
-                        startMain();
-                    }
-
-
-
+                if (apiKey.isEmpty()) {
+                    Log.i(TAG, "Token ausente; abrindo LoginActivity");
+                    startLogin();
+                } else {
+                    Log.i(TAG, "Token presente; iniciando rastreamento e abrindo MainActivity");
+                    startMain();
+                }
+            });
+        });
     }
 
     private void startMain() {
-        LocationTracker.start(this);
-        Log.i(TAG, "startMain(): abrindo MainActivity");
-        startActivity(new Intent(this, MainActivity.class));
+        LocationTracker.start(getApplicationContext());
+        Intent intent = new Intent(this, MainActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
     }
 
     private void startLogin() {
-        Log.i(TAG, "startLogin(): abrindo LoginActivity e limpando pilha");
-        Intent i = new Intent(this, LoginActivity.class)
+        Intent intent = new Intent(this, LoginActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
+        startActivity(intent);
         finish();
     }
 
     private void startWorkHour() {
-        Log.i(TAG, "startWorkHour(): abrindo WorkHourActivity");
-        startActivity(new Intent(this, WorkHourActivity.class));
+        Intent intent = new Intent(this, WorkHourActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        startupExecutor.shutdownNow();
     }
 }

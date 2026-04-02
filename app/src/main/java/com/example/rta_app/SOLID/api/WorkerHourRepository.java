@@ -75,6 +75,16 @@ public class WorkerHourRepository {
             json.put("hour_dinner", workerHous.getHour_dinner());
             json.put("hour_finish", workerHous.getHour_finish());
             json.put("hour_stop", workerHous.getHour_stop());
+            json.put("latitude_first" , workerHous.getLatitude_first());
+            json.put("longitude_first" , workerHous.getLongitude_first());
+            json.put("latitude_dinner" , workerHous.getLatitude_dinner());
+            json.put("longitude_dinner" , workerHous.getLongitude_dinner());
+            json.put("latitude_stop" , workerHous.getLatitude_stop());
+            json.put("longitude_stop" , workerHous.getLongitude_stop());
+            json.put("latitude_finish" , workerHous.getLatitude_finish());
+            json.put("longitude_finish" , workerHous.getLongitude_finish());
+
+
 
 
         } catch (JSONException e) {
@@ -106,6 +116,14 @@ public class WorkerHourRepository {
                 json.put("hour_finish", workerHous.getHour_finish());
                 json.put("hour_stop", workerHous.getHour_stop());
                 json.put("hour_after", workerHous.getHour_after());
+                json.put("latitude_first", workerHous.getLatitude_first());
+                json.put("longitude_first", workerHous.getLongitude_first());
+                json.put("latitude_dinner", workerHous.getLatitude_dinner());
+                json.put("longitude_dinner", workerHous.getLongitude_dinner());
+                json.put("latitude_stop", workerHous.getLatitude_stop());
+                json.put("longitude_stop", workerHous.getLongitude_stop());
+                json.put("latitude_finish", workerHous.getLatitude_finish());
+                json.put("longitude_finish", workerHous.getLongitude_finish());
                 json.put("carro_inicial", workerHous.getCarroInicial());
                 json.put("carro_final", workerHous.getCarroFinal());
                 json.put("id_verificardor", workerHous.getIdVerificardor());
@@ -130,7 +148,7 @@ public class WorkerHourRepository {
                 String data = readFromFile();
                 if (data == null) {
                     Log.d(TAG, "getWorkerHous(): no file, returning empty WorkerHous");
-                    tcs.setResult(new WorkerHous("", "", "", "", "", ""));
+                    tcs.setResult(new WorkerHous("", "", "", "", "", "", "", "", "", "", "", "", "", ""));
                 } else {
                     JSONObject json = new JSONObject(data);
                     Log.d(TAG,json.toString());
@@ -141,6 +159,14 @@ public class WorkerHourRepository {
                             json.optString("hour_finish", ""),
                             json.optString("hour_stop", ""),
                             json.optString("hour_after", ""),
+                            json.optString("latitude_first", ""),
+                            json.optString("longitude_first", ""),
+                            json.optString("latitude_dinner", ""),
+                            json.optString("longitude_dinner", ""),
+                            json.optString("latitude_stop", ""),
+                            json.optString("longitude_stop", ""),
+                            json.optString("latitude_finish", ""),
+                            json.optString("longitude_finish", ""),
                             json.optBoolean("carro_inicial", false),
                             json.optBoolean("carro_final", false),
                             json.optLong("id_verificardor", 0L),
