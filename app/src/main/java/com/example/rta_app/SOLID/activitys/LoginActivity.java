@@ -195,9 +195,9 @@ public class LoginActivity extends AppCompatActivity {
     // ========= NAVEGAÇÃO =========
 
     private void openMain() {
-        LocationTracker.start(this);
+        LocationTracker.sync(this);
         Log.i(TAG, "Abrindo MainActivity");
-        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        startActivity(new Intent(LoginActivity.this, FirstActivity.class));
         finish();
     }
 

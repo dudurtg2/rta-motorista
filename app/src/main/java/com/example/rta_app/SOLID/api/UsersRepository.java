@@ -3,8 +3,9 @@ package com.example.rta_app.SOLID.api;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.rta_app.SOLID.services.TokenStorage;
 import com.example.rta_app.SOLID.entities.Users;
+import com.example.rta_app.SOLID.services.ApiClient;
+import com.example.rta_app.SOLID.services.TokenStorage;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 
@@ -18,34 +19,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class UsersRepository {
     private static final String TAG = "UsersRepo";
-    private static final String URL_API = "https://android.lc-transportes.com/";
     private static final String FILE_NAME = "user_data.json";
-    private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
 
     private final TokenStorage storage;
     private final Context context;
-    private final OkHttpClient httpClient;
+    private final ApiClient apiClient;
     private final ExecutorService executor;
 
     public UsersRepository(Context context) {
         this.context = context.getApplicationContext();
-        this.httpClient = new OkHttpClient();
+        this.apiClient = new ApiClient(this.context);
         this.executor = Executors.newSingleThreadExecutor();
         this.storage = new TokenStorage(this.context);
-
     }
 
-    /**
-     * Busca apenas o objeto Users dentro de user_data.json (campo "data").
-     */
     public Task<Users> getUser() {
         TaskCompletionSource<Users> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
@@ -69,133 +61,87 @@ public class UsersRepository {
 
                 tcs.setResult(new Users(nome, id, telefone, baseNome, baseId, frete));
             } catch (Exception e) {
-                Log.e(TAG, "Erro ao obter usuário", e);
+                Log.e(TAG, "Erro ao obter usuario", e);
                 tcs.setException(e);
             }
         });
         return tcs.getTask();
     }
 
-    /**
-     * Grava localmente só o nó "data" do usuário em user_data.json.
-     */
     public Task<Void> saveUser(Users user) {
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
-                // 1) Atualiza no servidor
+                String telefone = user.getTelefone() == null ? "" : user.getTelefone();
                 JSONObject body = new JSONObject()
                         .put("nome", user.getName())
-                        .put("telefone", user.getTelefone().replaceAll("\\D+", ""));
-                executeRequest(
-                        "api/motoristas/updateSite/" + user.getUid(),
-                        "PUT",
-                        body,
-                        tcs
-                );
+                        .put("telefone", telefone.replaceAll("\\D+", ""));
 
-                // 2) Atualiza o cache local (campo data)
+                executeRequest("api/motoristas/updateSite/" + user.getUid(), "PUT", body);
+
                 String raw = readFile(FILE_NAME);
                 JSONObject root = new JSONObject(raw);
                 JSONObject data = root.getJSONObject("data");
                 data.put("nome", user.getName());
-                data.put("telefone", user.getTelefone());
+                data.put("telefone", telefone);
                 writeFile(FILE_NAME, root.toString());
 
+                tcs.setResult(null);
             } catch (Exception e) {
-                Log.e(TAG, "Erro ao salvar usuário", e);
+                Log.e(TAG, "Erro ao salvar usuario", e);
                 tcs.setException(e);
             }
         });
         return tcs.getTask();
     }
 
-    /**
-     * Faz login, salva os tokens no EncryptedSharedPreferences e grava
-     * em user_data.json só o bloco "data".
-     */
     public Task<Void> loginUser(String nome, String senha) {
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
-                // 1) chama API de login
                 JSONObject loginBody = new JSONObject()
                         .put("login", nome)
                         .put("senha", senha);
-                RequestBody body = RequestBody.create(loginBody.toString(), JSON_MEDIA);
+                RequestBody body = RequestBody.create(loginBody.toString(), ApiClient.JSON_MEDIA);
 
-                Request req = new Request.Builder()
-                        .url(URL_API + "auth/V12/login")
+                Request req = apiClient.request("auth/V12/login")
                         .post(body)
                         .build();
 
-                try (Response resp = httpClient.newCall(req).execute()) {
-                    if (!resp.isSuccessful() || resp.body() == null) {
-                        throw new IOException("Login failed: " + resp.code());
-                    }
-
-
-                    JSONObject json = new JSONObject(resp.body().string());
-
-                    JSONObject data = json.optJSONObject("data");
-                    String role = data.optString("role");
-                    if (!"MOTORISTA".equals(role)) {
-                        throw new RuntimeException("Usuário não é motorista");
-                    }
-
-                    // 2) salva tokens encriptados
-                    String apiKey = json.getString("apiKey");
-                    storage.saveApiKey(apiKey);
-
-                    // 3) grava só o data em user_data.json
-                    JSONObject root = new JSONObject().put("data", data);
-                    writeFile(FILE_NAME, root.toString());
-
-                    tcs.setResult(null);
+                JSONObject json = new JSONObject(apiClient.executeForBody(req));
+                JSONObject data = json.optJSONObject("data");
+                if (data == null) {
+                    throw new IOException("Login sem dados do usuario");
                 }
 
+                String role = data.optString("role");
+                if (!"MOTORISTA".equals(role)) {
+                    throw new RuntimeException("Usuario nao e motorista");
+                }
+
+                String apiKey = json.getString("apiKey");
+                storage.saveApiKey(apiKey);
+
+                JSONObject root = new JSONObject().put("data", data);
+                writeFile(FILE_NAME, root.toString());
+
+                tcs.setResult(null);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao realizar login", e);
-                storage.clear();  // limpa tokens caso falhe
+                storage.clear();
                 tcs.setException(e);
             }
         });
         return tcs.getTask();
     }
 
-    // --- executa PUT ou POST protegidos por Bearer token ---
-    private void executeRequest(
-            String path,
-            String method,
-            JSONObject body,
-            TaskCompletionSource<Void> tcs
-    ) {
-        executor.execute(() -> {
-            try {
-                // garante token válido
-
-                String access = storage.getApiKey();
-                RequestBody rb = RequestBody.create(body.toString(), JSON_MEDIA);
-                Request.Builder b = new Request.Builder()
-                        .url(URL_API + path)
-                        .addHeader("X-API-Key", access);
-
-                Request req = "PUT".equals(method) ? b.put(rb).build() : b.post(rb).build();
-                try (Response resp = httpClient.newCall(req).execute()) {
-                    if (resp.isSuccessful()) {
-                        tcs.setResult(null);
-                    } else {
-                        throw new IOException("API error: " + resp.code());
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Erro em executeRequest", e);
-                tcs.setException(e);
-            }
-        });
+    private void executeRequest(String path, String method, JSONObject body) throws IOException {
+        RequestBody rb = RequestBody.create(body.toString(), ApiClient.JSON_MEDIA);
+        Request.Builder builder = apiClient.authenticatedRequest(path);
+        Request req = "PUT".equals(method) ? builder.put(rb).build() : builder.post(rb).build();
+        apiClient.executeForNoBody(req);
     }
 
-    // --- Helpers de I/O do bloco data em user_data.json ---
     private String readFile(String name) throws IOException {
         try (FileInputStream fis = context.openFileInput(name)) {
             byte[] buf = new byte[fis.available()];

@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.rta_app.R;
+import com.example.rta_app.SOLID.activitys.tracker.LocationTracker;
 import com.example.rta_app.SOLID.api.UsersRepository;
 import com.example.rta_app.SOLID.api.WorkerHourRepository;
 import com.example.rta_app.SOLID.aplication.WorkerAplication;
@@ -74,7 +75,10 @@ public class WorkHourActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         loadInitialData();
+
     }
+
+
 
     private void loadUser() {
         usersRepository.getUser()
@@ -106,6 +110,9 @@ public class WorkHourActivity extends AppCompatActivity {
             if (workerHous != null && isBlank(workerHous.getHour_stop())) {
                 validateAndOpenPoint(type, workerHous);
             } else {
+                if (workerHous != null) {
+                    updateTrackingState(workerHous);
+                }
                 updateToSheets();
             }
         });
@@ -188,6 +195,7 @@ public class WorkHourActivity extends AppCompatActivity {
                 updateWorkerHoursData(type, location)
                         .addOnSuccessListener(aVoid -> workerHourRepository.getWorkerHous()
                                 .addOnSuccessListener(workerHous -> {
+                                    updateTrackingState(workerHous);
                                     if (type == PointType.FIM) {
                                         updateToSheets();
                                     }
@@ -313,6 +321,7 @@ public class WorkHourActivity extends AppCompatActivity {
         switch (type) {
             case ENTRADA:
                 binding.buttonFistHour.setText(workerHous.getHour_first());
+
                 break;
             case ALMOCO_INICIO:
                 binding.buttonDinnerStarHour.setText(workerHous.getHour_dinner());
@@ -330,10 +339,12 @@ public class WorkHourActivity extends AppCompatActivity {
         workerHourRepository.getWorkerHous().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 WorkerHous workerHous = task.getResult();
-                Log.i("TESTEEEEE", "workerHous=" + workerHous.toString());
                 if (workerHous != null) {
+                    Log.i("TESTEEEEE", "workerHous=" + workerHous.toString());
                     updateFullUI(workerHous);
+                    updateTrackingState(workerHous);
                 } else {
+                    LocationTracker.stop(this);
                     resetUI();
                 }
             } else {
@@ -361,8 +372,10 @@ public class WorkHourActivity extends AppCompatActivity {
     }
 
     private void updateStatusUI(String hourValue, TextView btn, ImageView img,
-                                View nextBtn, View nextImg, String defaultText) {
+                                View nextBtn, ImageView nextImg, String defaultText) {
         boolean temHorario = !isBlank(hourValue);
+
+
 
         if (temHorario) {
             btn.setText(hourValue);
@@ -374,10 +387,13 @@ public class WorkHourActivity extends AppCompatActivity {
 
             if (nextBtn != null) {
                 nextBtn.setVisibility(View.VISIBLE);
+
+
                 nextBtn.bringToFront();
             }
             if (nextImg != null) {
                 nextImg.setVisibility(View.VISIBLE);
+                nextImg.setImageResource(R.drawable.clock_hour);
                 nextImg.bringToFront();
             }
         } else {
@@ -397,6 +413,11 @@ public class WorkHourActivity extends AppCompatActivity {
         binding.buttonDinnerStarHour.setText("Almoço");
         binding.buttonFistHour.setText("Entrada");
     }
+
+    private void updateTrackingState(WorkerHous workerHous) {
+        LocationTracker.update(this, workerHous);
+    }
+
 
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();

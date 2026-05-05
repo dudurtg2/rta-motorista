@@ -128,7 +128,7 @@ public class TrackingService extends Service {
 
     private void requestUpdates() {
         LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, PING_INTERVAL_MS)
-                .setMinUpdateDistanceMeters(MIN_DIST_METERS)
+                .setMinUpdateDistanceMeters(0)
                 .setWaitForAccurateLocation(false)
                 .build();
 

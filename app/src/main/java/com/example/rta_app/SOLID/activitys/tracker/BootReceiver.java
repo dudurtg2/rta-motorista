@@ -38,8 +38,8 @@ public class BootReceiver extends BroadcastReceiver {
                     return;
                 }
 
-                Log.i(TAG, "Boot detectado; iniciando TrackingService");
-                LocationTracker.start(appContext);
+                Log.i(TAG, "Boot detectado; sincronizando rastreamento com a jornada salva");
+                LocationTracker.sync(appContext);
             } catch (Exception e) {
                 Log.e(TAG, "Falha ao processar boot receiver", e);
             } finally {

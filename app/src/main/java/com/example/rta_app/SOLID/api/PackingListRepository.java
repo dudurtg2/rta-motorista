@@ -6,10 +6,9 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.entities.PackingList;
-import com.example.rta_app.SOLID.services.TokenStorage;
+import com.example.rta_app.SOLID.services.ApiClient;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,69 +20,50 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class PackingListRepository {
 
     private static final String TAG = "PackingListRepo";
-    private static final String URL_API = "https://android.lc-transportes.com/";
     private static final String FILE_NAME = "user_data.json";
-    private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
 
     private final Context context;
-    private final OkHttpClient httpClient;
-    private final TokenStorage tokenStorage;
+    private final ApiClient apiClient;
     private final ExecutorService executor;
 
     public PackingListRepository(Context context) {
         this.context = context.getApplicationContext();
-        this.tokenStorage = new TokenStorage(this.context);
-        this.httpClient = new OkHttpClient.Builder()
-                .protocols(Collections.singletonList(Protocol.HTTP_1_1))
-                .build();
+        this.apiClient = new ApiClient(this.context);
         this.executor = Executors.newSingleThreadExecutor();
         Log.d(TAG, "PackingListRepository initialized");
     }
 
-    // ------------------ MÉTODOS PÚBLICOS ------------------ //
-
     public Task<PackingList> getPackingListToDirect(String id) {
-        return getPackingList(id, "alocado", getAccessToken());
+        return getPackingList(id, "alocado");
     }
 
     public Task<PackingList> getPackingListToRota(String id) {
-        return getPackingList(id, "retirado", getAccessToken());
+        return getPackingList(id, "retirado");
     }
 
     public Task<PackingList> getPackingListToBase(String id) {
-        return getPackingList(id, "aguardando", getAccessToken());
+        return getPackingList(id, "aguardando");
     }
 
     public Task<List<PackingList>> getListPackingListBase() {
-        return getPackingListList("retirado", getAccessToken());
+        return getPackingListList("retirado");
     }
 
     public Task<Void> movePackingListForDelivery(PackingList packingList) {
         Log.d(TAG, "movePackingListForDelivery: " + packingList.getCodigodeficha());
-        try {
-            updateRomaneiosNome(packingList);
-            return Tasks.forResult(null);
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao mover packing list", e);
-            return Tasks.forException(e);
-        }
+        return updateRomaneiosNome(packingList);
     }
 
     public Task<Void> updateStatusPackingList(PackingList packingList, String ocorrencia, String status) {
@@ -93,12 +73,15 @@ public class PackingListRepository {
         executor.execute(() -> {
             try {
                 JSONObject body = new JSONObject();
-                if (!ocorrencia.isEmpty()) body.put("ocorrencia", ocorrencia);
+                if (ocorrencia != null && !ocorrencia.isEmpty()) {
+                    body.put("ocorrencia", ocorrencia);
+                }
 
                 body.put("status", status);
                 body.put("dataFinal", getCurrentDateTime());
 
-                executeRequest("api/romaneios/update/codigo/" + packingList.getCodigodeficha(), "PUT", body, tcs);
+                executeRequest("api/romaneios/update/codigo/" + packingList.getCodigodeficha(), "PUT", body);
+                tcs.setResult(null);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao atualizar status", e);
                 tcs.setException(e);
@@ -115,7 +98,8 @@ public class PackingListRepository {
             try {
                 String base64 = bitmapToBase64(bitmap);
                 JSONObject body = new JSONObject().put("base64Image", base64);
-                executeRequest("api/romaneios/imageUpload/" + uid, "POST", body, tcs);
+                executeRequest("api/romaneios/imageUpload/" + uid, "POST", body);
+                tcs.setResult(null);
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao enviar imagem", e);
                 tcs.setException(e);
@@ -124,38 +108,30 @@ public class PackingListRepository {
         return tcs.getTask();
     }
 
-    // ------------------ MÉTODOS PRIVADOS ------------------ //
-
-    private Task<PackingList> getPackingList(String id, String sts, String token) {
+    private Task<PackingList> getPackingList(String id, String sts) {
         Log.d(TAG, "getPackingList ID: " + id + ", filtro: " + sts);
 
         TaskCompletionSource<PackingList> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
-                Request request = new Request.Builder()
-                        .url(URL_API + "api/romaneios/findBySearch/" + id)
-                        .addHeader("X-API-Key", token)
+                Request request = apiClient.authenticatedRequest("api/romaneios/findBySearch/" + id)
                         .get()
                         .build();
 
-                try (Response resp = httpClient.newCall(request).execute()) {
-                    if (!resp.isSuccessful()) throw new IOException(resp.message());
-                    JSONObject json = new JSONObject(resp.body().string());
+                JSONObject json = new JSONObject(apiClient.executeForBody(request));
+                String stsFilter = json.optString("sts");
 
-
-                    String stsFilter = json.optString("sts");
-
-
-                    if (stsFilter.equals("finalizado") || stsFilter.equals("inativo")) {
-                        throw new IllegalStateException("Status filter inválido: " + stsFilter);
-                    }
-                    if (sts.equals("aguardando") || sts.equals("alocado")) {
-                        if (stsFilter.equals("retirado") || stsFilter.equals("recusado") ) throw new IllegalStateException("Status filter inválido: " + stsFilter);
-                    }
-
-                    PackingList pl = parsePackingList(json, sts);
-                    tcs.setResult(pl);
+                if (stsFilter.equals("finalizado") || stsFilter.equals("inativo")) {
+                    throw new IllegalStateException("Status filter invalido: " + stsFilter);
                 }
+                if (sts.equals("aguardando") || sts.equals("alocado")) {
+                    if (stsFilter.equals("retirado") || stsFilter.equals("recusado")) {
+                        throw new IllegalStateException("Status filter invalido: " + stsFilter);
+                    }
+                }
+
+                PackingList pl = parsePackingList(json, sts);
+                tcs.setResult(pl);
             } catch (Exception e) {
                 Log.e(TAG, "Erro GET single", e);
                 tcs.setException(e);
@@ -164,30 +140,24 @@ public class PackingListRepository {
         return tcs.getTask();
     }
 
-    private Task<List<PackingList>> getPackingListList(String sts, String token) {
+    private Task<List<PackingList>> getPackingListList(String sts) {
         Log.d(TAG, "getPackingListList status: " + sts);
 
         TaskCompletionSource<List<PackingList>> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
-                String driverId = getIdDrive();
+                String driverId = getIdDriveOrThrow();
 
-                Request request = new Request.Builder()
-                        .url(URL_API + "api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts)
-                        .addHeader("X-API-Key", token)
+                Request request = apiClient.authenticatedRequest("api/romaneios/getMinimalDriverAll/" + driverId + "/" + sts)
                         .get()
                         .build();
 
-                try (Response resp = httpClient.newCall(request).execute()) {
-                    if (!resp.isSuccessful()) throw new IOException(resp.message());
-
-                    JSONArray arr = new JSONArray(resp.body().string());
-                    List<PackingList> list = new ArrayList<>();
-                    for (int i = 0; i < arr.length(); i++) {
-                        list.add(parseMinimal(arr.getJSONObject(i)));
-                    }
-                    tcs.setResult(list);
+                JSONArray arr = new JSONArray(apiClient.executeForBody(request));
+                List<PackingList> list = new ArrayList<>();
+                for (int i = 0; i < arr.length(); i++) {
+                    list.add(parseMinimal(arr.getJSONObject(i)));
                 }
+                tcs.setResult(list);
             } catch (Exception e) {
                 Log.e(TAG, "Erro GET list", e);
                 tcs.setException(e);
@@ -196,53 +166,32 @@ public class PackingListRepository {
         return tcs.getTask();
     }
 
-    private void executeRequest(String path, String method, JSONObject body, TaskCompletionSource<Void> tcs) {
-        executor.execute(() -> {
-            try {
-                RequestBody rb = RequestBody.create(body.toString(), JSON_MEDIA);
-
-                Request.Builder builder = new Request.Builder()
-                        .url(URL_API + path)
-                        .addHeader("X-API-Key", getAccessToken());
-
-                Request req = "PUT".equals(method) ? builder.put(rb).build() : builder.post(rb).build();
-
-                try (Response resp = httpClient.newCall(req).execute()) {
-                    if (resp.isSuccessful()) {
-                        tcs.setResult(null);
-                    } else {
-                        throw new IOException("Erro HTTP: " + resp.code() + " - " + resp.message());
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Erro operação " + method + " " + path, e);
-                tcs.setException(e);
-            }
-        });
+    private void executeRequest(String path, String method, JSONObject body) throws IOException {
+        RequestBody rb = RequestBody.create(body.toString(), ApiClient.JSON_MEDIA);
+        Request.Builder builder = apiClient.authenticatedRequest(path);
+        Request req = "PUT".equals(method) ? builder.put(rb).build() : builder.post(rb).build();
+        apiClient.executeForNoBody(req);
     }
 
     private PackingList parsePackingList(JSONObject json, String stsFilter) throws JSONException {
-
         PackingList pl = new PackingList();
-        pl.setFuncionario(json.optJSONObject("funcionario").optString("nome"));
-        pl.setEntregador(json.optJSONObject("entregador").optString("nome"));
-        pl.setTelefone(json.optJSONObject("entregador").optString("telefone"));
+        pl.setFuncionario(optObjectString(json, "funcionario", "nome"));
+        pl.setEntregador(optObjectString(json, "entregador", "nome"));
+        pl.setTelefone(optObjectString(json, "entregador", "telefone"));
         pl.setCodigodeficha(json.optString("codigoUid"));
         pl.setHoraedia(json.optString("data"));
         pl.setQuantidade(String.valueOf(json.optInt("quantidade")));
         pl.setStatus(stsFilter);
         pl.setMotorista(json.optString("motorista"));
         pl.setDownloadlink(json.optString("linkDownload"));
-        pl.setEmpresa(json.optJSONObject("empresa").optString("nome"));
-        pl.setEndereco(json.optJSONObject("entregador").optString("endereco"));
-
+        pl.setEmpresa(optObjectString(json, "empresa", "nome"));
+        pl.setEndereco(optObjectString(json, "entregador", "endereco"));
         pl.setLocal(parseCidades(json.optJSONArray("cidade")));
         pl.setCodigosinseridos(parseCodigos(json.optJSONArray("codigos")));
-
         return pl;
     }
 
-    private PackingList parseMinimal(JSONObject json) throws JSONException {
+    private PackingList parseMinimal(JSONObject json) {
         PackingList pl = new PackingList();
         pl.setCodigodeficha(json.optString("codigoUid"));
         pl.setMotorista(json.optString("motorista"));
@@ -254,36 +203,31 @@ public class PackingListRepository {
         return pl;
     }
 
-    private void updateRomaneiosNome(PackingList pl) {
+    private Task<Void> updateRomaneiosNome(PackingList pl) {
+        TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         executor.execute(() -> {
             try {
                 JSONObject body = new JSONObject()
                         .put("status", "retirado")
-                        .put("motorista", getIdDrive());
+                        .put("motorista", getIdDriveOrThrow());
 
-                executeRequest("api/romaneios/update/codigo/" + pl.getCodigodeficha(), "PUT", body, new TaskCompletionSource<>());
+                executeRequest("api/romaneios/update/codigo/" + pl.getCodigodeficha(), "PUT", body);
+                tcs.setResult(null);
             } catch (Exception e) {
                 Log.e(TAG, "Erro updateRomaneio", e);
+                tcs.setException(e);
             }
         });
+        return tcs.getTask();
     }
 
-    // ------------------ UTILS ------------------ //
-
-    private String getAccessToken() {
-        String token = tokenStorage.getApiKey();
-        Log.d(TAG, "Access token: " + (token != null ? "[OK]" : "[NULL]"));
-        return token;
-    }
-
-    private String getIdDrive() {
-        try {
-            String json = readFile(FILE_NAME);
-            return new JSONObject(json).getJSONObject("data").optString("id");
-        } catch (Exception e) {
-            Log.e(TAG, "Erro ao ler Driver ID", e);
-            return null;
+    private String getIdDriveOrThrow() throws IOException, JSONException {
+        String json = readFile(FILE_NAME);
+        String driverId = new JSONObject(json).getJSONObject("data").optString("id");
+        if (driverId == null || driverId.trim().isEmpty()) {
+            throw new IllegalStateException("Driver ID invalido");
         }
+        return driverId;
     }
 
     private String readFile(String name) throws IOException {
@@ -306,12 +250,17 @@ public class PackingListRepository {
     }
 
     private String parseCidades(JSONArray cidades) throws JSONException {
-        if (cidades == null) return "";
+        if (cidades == null) {
+            return "";
+        }
+
         StringBuilder loc = new StringBuilder();
         for (int i = 0; i < cidades.length(); i++) {
             String cn = cidades.getJSONObject(i).optString("nome");
             if (!cn.isEmpty()) {
-                if (loc.length() > 0) loc.append(", ");
+                if (loc.length() > 0) {
+                    loc.append(", ");
+                }
                 loc.append(cn);
             }
         }
@@ -320,13 +269,20 @@ public class PackingListRepository {
 
     private List<String> parseCodigos(JSONArray cods) throws JSONException {
         List<String> codes = new ArrayList<>();
-        if (cods == null) return codes;
+        if (cods == null) {
+            return codes;
+        }
 
         for (int i = 0; i < cods.length(); i++) {
             JSONObject c = cods.getJSONObject(i);
-            String prefix = "PACOTES".equals(c.optString("type")) ? "✉️" : "📦";
+            String prefix = "PACOTES".equals(c.optString("type")) ? "\u2709\uFE0F" : "\uD83D\uDCE6";
             codes.add(prefix + " - " + c.optString("codigo"));
         }
         return codes;
+    }
+
+    private static String optObjectString(JSONObject source, String objectName, String fieldName) {
+        JSONObject object = source.optJSONObject(objectName);
+        return object == null ? "" : object.optString(fieldName);
     }
 }

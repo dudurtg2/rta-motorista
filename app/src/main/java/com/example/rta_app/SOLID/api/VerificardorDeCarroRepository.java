@@ -4,336 +4,135 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.rta_app.SOLID.entities.VerificadoresDoCarro;
-import com.example.rta_app.SOLID.entities.WorkerHous;
-import com.example.rta_app.SOLID.services.TokenStorage;
+import com.example.rta_app.SOLID.services.ApiClient;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class VerificardorDeCarroRepository {
 
     private static final String TAG = "VerificardorDeCarroRepositoryaa";
     private static final String USER_FILE = "user_data.json";
-    private static final String BASE_URL = "https://android.lc-transportes.com/";
-    private static final MediaType JSON_MEDIA = MediaType.get("application/json; charset=utf-8");
 
     private final Context context;
-    private final TokenStorage tokenStorage;
-    private final OkHttpClient httpClient;
+    private final ApiClient apiClient;
     private final ExecutorService executor;
 
     public VerificardorDeCarroRepository(Context context) {
-        Log.d(TAG, "Constructor: initializing WorkerHourRepository");
+        Log.d(TAG, "Constructor: initializing VerificardorDeCarroRepository");
         this.context = context.getApplicationContext();
-        httpClient = new OkHttpClient.Builder()
-                .connectTimeout(300, TimeUnit.SECONDS)   // tempo para conectar
-                .writeTimeout(600, TimeUnit.SECONDS)     // tempo para enviar o body (upload)
-                .readTimeout(600, TimeUnit.SECONDS)      // tempo esperando a resposta
-                .callTimeout(900, TimeUnit.SECONDS)      // tempo total da chamada
-                .protocols(Collections.singletonList(Protocol.HTTP_1_1))
-                .build();
-        this.tokenStorage = new TokenStorage(this.context);
+        this.apiClient = new ApiClient(this.context);
         this.executor = Executors.newSingleThreadExecutor();
     }
 
     public Task<Long> update(VerificadoresDoCarro verificadoresDoCarro, Long id) {
-        Log.d(TAG, "saveHors(): verificadoresDoCarro=" + verificadoresDoCarro);
-        TaskCompletionSource<Long> tcs = new TaskCompletionSource<>();
-
-        String token = getAccessToken();
-        String driveId = getUserId();
-        if (token == null || driveId == null) {
-            Log.e(TAG, "saveHors(): token or userId missing (token=" + token + ", userId=" + driveId + ")");
-            tcs.setException(new IllegalStateException("Token or user ID missing"));
-            return tcs.getTask();
-        }
-
-        JSONObject json = new JSONObject();
-
-        try {
-            json.put("status", verificadoresDoCarro.getStatus());
-            json.put("verificadorInicial", verificadoresDoCarro.getVerificadorInicial());
-            json.put("verificadorFinal", verificadoresDoCarro.getVerificadorFinal());
-
-            // Datas no formato ISO-8601 (String). Ajuste se seus getters retornarem Date/LocalDateTime.
-            json.put("dataInicial", verificadoresDoCarro.getDataInicial());
-            json.put("dataFinal", verificadoresDoCarro.getDataFinal());
-
-            json.put("finalizado", verificadoresDoCarro.getFinalizado());
-
-            json.put("latariaEsquerdaInicio", verificadoresDoCarro.getLatariaEsquerdaInicio());
-            json.put("latariaEsquerdaFinal", verificadoresDoCarro.getLatariaEsquerdaFinal());
-            json.put("latariaDireitaInicio", verificadoresDoCarro.getLatariaDireitaInicio());
-            json.put("latariaDireitaFinal", verificadoresDoCarro.getLatariaDireitaFinal());
-            json.put("painelInicio", verificadoresDoCarro.getPainelInicio());
-            json.put("painelFinal", verificadoresDoCarro.getPainelFinal());
-            json.put("frenteInicial", verificadoresDoCarro.getFrenteInicial());
-            json.put("frenteFinal", verificadoresDoCarro.getFrenteFinal());
-            json.put("atrasInicio", verificadoresDoCarro.getAtrasInicio());
-            json.put("atrasFinal", verificadoresDoCarro.getAtrasFinal());
-
-
-
-
-            JSONObject motoristaJson = new JSONObject();
-            motoristaJson.put("id", driveId); // ou verificadoresDoCarro.getMotorista().getId()
-            json.put("motorista", motoristaJson);
-
-
-
-            json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
-
-            json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
-
-        } catch (JSONException e) {
-            Log.e(TAG, "saveHors(): JSON error", e);
-            tcs.setException(e);
-            return tcs.getTask();
-        }
-
-        Log.d(TAG, "saveHors(): json=" + json.toString());
-
-        RequestBody body = RequestBody.create(json.toString(), JSON_MEDIA);
-        Request request = new Request.Builder()
-                .url(BASE_URL + "api/verificadoresDoCarros/finalizar/"+id)
-                .put(body)
-                .addHeader("X-API-Key", token)
-                .build();
-
-        executeRequestReturningId(request, tcs);
-        return tcs.getTask();
+        Log.d(TAG, "update(): verificadoresDoCarro=" + verificadoresDoCarro);
+        return sendReturningId("api/verificadoresDoCarros/finalizar/" + id, "PUT", verificadoresDoCarro, false);
     }
 
     public Task<Long> updateF(VerificadoresDoCarro verificadoresDoCarro, Long id) {
-        Log.d(TAG, "saveHors(): verificadoresDoCarro=" + verificadoresDoCarro.toString());
-        TaskCompletionSource<Long> tcs = new TaskCompletionSource<>();
-
-        String token = getAccessToken();
-        String driveId = getUserId();
-        if (token == null || driveId == null) {
-            Log.e(TAG, "saveHors(): token or userId missing (token=" + token + ", userId=" + driveId + ")");
-            tcs.setException(new IllegalStateException("Token or user ID missing"));
-            return tcs.getTask();
-        }
-
-        JSONObject json = new JSONObject();
-
-        try {
-            json.put("status", verificadoresDoCarro.getStatus());
-            json.put("verificadorInicial", verificadoresDoCarro.getVerificadorInicial());
-            json.put("verificadorFinal", verificadoresDoCarro.getVerificadorFinal());
-
-            // Datas no formato ISO-8601 (String). Ajuste se seus getters retornarem Date/LocalDateTime.
-            json.put("dataInicial", verificadoresDoCarro.getDataInicial());
-            json.put("dataFinal", verificadoresDoCarro.getDataFinal());
-
-            json.put("finalizado", verificadoresDoCarro.getFinalizado());
-            json.put("latariaEsquerdaInicio", verificadoresDoCarro.getLatariaEsquerdaInicio());
-            json.put("latariaEsquerdaFinal", verificadoresDoCarro.getLatariaEsquerdaFinal());
-            json.put("latariaDireitaInicio", verificadoresDoCarro.getLatariaDireitaInicio());
-            json.put("latariaDireitaFinal", verificadoresDoCarro.getLatariaDireitaFinal());
-            json.put("painelInicio", verificadoresDoCarro.getPainelInicio());
-            json.put("painelFinal", verificadoresDoCarro.getPainelFinal());
-            json.put("frenteInicial", verificadoresDoCarro.getFrenteInicial());
-            json.put("frenteFinal", verificadoresDoCarro.getFrenteFinal());
-            json.put("atrasInicio", verificadoresDoCarro.getAtrasInicio());
-            json.put("atrasFinal", verificadoresDoCarro.getAtrasFinal());
-            JSONObject carroJson = new JSONObject();
-            carroJson.put("id", verificadoresDoCarro.getCarro());
-            json.put("carro", carroJson);
-
-            JSONObject motoristaJson = new JSONObject();
-            motoristaJson.put("id", driveId); // ou verificadoresDoCarro.getMotorista().getId()
-            json.put("motorista", motoristaJson);
-
-
-            json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
-
-            json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
-
-        } catch (JSONException e) {
-            Log.e(TAG, "saveHors(): JSON error", e);
-            tcs.setException(e);
-            return tcs.getTask();
-        }
-
-        Log.d(TAG, "Vai salvar(): json=" + json.toString());
-
-        RequestBody body = RequestBody.create(json.toString(), JSON_MEDIA);
-        Request request = new Request.Builder()
-                .url(BASE_URL + "api/verificadoresDoCarros/finalizar/"+id)
-                .put(body)
-                .addHeader("X-API-Key", token)
-                .build();
-
-        executeRequestReturningId(request, tcs);
-        return tcs.getTask();
+        Log.d(TAG, "updateF(): verificadoresDoCarro=" + verificadoresDoCarro);
+        return sendReturningId("api/verificadoresDoCarros/finalizar/" + id, "PUT", verificadoresDoCarro, true);
     }
 
     public Task<Long> save(VerificadoresDoCarro verificadoresDoCarro) {
         Log.d(TAG, "save(): verificadoresDoCarro=" + verificadoresDoCarro);
-        TaskCompletionSource<Long> tcs = new TaskCompletionSource<>();
+        return sendReturningId("api/verificadoresDoCarros/save", "POST", verificadoresDoCarro, true);
+    }
 
-        String token = getAccessToken();
-        String driveId = getUserId();
-        if (token == null || driveId == null) {
-            Log.e(TAG, "save(): token or userId missing (token=" + token + ", userId=" + driveId + ")");
-            tcs.setException(new IllegalStateException("Token or user ID missing"));
-            return tcs.getTask();
-        }
+    private JSONObject buildJson(VerificadoresDoCarro verificadoresDoCarro, boolean includeCarro)
+            throws IOException, JSONException {
 
+        String driveId = getUserIdOrThrow();
         JSONObject json = new JSONObject();
 
-        try {
-            json.put("status", verificadoresDoCarro.getStatus());
-            json.put("verificadorInicial", verificadoresDoCarro.getVerificadorInicial());
-            json.put("verificadorFinal", verificadoresDoCarro.getVerificadorFinal());
+        json.put("status", verificadoresDoCarro.getStatus());
+        json.put("verificadorInicial", verificadoresDoCarro.getVerificadorInicial());
+        json.put("verificadorFinal", verificadoresDoCarro.getVerificadorFinal());
+        json.put("dataInicial", verificadoresDoCarro.getDataInicial());
+        json.put("dataFinal", verificadoresDoCarro.getDataFinal());
+        json.put("finalizado", verificadoresDoCarro.getFinalizado());
+        json.put("latariaEsquerdaInicio", verificadoresDoCarro.getLatariaEsquerdaInicio());
+        json.put("latariaEsquerdaFinal", verificadoresDoCarro.getLatariaEsquerdaFinal());
+        json.put("latariaDireitaInicio", verificadoresDoCarro.getLatariaDireitaInicio());
+        json.put("latariaDireitaFinal", verificadoresDoCarro.getLatariaDireitaFinal());
+        json.put("painelInicio", verificadoresDoCarro.getPainelInicio());
+        json.put("painelFinal", verificadoresDoCarro.getPainelFinal());
+        json.put("frenteInicial", verificadoresDoCarro.getFrenteInicial());
+        json.put("frenteFinal", verificadoresDoCarro.getFrenteFinal());
+        json.put("atrasInicio", verificadoresDoCarro.getAtrasInicio());
+        json.put("atrasFinal", verificadoresDoCarro.getAtrasFinal());
 
-            json.put("dataInicial", verificadoresDoCarro.getDataInicial());
-            json.put("dataFinal", verificadoresDoCarro.getDataFinal());
-
-            json.put("finalizado", verificadoresDoCarro.getFinalizado());
-
-            json.put("latariaEsquerdaInicio", verificadoresDoCarro.getLatariaEsquerdaInicio());
-            json.put("latariaEsquerdaFinal", verificadoresDoCarro.getLatariaEsquerdaFinal());
-            json.put("latariaDireitaInicio", verificadoresDoCarro.getLatariaDireitaInicio());
-            json.put("latariaDireitaFinal", verificadoresDoCarro.getLatariaDireitaFinal());
-            json.put("painelInicio", verificadoresDoCarro.getPainelInicio());
-            json.put("painelFinal", verificadoresDoCarro.getPainelFinal());
-            json.put("frenteInicial", verificadoresDoCarro.getFrenteInicial());
-            json.put("frenteFinal", verificadoresDoCarro.getFrenteFinal());
-            json.put("atrasInicio", verificadoresDoCarro.getAtrasInicio());
-            json.put("atrasFinal", verificadoresDoCarro.getAtrasFinal());
-
-            // Objeto carro
+        if (includeCarro) {
             JSONObject carroJson = new JSONObject();
             carroJson.put("id", verificadoresDoCarro.getCarro());
             json.put("carro", carroJson);
-
-            // Objeto motorista
-            JSONObject motoristaJson = new JSONObject();
-            motoristaJson.put("id", driveId);
-            json.put("motorista", motoristaJson);
-
-            json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
-            json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
-
-        } catch (JSONException e) {
-            Log.e(TAG, "save(): JSON error", e);
-            tcs.setException(e);
-            return tcs.getTask();
         }
 
-        Log.d(TAG, "save(): json=" + json.toString());
+        JSONObject motoristaJson = new JSONObject();
+        motoristaJson.put("id", driveId);
+        json.put("motorista", motoristaJson);
 
-        RequestBody body = RequestBody.create(json.toString(), JSON_MEDIA);
-        Request request = new Request.Builder()
-                .url(BASE_URL + "api/verificadoresDoCarros/save")
-                .post(body)
-                .addHeader("X-API-Key", token)
-                .build();
+        json.put("observacoesAdicionaisInicio", verificadoresDoCarro.getObservacoesAdicionaisInicio());
+        json.put("observacoesAdicionaisFinal", verificadoresDoCarro.getObservacoesAdicionaisFinal());
+        return json;
+    }
 
-        // NOVO: usa helper que retorna ID
-        executeRequestReturningId(request, tcs);
+    private Task<Long> sendReturningId(
+            String path,
+            String method,
+            VerificadoresDoCarro verificadoresDoCarro,
+            boolean includeCarro
+    ) {
+        TaskCompletionSource<Long> tcs = new TaskCompletionSource<>();
+        executor.execute(() -> {
+            try {
+                Log.d(TAG, "sendReturningId(): path=" + path);
+                JSONObject json = buildJson(verificadoresDoCarro, includeCarro);
+                RequestBody body = RequestBody.create(json.toString(), ApiClient.JSON_MEDIA);
+                Request.Builder builder = apiClient.authenticatedRequest(path);
+                Request request = "PUT".equals(method) ? builder.put(body).build() : builder.post(body).build();
 
+                String responseBody = apiClient.executeForBody(request);
+                Log.d(TAG, "sendReturningId(): body=" + responseBody);
+
+                JSONObject responseJson = new JSONObject(responseBody);
+                if (!responseJson.has("id")) {
+                    throw new JSONException("Campo 'id' nao encontrado no retorno: " + responseBody);
+                }
+
+                long id = responseJson.getLong("id");
+                Log.d(TAG, "sendReturningId(): parsed id=" + id);
+                tcs.setResult(id);
+            } catch (Exception e) {
+                Log.e(TAG, "sendReturningId(): request error", e);
+                tcs.setException(e);
+            }
+        });
         return tcs.getTask();
     }
-    private void executeRequestReturningId(Request request, TaskCompletionSource<Long> tcs) {
-        Log.d(TAG, "executeRequestReturningId(): url=" + request.url());
-        executor.execute(() -> {
-            try (Response resp = httpClient.newCall(request).execute()) {
-                String body = resp.body() != null ? resp.body().string() : "";
-                Log.d(TAG, "executeRequestReturningId(): response code=" + resp.code() + ", body=" + body);
 
-                if (resp.isSuccessful()) {
-                    try {
-                        // Supondo que a API retorna algo como:
-                        // { "id": 123, "status": "...", ... }
-                        JSONObject json = new JSONObject(body);
-                        if (!json.has("id")) {
-                            Log.e(TAG, "executeRequestReturningId(): 'id' not found in body");
-                            tcs.setException(new JSONException("Campo 'id' não encontrado no retorno: " + body));
-                            return;
-                        }
-
-                        long id = json.getLong("id");
-                        Log.d(TAG, "executeRequestReturningId(): parsed id=" + id);
-                        tcs.setResult(id);
-
-                    } catch (JSONException e) {
-                        Log.e(TAG, "executeRequestReturningId(): JSON parse error", e);
-                        tcs.setException(e);
-                    }
-                } else {
-                    Log.e(TAG, "executeRequestReturningId(): failure, code=" + resp.code() + ", body=" + body);
-                    tcs.setException(new IOException("API error: " + resp.code() + " - " + body));
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "executeRequestReturningId(): request error", e);
-                tcs.setException(e);
-            }
-        });
-    }
-
-    private void executeRequest(Request request, TaskCompletionSource<Void> tcs) {
-        Log.d(TAG, "executeRequest(): url=" + request.url());
-        executor.execute(() -> {
-            try (Response resp = httpClient.newCall(request).execute()) {
-                String body = resp.body() != null ? resp.body().string() : "";
-                if (resp.isSuccessful()) {
-                    Log.d(TAG, "executeRequest(): success, body=" + body);
-                    tcs.setResult(null);
-                } else {
-                    Log.e(TAG, "executeRequest(): failure, body=" + body);
-                    tcs.setException(new IOException("API error: " + body));
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "executeRequest(): request error", e);
-                tcs.setException(e);
-            }
-        });
-    }
-
-
-
-    private String getAccessToken() {
-      
-        String token = tokenStorage.getApiKey();
-        Log.d(TAG, "getAccessToken(): token=" + (token != null ? "[REDACTED]" : "null"));
-        return token;
-    }
-
-    private String getUserId() {
+    private String getUserIdOrThrow() throws IOException, JSONException {
         Log.d(TAG, "getUserId(): reading from " + USER_FILE);
-        try {
-            String json = readFile(USER_FILE);
-            JSONObject data = new JSONObject(json).getJSONObject("data");
-            String id = data.optString("id", null);
-            Log.d(TAG, "getUserId(): id=" + id);
-            return id;
-        } catch (Exception e) {
-            Log.e(TAG, "getUserId(): error reading user ID", e);
-            return null;
+        String json = readFile(USER_FILE);
+        JSONObject data = new JSONObject(json).getJSONObject("data");
+        String id = data.optString("id", null);
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalStateException("Token or user ID missing");
         }
+        Log.d(TAG, "getUserId(): id=" + id);
+        return id;
     }
 
     private String readFile(String name) throws IOException {

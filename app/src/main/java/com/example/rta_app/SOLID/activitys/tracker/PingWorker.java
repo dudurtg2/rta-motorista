@@ -69,7 +69,7 @@ public class PingWorker extends Worker {
             }
 
             WorkerHous workerHous = Tasks.await(workerHourRepository.getWorkerHous(), 10, TimeUnit.SECONDS);
-            if (!shouldSendPing(workerHous)) {
+            if (!LocationTracker.shouldTrack(workerHous)) {
                 Log.i(TAG, "doWork(): fora da janela válida de rastreamento; ping ignorado sem retry");
                 return Result.success();
             }
@@ -120,24 +120,6 @@ public class PingWorker extends Worker {
             Log.e(TAG, "doWork(): erro ao enviar ping", e);
             return Result.retry();
         }
-    }
-
-    private boolean shouldSendPing(WorkerHous workerHous) {
-        if (workerHous == null) {
-            return false;
-        }
-
-        String first = safe(workerHous.getHour_first());
-        String dinner = safe(workerHous.getHour_dinner());
-        String finish = safe(workerHous.getHour_finish());
-
-        boolean workingBeforeLunch = !first.isEmpty() && dinner.isEmpty();
-        boolean workingAfterLunch = !dinner.isEmpty() && finish.isEmpty();
-        return workingBeforeLunch || workingAfterLunch;
-    }
-
-    private String safe(String value) {
-        return value == null ? "" : value.trim();
     }
 
     private static int batteryPct(Context context) {
